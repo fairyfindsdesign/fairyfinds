@@ -223,3 +223,78 @@ CREATE POLICY "Public Read boutique-assets" ON storage.objects FOR SELECT USING 
 
 DROP POLICY IF EXISTS "Admin All boutique-assets" ON storage.objects;
 CREATE POLICY "Admin All boutique-assets" ON storage.objects FOR ALL USING (bucket_id = 'boutique-assets') WITH CHECK (bucket_id = 'boutique-assets');
+
+-- 9. Insert Default Categories
+INSERT INTO categories (id, name, slug, description, image_url, display_order)
+VALUES
+('cat-sarees', 'Sarees', 'sarees', 'Handwoven silks, organzas, and celebratory drapes crafted with intricate zari and delicate embroidery.', 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=600', 1),
+('cat-dresses', 'Dresses', 'dresses', 'Contemporary midi and maxi silhouettes tailored in pure georgettes, linens, and breathable silks.', 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=600', 2),
+('cat-blouses', 'Tops & Blouses', 'blouses', 'Signature crop tops, corset-style blouses, and brocade bodice cuts to pair with our drapes.', 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=600', 3),
+('cat-other', 'Other Fashion', 'other', 'Bespoke co-ord sets, dupattas, festive stoles, and statement atelier accessories.', 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=600', 4)
+ON CONFLICT (id) DO NOTHING;
+
+-- 10. Insert Default Collections
+INSERT INTO collections (id, name, slug, description, image_url, show_on_home, has_dedicated_page, display_order, is_published)
+VALUES
+('col-red-saree', 'Red Saree', 'red-saree', 'An evocative edit of crimson, vermilion, and scarlet sarees woven with pure gold zari accents.', 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=1200', true, true, 1, true),
+('col-green-lehenga', 'Green Lehenga', 'green-lehenga', 'Rich emerald hues, hand-embellished sequins, and voluminous silhouettes crafted for celebrations.', 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=1200', true, true, 2, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- 11. Insert Default Homepage Sections
+INSERT INTO homepage_sections (id, section_type, title, subtitle, content, display_order, is_visible)
+VALUES 
+(
+  'sec-hero',
+  'HERO',
+  'Hero Section',
+  'FAIRY FINDS BOUTIQUE',
+  '{"heading": "Artisanal Elegance, Crafted for the Modern Muse", "subtitle": "FAIRY FINDS BOUTIQUE", "description": "Discover curated ready-to-wear silhouettes and bespoke couture tailored exclusively to your measurements.", "button_text": "Explore Collection", "button_link": "/shop", "image_url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1600", "badge": "New Season 2026"}'::jsonb,
+  1,
+  true
+),
+(
+  'sec-new-arrivals',
+  'PRODUCT_COLLECTION',
+  'New Arrivals',
+  'THE LATEST EDIT',
+  '{"heading": "Fresh Additions to the Atelier", "description": "Handcrafted garments in limited batches, available for immediate WhatsApp ordering.", "product_limit": 4, "button_text": "View All Products", "button_link": "/shop"}'::jsonb,
+  2,
+  true
+),
+(
+  'sec-featured-collection',
+  'FEATURED_COLLECTIONS',
+  'Featured Collection',
+  'SIGNATURE EDIT',
+  '{"heading": "The Red Saree Collection", "description": "An ode to timeless grace. Rich silk textures, delicate weaves, and hand-finished borders designed to turn every celebration into an unforgettable memory.", "button_text": "Explore Red Saree", "button_link": "/collections/red-saree", "image_url": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1600"}'::jsonb,
+  3,
+  true
+),
+(
+  'sec-categories',
+  'CATEGORY_CARDS',
+  'Shop by Category',
+  'CURATED PIECES',
+  '{"heading": "Explore Our Categories", "description": "Select your preferred style from sarees, dresses, blouses, and festive sets."}'::jsonb,
+  4,
+  true
+),
+(
+  'sec-custom-made',
+  'CUSTOM_MADE',
+  'Custom-Made Orders',
+  'BESPOKE TAILORING',
+  '{"heading": "Bring Your Dream Outfit to Life", "description": "Looking for a custom cut, specific fabric, or made-to-measure bridal drape? Work directly with our designer through WhatsApp to create a one-of-a-kind garment.", "button_text": "Start Your Custom Order", "button_link": "/custom", "image_url": "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=1200"}'::jsonb,
+  5,
+  true
+),
+(
+  'sec-reviews',
+  'REVIEWS',
+  'Client Love & Testimonials',
+  'CLIENT LOVE & TESTIMONIALS',
+  '{"heading": "Celebrated by Discerning Women Across Sri Lanka", "description": "Authentic experiences from patrons who entrusted their festive, bridal, and everyday celebrations to Fairy Finds.", "badge": "5.0 ★ Client Satisfaction"}'::jsonb,
+  6,
+  true
+)
+ON CONFLICT (id) DO NOTHING;

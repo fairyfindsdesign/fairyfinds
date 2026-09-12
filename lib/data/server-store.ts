@@ -83,96 +83,120 @@ async function ensureSupabaseSeeded(supabase: any) {
   hasCheckedSeed = true;
 
   try {
-    const { count, error } = await supabase
+    isSeeding = true;
+    const local = getLocalData();
+
+    // 1. Check & Seed Homepage Sections if empty
+    const { count: secCount } = await supabase
+      .from('homepage_sections')
+      .select('*', { count: 'exact', head: true });
+
+    if (secCount === 0) {
+      console.log('[Supabase] Seeding homepage sections...');
+      const sectionsToSeed = local.sections && local.sections.length > 0 ? local.sections : initialSections;
+      await supabase.from('homepage_sections').upsert(
+        sectionsToSeed.map((s) => ({
+          id: s.id,
+          section_type: s.section_type,
+          title: s.title,
+          subtitle: s.subtitle,
+          content: s.content,
+          display_order: s.display_order,
+          is_visible: s.is_visible,
+        }))
+      );
+    }
+
+    // 2. Check & Seed Categories if empty
+    const { count: catCount } = await supabase
+      .from('categories')
+      .select('*', { count: 'exact', head: true });
+
+    if (catCount === 0) {
+      console.log('[Supabase] Seeding categories...');
+      const categoriesToSeed = local.categories && local.categories.length > 0 ? local.categories : initialCategories;
+      await supabase.from('categories').upsert(
+        categoriesToSeed.map((c) => ({
+          id: c.id,
+          name: c.name,
+          slug: c.slug,
+          description: c.description,
+          image_url: c.image_url,
+          display_order: c.display_order,
+        }))
+      );
+    }
+
+    // 3. Check & Seed Collections if empty
+    const { count: colCount } = await supabase
+      .from('collections')
+      .select('*', { count: 'exact', head: true });
+
+    if (colCount === 0) {
+      console.log('[Supabase] Seeding collections...');
+      const collectionsToSeed = local.collections && local.collections.length > 0 ? local.collections : initialCollections;
+      await supabase.from('collections').upsert(
+        collectionsToSeed.map((c) => ({
+          id: c.id,
+          name: c.name,
+          slug: c.slug,
+          description: c.description,
+          image_url: c.image_url,
+          show_on_home: c.show_on_home,
+          has_dedicated_page: c.has_dedicated_page,
+          display_order: c.display_order,
+          is_published: c.is_published,
+        }))
+      );
+    }
+
+    // 4. Check & Seed Products if empty
+    const { count: prodCount } = await supabase
       .from('products')
       .select('*', { count: 'exact', head: true });
 
-    if (!error && count === 0) {
-      isSeeding = true;
-      console.log('[Supabase] Database tables are empty. Seeding boutique catalog...');
-      const local = getLocalData();
+    if (prodCount === 0) {
+      console.log('[Supabase] Seeding products...');
+      const productsToSeed = local.products && local.products.length > 0 ? local.products : initialProducts;
+      for (const prod of productsToSeed) {
+        await supabase.from('products').upsert({
+          id: prod.id,
+          name: prod.name,
+          slug: prod.slug,
+          product_code: prod.product_code,
+          price: prod.price,
+          description: prod.description,
+          category_id: prod.category_id || null,
+          collection_id: prod.collection_id || null,
+          images: prod.images,
+          fabric: prod.fabric,
+          care_instructions: prod.care_instructions,
+          is_published: prod.is_published,
+          is_featured: prod.is_featured,
+          updated_at: new Date().toISOString(),
+        });
 
-      // Seed categories
-      if (local.categories?.length > 0) {
-        await supabase.from('categories').upsert(
-          local.categories.map((c) => ({
-            id: c.id,
-            name: c.name,
-            slug: c.slug,
-            description: c.description,
-            image_url: c.image_url,
-            display_order: c.display_order,
-          }))
-        );
-      }
-
-      // Seed collections
-      if (local.collections?.length > 0) {
-        await supabase.from('collections').upsert(
-          local.collections.map((c) => ({
-            id: c.id,
-            name: c.name,
-            slug: c.slug,
-            description: c.description,
-            image_url: c.image_url,
-            show_on_home: c.show_on_home,
-            has_dedicated_page: c.has_dedicated_page,
-            display_order: c.display_order,
-            is_published: c.is_published,
-          }))
-        );
-      }
-
-      // Seed products & variants
-      if (local.products?.length > 0) {
-        for (const prod of local.products) {
-          await supabase.from('products').upsert({
-            id: prod.id,
-            name: prod.name,
-            slug: prod.slug,
-            product_code: prod.product_code,
-            price: prod.price,
-            description: prod.description,
-            category_id: prod.category_id || null,
-            collection_id: prod.collection_id || null,
-            images: prod.images,
-            fabric: prod.fabric,
-            care_instructions: prod.care_instructions,
-            is_published: prod.is_published,
-            is_featured: prod.is_featured,
-            updated_at: new Date().toISOString(),
-          });
-
-          if (prod.variants?.length > 0) {
-            await supabase.from('product_variants').upsert(
-              prod.variants.map((v) => ({
-                id: crypto.randomUUID(),
-                product_id: prod.id,
-                size: v.size,
-                stock_quantity: v.stock_quantity,
-                sku: v.sku,
-              }))
-            );
-          }
+        if (prod.variants?.length > 0) {
+          await supabase.from('product_variants').upsert(
+            prod.variants.map((v) => ({
+              id: crypto.randomUUID(),
+              product_id: prod.id,
+              size: v.size,
+              stock_quantity: v.stock_quantity,
+              sku: v.sku,
+            }))
+          );
         }
       }
+    }
 
-      // Seed homepage sections
-      if (local.sections?.length > 0) {
-        await supabase.from('homepage_sections').upsert(
-          local.sections.map((s) => ({
-            id: s.id,
-            section_type: s.section_type,
-            title: s.title,
-            subtitle: s.subtitle,
-            content: s.content,
-            display_order: s.display_order,
-            is_visible: s.is_visible,
-          }))
-        );
-      }
+    // 5. Check & Seed Store Settings if empty
+    const { count: setCount } = await supabase
+      .from('store_settings')
+      .select('*', { count: 'exact', head: true });
 
-      // Seed store settings
+    if (setCount === 0) {
+      console.log('[Supabase] Seeding store settings...');
       await supabase.from('store_settings').upsert({
         id: 1,
         whatsapp_number: local.settings.whatsapp_number,
@@ -182,14 +206,13 @@ async function ensureSupabaseSeeded(supabase: any) {
         address: local.settings.address,
         announcement_bar: local.settings.announcement_bar,
         currency_symbol: local.settings.currency_symbol || 'Rs.',
-        navigation: local.navigation,
-        reviews: local.reviews,
+        navigation: local.navigation || initialNavigation,
+        reviews: local.reviews || initialReviews,
         updated_at: new Date().toISOString(),
       });
-
-      console.log('[Supabase] Initial catalog seeded successfully!');
-      isSeeding = false;
     }
+
+    isSeeding = false;
   } catch (err) {
     console.error('Error in ensureSupabaseSeeded:', err);
     isSeeding = false;
@@ -543,12 +566,32 @@ export async function getServerHomepageSections(): Promise<HomepageSection[]> {
     try {
       await ensureSupabaseSeeded(supabase);
       const { data, error } = await supabase.from('homepage_sections').select('*').order('display_order');
-      if (!error && data) return data;
+      if (!error && data && data.length > 0) return data;
+
+      // If table exists in Supabase but has 0 rows, seed with initialSections immediately
+      if (!error && data && data.length === 0) {
+        const local = getLocalData();
+        const fallback = local.sections && local.sections.length > 0 ? local.sections : initialSections;
+        await supabase.from('homepage_sections').upsert(
+          fallback.map((s) => ({
+            id: s.id,
+            section_type: s.section_type,
+            title: s.title,
+            subtitle: s.subtitle,
+            content: s.content,
+            display_order: s.display_order,
+            is_visible: s.is_visible,
+          }))
+        );
+        return fallback;
+      }
     } catch (err) {
       console.error('Error fetching homepage_sections from Supabase:', err);
     }
   }
-  return getLocalData().sections.sort((a, b) => a.display_order - b.display_order);
+  const local = getLocalData();
+  const fallback = local.sections && local.sections.length > 0 ? local.sections : initialSections;
+  return fallback.sort((a, b) => a.display_order - b.display_order);
 }
 
 export async function reorderServerSections(orderedIds: string[]): Promise<HomepageSection[]> {

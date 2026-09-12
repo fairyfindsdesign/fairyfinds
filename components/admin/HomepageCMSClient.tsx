@@ -30,6 +30,7 @@ import {
   toggleSectionVisibilityAction,
   updateSectionContentAction,
 } from '@/app/actions/store';
+import ImageUpload from './ImageUpload';
 
 interface HomepageCMSClientProps {
   initialSections: HomepageSection[];
@@ -555,40 +556,18 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                             </div>
                           </div>
 
-                          {/* Image URL & Live Preview Card */}
+                          {/* Slide Background Image Upload */}
                           <div className="space-y-2">
-                            <label className="block text-[11px] uppercase tracking-wider text-neutral-600 font-semibold">
-                              Slide Background Image URL
-                            </label>
-                            <div className="flex flex-col sm:flex-row gap-3">
-                              <div className="flex-1">
-                                <input
-                                  type="url"
-                                  value={currentHeroSlide.image_url || ''}
-                                  onChange={(e) => updateCurrentSlide({ image_url: e.target.value })}
-                                  placeholder="https://images.unsplash.com/photo-..."
-                                  className="w-full px-3 py-2 bg-neutral-50/50 border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2] focus:bg-white"
-                                />
-                                <p className="text-[11px] text-neutral-400 mt-1 font-light">
-                                  High-resolution fashion or editorial image URL. A cinematic dark gradient overlay is automatically applied to guarantee optimal contrast.
-                                </p>
-                              </div>
-
-                              {/* Live Preview Thumbnail */}
-                              {currentHeroSlide.image_url && (
-                                <div className="relative w-full sm:w-48 h-24 bg-neutral-900 rounded-xs overflow-hidden border border-neutral-300 shrink-0">
-                                  <img
-                                    src={currentHeroSlide.image_url}
-                                    alt="Slide Preview"
-                                    className="w-full h-full object-cover"
-                                  />
-                                  <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent p-2 flex flex-col justify-end">
-                                    <span className="text-[9px] uppercase tracking-wider text-white/70 font-mono">Live Backdrop</span>
-                                    <span className="text-[10px] text-white font-sans truncate">{currentHeroSlide.heading || 'Editorial'}</span>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                            <ImageUpload
+                              multiple={false}
+                              value={currentHeroSlide.image_url || ''}
+                              onChange={(url) => updateCurrentSlide({ image_url: url })}
+                              label="Slide Background Editorial Image"
+                              helperText="Upload an editorial photo directly from your device. Automatically compressed to WebP and scaled to widescreen 16:9."
+                              aspectRatio="aspect-[16/9]"
+                              maxWidth={1920}
+                              maxHeight={1080}
+                            />
                           </div>
                         </div>
                       )}
@@ -704,42 +683,43 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                       </div>
 
                       {section.section_type !== 'REVIEWS' && (
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-[11px] uppercase tracking-wider text-neutral-600 font-semibold mb-1">
-                              Button Label
-                            </label>
-                            <input
-                              type="text"
-                              value={editFields.button_text}
-                              onChange={(e) => setEditFields({ ...editFields, button_text: e.target.value })}
-                              className="w-full px-3 py-2 bg-white border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2]"
-                            />
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[11px] uppercase tracking-wider text-neutral-600 font-semibold mb-1">
+                                Button Label
+                              </label>
+                              <input
+                                type="text"
+                                value={editFields.button_text}
+                                onChange={(e) => setEditFields({ ...editFields, button_text: e.target.value })}
+                                className="w-full px-3 py-2 bg-white border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2]"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] uppercase tracking-wider text-neutral-600 font-semibold mb-1">
+                                Button Link Destination
+                              </label>
+                              <input
+                                type="text"
+                                value={editFields.button_link}
+                                onChange={(e) => setEditFields({ ...editFields, button_link: e.target.value })}
+                                className="w-full px-3 py-2 bg-white border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2]"
+                              />
+                            </div>
                           </div>
 
-                          <div>
-                            <label className="block text-[11px] uppercase tracking-wider text-neutral-600 font-semibold mb-1">
-                              Button Link Destination
-                            </label>
-                            <input
-                              type="text"
-                              value={editFields.button_link}
-                              onChange={(e) => setEditFields({ ...editFields, button_link: e.target.value })}
-                              className="w-full px-3 py-2 bg-white border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2]"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-[11px] uppercase tracking-wider text-neutral-600 font-semibold mb-1">
-                              Image URL
-                            </label>
-                            <input
-                              type="url"
-                              value={editFields.image_url}
-                              onChange={(e) => setEditFields({ ...editFields, image_url: e.target.value })}
-                              className="w-full px-3 py-2 bg-white border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2]"
-                            />
-                          </div>
+                          <ImageUpload
+                            multiple={false}
+                            value={editFields.image_url || ''}
+                            onChange={(url) => setEditFields({ ...editFields, image_url: url })}
+                            label="Section Feature Imagery"
+                            helperText="Upload feature photograph from your device. Scaled and compressed to WebP automatically."
+                            aspectRatio="aspect-[16/9]"
+                            maxWidth={1600}
+                            maxHeight={1000}
+                          />
                         </div>
                       )}
 

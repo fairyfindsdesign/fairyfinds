@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Product, Category, Collection, ProductVariant } from '@/lib/types';
 import { saveProductAction } from '@/app/actions/store';
 import { ArrowLeft, Save, Plus, Trash2, CheckCircle2, Sparkles, AlertCircle } from 'lucide-react';
+import ImageUpload from './ImageUpload';
 
 interface ProductFormClientProps {
   initialProduct?: Product | null;
@@ -72,7 +73,12 @@ export default function ProductFormClient({
   const [fabric, setFabric] = useState(initialProduct?.fabric || '');
   const [careInstructions, setCareInstructions] = useState(initialProduct?.care_instructions || '');
   const [isPublished, setIsPublished] = useState(initialProduct?.is_published ?? true);
-  const [imageUrl, setImageUrl] = useState(initialProduct?.images?.[0] || '');
+  const [images, setImages] = useState<string[]>(() => {
+    if (initialProduct?.images && Array.isArray(initialProduct.images) && initialProduct.images.length > 0) {
+      return initialProduct.images;
+    }
+    return [];
+  });
 
   // Variants management
   const [variants, setVariants] = useState<ProductVariant[]>(
@@ -147,7 +153,7 @@ export default function ProductFormClient({
       fabric,
       care_instructions: careInstructions,
       is_published: isPublished,
-      images: imageUrl ? [imageUrl] : initialProduct?.images || [
+      images: images.length > 0 ? images : [
         'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=800'
       ],
       variants: sanitizedVariants,
@@ -326,22 +332,17 @@ export default function ProductFormClient({
           </div>
         </div>
 
-        {/* Primary Image URL */}
-        <div>
-          <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800 mb-1.5">
-            Primary Image URL
-          </label>
-          <input
-            type="url"
-            placeholder="https://..."
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
-          />
-          <p className="text-[11px] text-neutral-400 mt-1">
-            Provide a direct image URL or upload to Supabase Storage bucket.
-          </p>
-        </div>
+        {/* Photography & Lookbook Gallery */}
+        <ImageUpload
+          multiple={true}
+          values={images}
+          onMultiChange={setImages}
+          label="Piece Photography & Lookbook Gallery"
+          helperText="Upload photos directly from your phone camera or device. Photos are automatically compressed to WebP (up to 95% smaller) before uploading. The first photo acts as the primary catalog cover."
+          aspectRatio="aspect-[3/4]"
+          maxWidth={1600}
+          maxHeight={2000}
+        />
 
         {/* Description */}
         <div>

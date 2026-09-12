@@ -22,6 +22,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { saveCollectionAction, deleteCollectionAction } from '@/app/actions/store';
+import ImageUpload from './ImageUpload';
 
 interface CollectionManagerClientProps {
   initialCollections: Collection[];
@@ -310,60 +311,34 @@ export default function CollectionManagerClient({
               </div>
             </div>
 
-            {/* Section 2: Banner Image URL & Live Preview */}
+            {/* Section 2: Banner Image with Device Upload & Presets */}
             <div className="space-y-2">
-              <label className="block text-xs uppercase tracking-wider text-neutral-700 font-semibold">
-                Editorial Banner Image URL *
-              </label>
-              <div className="flex flex-col sm:flex-row gap-4 items-start">
-                <div className="flex-1 w-full space-y-2">
-                  <div className="relative">
-                    <input
-                      type="url"
-                      required
-                      placeholder="https://images.unsplash.com/..."
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      className="w-full pl-8 pr-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs rounded-xs focus:bg-white focus:outline-none focus:border-[#FF55D2]"
-                    />
-                    <ImageIcon className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-3" />
-                  </div>
+              <ImageUpload
+                multiple={false}
+                value={imageUrl}
+                onChange={setImageUrl}
+                label="Editorial Banner Image *"
+                helperText="Upload a signature banner directly from your device or camera roll. Photos are automatically compressed to high-definition WebP."
+                aspectRatio="aspect-[16/9]"
+                maxWidth={1920}
+                maxHeight={1080}
+              />
 
-                  {/* Preset Image Suggestions */}
-                  <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                    <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold mr-1">
-                      Quick Presets:
-                    </span>
-                    {PRESET_BANNER_IMAGES.map((preset) => (
-                      <button
-                        key={preset.label}
-                        type="button"
-                        onClick={() => setImageUrl(preset.url)}
-                        className="px-2 py-0.5 border border-neutral-200 hover:border-[#FF55D2] bg-neutral-50 hover:bg-[#FF55D2]/10 text-[10px] text-neutral-600 hover:text-[#FF55D2] rounded-xs transition-colors"
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Banner Thumbnail Live Preview */}
-                <div className="w-full sm:w-48 aspect-[16/9] relative bg-neutral-100 border border-neutral-200 overflow-hidden rounded-xs shrink-0 shadow-xs">
-                  {imageUrl ? (
-                    <Image
-                      src={imageUrl}
-                      alt="Collection banner preview"
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-neutral-400 text-[10px]">
-                      <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
-                      <span>Image Preview</span>
-                    </div>
-                  )}
-                </div>
+              {/* Preset Image Suggestions */}
+              <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold mr-1">
+                  Quick Presets:
+                </span>
+                {PRESET_BANNER_IMAGES.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => setImageUrl(preset.url)}
+                    className="px-2 py-0.5 border border-neutral-200 hover:border-[#FF55D2] bg-neutral-50 hover:bg-[#FF55D2]/10 text-[10px] text-neutral-600 hover:text-[#FF55D2] rounded-xs transition-colors cursor-pointer"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
               </div>
             </div>
 

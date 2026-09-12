@@ -147,3 +147,16 @@ CREATE POLICY "Admin All Homepage Sections" ON homepage_sections FOR ALL USING (
 DROP POLICY IF EXISTS "Admin All Store Settings" ON store_settings;
 CREATE POLICY "Admin All Store Settings" ON store_settings FOR ALL USING (true) WITH CHECK (true);
 
+-- 8. Storage Bucket for Boutique Assets
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('boutique-assets', 'boutique-assets', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage RLS Policies
+DROP POLICY IF EXISTS "Public Read boutique-assets" ON storage.objects;
+CREATE POLICY "Public Read boutique-assets" ON storage.objects FOR SELECT USING (bucket_id = 'boutique-assets');
+
+DROP POLICY IF EXISTS "Admin All boutique-assets" ON storage.objects;
+CREATE POLICY "Admin All boutique-assets" ON storage.objects FOR ALL USING (bucket_id = 'boutique-assets') WITH CHECK (bucket_id = 'boutique-assets');
+
+

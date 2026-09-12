@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { CustomerReview } from '@/lib/types';
 import { saveReviewsAction } from '@/app/actions/store';
+import ImageUpload from './ImageUpload';
 import {
   Star,
   Plus,
@@ -240,21 +241,19 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
               </div>
             </div>
 
-            {/* Profile Picture URL */}
+            {/* Profile Picture Upload */}
             <div>
-              <label className="block text-xs uppercase tracking-wider text-neutral-700 font-semibold mb-1.5">
-                Profile Picture URL (Optional)
-              </label>
-              <div className="relative">
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/... or image link"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-neutral-50/50 border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2] focus:bg-white"
-                />
-                <ImageIcon className="w-4 h-4 text-neutral-400 absolute left-3 top-2.5" />
-              </div>
+              <ImageUpload
+                multiple={false}
+                value={avatarUrl}
+                onChange={setAvatarUrl}
+                label="Profile Picture (Optional)"
+                helperText="Upload patron photo. Scaled and compressed to square avatar."
+                aspectRatio="aspect-square"
+                isAvatar={true}
+                maxWidth={400}
+                maxHeight={400}
+              />
             </div>
 
             {/* Location & City */}
@@ -409,15 +408,17 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
                           />
                         </div>
 
-                        <div>
-                          <label className="block text-[11px] uppercase tracking-wider text-neutral-600 font-semibold mb-1">
-                            Avatar URL
-                          </label>
-                          <input
-                            type="url"
+                        <div className="sm:col-span-2">
+                          <ImageUpload
+                            multiple={false}
                             value={editAvatarUrl}
-                            onChange={(e) => setEditAvatarUrl(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-white border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2]"
+                            onChange={setEditAvatarUrl}
+                            label="Customer Profile Photo"
+                            helperText="Upload new patron photo or replace avatar."
+                            aspectRatio="aspect-square"
+                            isAvatar={true}
+                            maxWidth={400}
+                            maxHeight={400}
                           />
                         </div>
 

@@ -88,6 +88,14 @@ CREATE TABLE IF NOT EXISTS store_settings (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Ensure columns exist if tables were created previously
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS navigation JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS reviews JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE collections ADD COLUMN IF NOT EXISTS show_on_home BOOLEAN DEFAULT false;
+ALTER TABLE collections ADD COLUMN IF NOT EXISTS has_dedicated_page BOOLEAN DEFAULT true;
+ALTER TABLE collections ADD COLUMN IF NOT EXISTS display_order INT DEFAULT 0;
+ALTER TABLE collections ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;
+
 -- Insert Default Settings
 INSERT INTO store_settings (id, whatsapp_number, store_name, announcement_bar)
 VALUES (1, '+94771234567', 'Fairy Finds Boutique', 'Complimentary Styling Consultation • Direct Orders & Custom Fitting via WhatsApp')
@@ -101,18 +109,41 @@ ALTER TABLE product_variants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE homepage_sections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE store_settings ENABLE ROW LEVEL SECURITY;
 
--- Public Read Policies
+-- Public Read Policies (Safely replace if existing)
+DROP POLICY IF EXISTS "Public Read Categories" ON categories;
 CREATE POLICY "Public Read Categories" ON categories FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Collections" ON collections;
 CREATE POLICY "Public Read Collections" ON collections FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Products" ON products;
 CREATE POLICY "Public Read Products" ON products FOR SELECT USING (is_published = true);
+
+DROP POLICY IF EXISTS "Public Read Product Variants" ON product_variants;
 CREATE POLICY "Public Read Product Variants" ON product_variants FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Homepage Sections" ON homepage_sections;
 CREATE POLICY "Public Read Homepage Sections" ON homepage_sections FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Store Settings" ON store_settings;
 CREATE POLICY "Public Read Store Settings" ON store_settings FOR SELECT USING (true);
 
--- Full CMS Admin Mutation Policies
+-- Full CMS Admin Mutation Policies (Safely replace if existing)
+DROP POLICY IF EXISTS "Admin All Categories" ON categories;
 CREATE POLICY "Admin All Categories" ON categories FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Admin All Collections" ON collections;
 CREATE POLICY "Admin All Collections" ON collections FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Admin All Products" ON products;
 CREATE POLICY "Admin All Products" ON products FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Admin All Variants" ON product_variants;
 CREATE POLICY "Admin All Variants" ON product_variants FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Admin All Homepage Sections" ON homepage_sections;
 CREATE POLICY "Admin All Homepage Sections" ON homepage_sections FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Admin All Store Settings" ON store_settings;
 CREATE POLICY "Admin All Store Settings" ON store_settings FOR ALL USING (true) WITH CHECK (true);
+

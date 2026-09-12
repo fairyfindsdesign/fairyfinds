@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { Category, Collection, CustomerPhoto, CustomerReview, HomepageSection, NavItem, Product, StoreSettings } from '../types';
-import { initialCategories, initialCollections, initialCustomerPhotos, initialNavigation, initialProducts, initialReviews, initialSections, initialSettings } from './initial-data';
+import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, StoreSettings } from '../types';
+import { initialCategories, initialCollections, initialNavigation, initialProducts, initialReviews, initialSections, initialSettings } from './initial-data';
 import { getAdminSupabase } from '../supabase/admin';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'store.json');
@@ -15,7 +15,6 @@ interface StoreData {
   products: Product[];
   sections: HomepageSection[];
   reviews: CustomerReview[];
-  customer_photos: CustomerPhoto[];
 }
 
 // Global in-memory cache for serverless environments (Vercel) where the filesystem is read-only
@@ -38,7 +37,6 @@ export function getLocalData(): StoreData {
         products: parsed.products || initialProducts,
         sections: parsed.sections || initialSections,
         reviews: parsed.reviews || initialReviews,
-        customer_photos: parsed.customer_photos || initialCustomerPhotos,
       };
       globalStore.__fairyStoreData = data;
       return data;
@@ -55,7 +53,6 @@ export function getLocalData(): StoreData {
     products: initialProducts,
     sections: initialSections,
     reviews: initialReviews,
-    customer_photos: initialCustomerPhotos,
   };
   globalStore.__fairyStoreData = defaultData;
   return defaultData;
@@ -211,7 +208,6 @@ async function ensureSupabaseSeeded(supabase: any) {
         currency_symbol: local.settings.currency_symbol || 'Rs.',
         navigation: local.navigation || initialNavigation,
         reviews: local.reviews || initialReviews,
-        customer_photos: local.customer_photos || initialCustomerPhotos,
         updated_at: new Date().toISOString(),
       });
     }
@@ -793,48 +789,5 @@ export async function updateServerReviews(reviews: CustomerReview[]): Promise<Cu
     }
   }
   return data.reviews;
-}
-
-// --- Customer Photos / Muses ---
-export async function getServerCustomerPhotos(): Promise<CustomerPhoto[]> {
-  const supabase = getAdminSupabase();
-  if (supabase) {
-    try {
-      await ensureSupabaseSeeded(supabase);
-      const { data, error } = await supabase.from('store_settings').select('customer_photos').eq('id', 1).single();
-      if (!error && data?.customer_photos && Array.isArray(data.customer_photos)) {
-        return data.customer_photos;
-      }
-    } catch (err) {
-      console.error('Error fetching customer photos from Supabase:', err);
-    }
-  }
-  return getLocalData().customer_photos || initialCustomerPhotos;
-}
-
-export async function updateServerCustomerPhotos(photos: CustomerPhoto[]): Promise<CustomerPhoto[]> {
-  const data = getLocalData();
-  data.customer_photos = photos;
-  saveLocalData(data);
-
-  const supabase = getAdminSupabase();
-  if (supabase) {
-    try {
-      const { error } = await supabase.from('store_settings').upsert({
-        id: 1,
-        customer_photos: photos,
-        updated_at: new Date().toISOString(),
-      });
-      if (error) {
-        console.error('Supabase customer_photos update error:', error);
-        throw new Error(`Database error updating customer photos: ${error.message}`);
-      }
-      return await getServerCustomerPhotos();
-    } catch (err: any) {
-      console.error('Error updating customer photos in Supabase:', err);
-      throw err;
-    }
-  }
-  return data.customer_photos;
 }
 

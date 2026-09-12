@@ -15,7 +15,6 @@ import {
   Menu,
   X,
   Star,
-  Camera,
   ChevronRight,
   ShieldCheck,
 } from 'lucide-react';
@@ -40,7 +39,6 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
     { name: 'Homepage CMS', href: '/admin/homepage', icon: LayoutTemplate },
     { name: 'Navigation Menu', href: '/admin/navigation', icon: Menu },
     { name: 'Customer Reviews', href: '/admin/reviews', icon: Star },
-    { name: 'Customer Muses', href: '/admin/gallery', icon: Camera },
     { name: 'Store Settings', href: '/admin/settings', icon: Settings },
   ];
 

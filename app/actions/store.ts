@@ -12,9 +12,8 @@ import {
   updateServerSectionContent,
   updateServerNavigation,
   updateServerReviews,
-  updateServerCustomerPhotos,
 } from '@/lib/data/server-store';
-import { Collection, CustomerPhoto, CustomerReview, HomepageSection, NavItem, Product, StoreSettings } from '@/lib/types';
+import { Collection, CustomerReview, HomepageSection, NavItem, Product, StoreSettings } from '@/lib/types';
 
 /**
  * Purges both layout and individual route caches to ensure
@@ -29,7 +28,6 @@ function purgeStorefrontCache() {
     revalidatePath('/contact', 'page');
     revalidatePath('/about', 'page');
     revalidatePath('/custom', 'page');
-    revalidatePath('/muses', 'page');
     revalidatePath('/collections', 'layout');
     revalidatePath('/collections/[slug]', 'page');
     revalidatePath('/product/[slug]', 'page');
@@ -40,7 +38,6 @@ function purgeStorefrontCache() {
     revalidatePath('/admin/settings', 'page');
     revalidatePath('/admin/navigation', 'page');
     revalidatePath('/admin/reviews', 'page');
-    revalidatePath('/admin/gallery', 'page');
   } catch (err) {
     console.error('Error in purgeStorefrontCache:', err);
   }
@@ -181,20 +178,6 @@ export async function saveReviewsAction(reviews: CustomerReview[]) {
   } catch (err: any) {
     console.error('saveReviewsAction error:', err);
     return { success: false, error: err?.message || 'Database error saving reviews' };
-  }
-}
-
-export async function saveCustomerPhotosAction(photos: CustomerPhoto[]) {
-  try {
-    const result = await updateServerCustomerPhotos(photos);
-    purgeStorefrontCache();
-    revalidatePath('/muses', 'page');
-    revalidatePath('/admin/gallery', 'page');
-    revalidatePath('/admin', 'layout');
-    return { success: true, photos: result };
-  } catch (err: any) {
-    console.error('saveCustomerPhotosAction error:', err);
-    return { success: false, error: err?.message || 'Database error saving customer photos' };
   }
 }
 

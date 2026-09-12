@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { HomepageSection, HeroSlide } from '@/lib/types';
 import {
@@ -24,6 +25,8 @@ import {
   RefreshCw,
   MessageSquareQuote,
   ExternalLink,
+  Camera,
+  X,
 } from 'lucide-react';
 import {
   reorderSectionsAction,
@@ -152,6 +155,25 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
     const nextList = [...heroSlides, newSlide];
     setHeroSlides(nextList);
     setActiveSlideIdx(nextList.length - 1);
+  };
+
+  const handleBatchAddSlides = (urls: string[]) => {
+    if (!urls || urls.length === 0) return;
+    const newSlides: HeroSlide[] = urls.map((url, i) => ({
+      id: `slide-${Date.now()}-${i}`,
+      heading: 'New Editorial Collection',
+      badge: 'Atelier Spotlight',
+      description:
+        'Handcrafted luxury silhouettes tailored with pure silk drapes and bespoke finishing.',
+      button_text: 'Explore Collection',
+      button_link: '/shop',
+      secondary_button_text: 'Bespoke Order',
+      secondary_button_link: '/custom',
+      image_url: url,
+    }));
+    const nextList = [...heroSlides, ...newSlides];
+    setHeroSlides(nextList);
+    setActiveSlideIdx(nextList.length - newSlides.length);
   };
 
   const handleDeleteSlide = (index: number) => {
@@ -366,7 +388,34 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                         </div>
                       </div>
 
-                      {/* Slide Tabs Navigation */}
+                      {/* Batch Multi-Photo Upload Dropzone */}
+                      <div className="bg-white border border-dashed border-[#FF55D2]/40 rounded-xs p-4 bg-[#FF55D2]/[0.02]">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <Camera className="w-4 h-4 text-[#FF55D2]" />
+                              <h5 className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]">
+                                Batch Upload Carousel Photos
+                              </h5>
+                              <span className="text-[10px] font-medium px-2 py-0.5 bg-[#FF55D2]/10 text-[#FF55D2] rounded-xs">
+                                Multi-Select Supported
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-neutral-500 font-light mt-0.5">
+                              Select multiple photos from your device. Each image is automatically compressed to WebP and appended as a new carousel slide.
+                            </p>
+                          </div>
+                        </div>
+                        <ImageUpload
+                          multiple={true}
+                          values={[]}
+                          onMultiChange={(newUrls) => handleBatchAddSlides(newUrls)}
+                          label="Upload multiple carousel photos (auto-creates slides)"
+                          aspectRatio="aspect-[16/9]"
+                        />
+                      </div>
+
+                      {/* Slide Tabs Navigation & Visual Thumbnail Strip */}
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-[11px] uppercase tracking-wider text-neutral-500 font-semibold">
@@ -378,36 +427,68 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                             className="px-3 py-1 bg-white hover:bg-neutral-50 border border-dashed border-[#FF55D2] text-[#FF55D2] text-xs font-semibold rounded-xs flex items-center gap-1.5 transition-colors shadow-xs active:scale-95"
                           >
                             <Plus className="w-3.5 h-3.5" />
-                            <span>Add Slide</span>
+                            <span>Add Single Slide</span>
                           </button>
                         </div>
 
-                        {/* Tabs horizontal list */}
-                        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                        {/* Visual Thumbnail Strip */}
+                        <div className="flex items-center gap-2.5 overflow-x-auto pb-2 pt-1">
                           {heroSlides.map((slide, sIdx) => {
                             const isActive = sIdx === activeSlideIdx;
                             return (
-                              <button
+                              <div
                                 key={slide.id || sIdx}
-                                type="button"
                                 onClick={() => setActiveSlideIdx(sIdx)}
-                                className={`px-3.5 py-2 text-xs font-medium rounded-xs border transition-all flex items-center gap-2 shrink-0 ${
+                                className={`relative group shrink-0 cursor-pointer rounded-xs border-2 transition-all p-1.5 flex items-center gap-2.5 ${
                                   isActive
-                                    ? 'bg-[#1A1A1A] text-white border-[#1A1A1A] shadow-xs'
-                                    : 'bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300'
+                                    ? 'border-[#FF55D2] bg-pink-50/50 shadow-xs ring-2 ring-[#FF55D2]/20'
+                                    : 'border-neutral-200 bg-white hover:border-neutral-400 hover:bg-neutral-50'
                                 }`}
                               >
-                                <span
-                                  className={`w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center ${
-                                    isActive ? 'bg-[#FF55D2] text-white' : 'bg-neutral-200 text-neutral-700'
-                                  }`}
-                                >
-                                  {sIdx + 1}
-                                </span>
-                                <span className="max-w-[130px] truncate text-left">
-                                  {slide.badge || slide.heading?.slice(0, 18) || `Slide ${sIdx + 1}`}
-                                </span>
-                              </button>
+                                <div className="relative w-12 h-12 rounded-xs overflow-hidden bg-neutral-100 shrink-0">
+                                  {slide.image_url ? (
+                                    <Image
+                                      src={slide.image_url}
+                                      alt={slide.heading || `Slide ${sIdx + 1}`}
+                                      fill
+                                      className="object-cover"
+                                      sizes="48px"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-neutral-400">
+                                      <ImageIcon className="w-4 h-4" />
+                                    </div>
+                                  )}
+                                  <span
+                                    className={`absolute top-0 left-0 px-1 text-[9px] font-bold ${
+                                      isActive ? 'bg-[#FF55D2] text-white' : 'bg-black/70 text-white'
+                                    }`}
+                                  >
+                                    #{sIdx + 1}
+                                  </span>
+                                </div>
+                                <div className="text-left pr-6 min-w-[90px] max-w-[140px]">
+                                  <p className="text-[11px] font-semibold text-[#1A1A1A] truncate">
+                                    {slide.badge || `Slide ${sIdx + 1}`}
+                                  </p>
+                                  <p className="text-[10px] text-neutral-500 truncate">
+                                    {slide.heading || 'No headline'}
+                                  </p>
+                                </div>
+                                {heroSlides.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteSlide(sIdx);
+                                    }}
+                                    className="absolute top-1 right-1 p-1 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-xs transition-colors"
+                                    title="Delete slide"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
                             );
                           })}
                         </div>

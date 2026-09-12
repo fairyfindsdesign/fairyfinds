@@ -84,43 +84,6 @@ export default async function HomePage() {
                     label: 'Explore All Styles',
                   }}
                   className="py-16 sm:py-24 bg-[#FAF9F6] border-b border-neutral-200 scroll-mt-20"
-                  bottomContent={
-                    section.content.image_url ? (
-                      /* Editorial Spotlight Banner */
-                      <div className="relative py-14 sm:py-20 px-6 sm:px-12 bg-[#1A1A1A] text-white overflow-hidden shadow-lg border border-neutral-800">
-                        <div className="absolute inset-0 opacity-30">
-                          <Image
-                            src={section.content.image_url}
-                            alt={section.content.heading || 'Atelier Spotlight'}
-                            fill
-                            className="object-cover object-center filter grayscale-25"
-                          />
-                        </div>
-                        <div className="relative max-w-3xl mx-auto text-center space-y-4 z-10">
-                          <span className="inline-block text-[10px] uppercase tracking-[0.3em] text-[#FF55D2] font-semibold">
-                            ATELIER SPOTLIGHT
-                          </span>
-                          <h3 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-white leading-tight">
-                            {section.content.heading || 'The Signature Collection'}
-                          </h3>
-                          {section.content.description && (
-                            <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed max-w-xl mx-auto font-light">
-                              {section.content.description}
-                            </p>
-                          )}
-                          <div className="pt-2">
-                            <Link
-                              href={section.content.button_link || '/shop'}
-                              className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-widest font-semibold transition-colors shadow-lg"
-                            >
-                              <span>{section.content.button_text || 'Explore Collection'}</span>
-                              <ArrowRight className="w-4 h-4" />
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    ) : null
-                  }
                 >
                   {featuredCollections.map((col) => {
                     const count = products.filter(

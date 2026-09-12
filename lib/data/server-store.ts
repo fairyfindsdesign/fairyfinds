@@ -261,6 +261,7 @@ export async function updateServerSettings(settings: Partial<StoreSettings>): Pr
         console.error('Supabase store_settings update error:', error);
         throw new Error(`Database error updating settings: ${error.message || error.details}`);
       }
+      return await getServerSettings();
     } catch (err: any) {
       console.error('Error updating store_settings in Supabase:', err);
       throw err;
@@ -612,13 +613,19 @@ export async function reorderServerSections(orderedIds: string[]): Promise<Homep
   if (supabase) {
     try {
       for (const sec of data.sections) {
-        await supabase
+        const { error } = await supabase
           .from('homepage_sections')
-          .update({ display_order: sec.display_order })
+          .update({ display_order: sec.display_order, updated_at: new Date().toISOString() })
           .eq('id', sec.id);
+        if (error) {
+          console.error('Supabase error reordering section:', error);
+          throw new Error(`Failed to update display order: ${error.message}`);
+        }
       }
-    } catch (err) {
+      return await getServerHomepageSections();
+    } catch (err: any) {
       console.error('Error reordering homepage sections in Supabase:', err);
+      throw err;
     }
   }
 
@@ -633,12 +640,18 @@ export async function toggleServerSectionVisibility(id: string, is_visible: bool
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
-      await supabase
+      const { error } = await supabase
         .from('homepage_sections')
-        .update({ is_visible })
+        .update({ is_visible, updated_at: new Date().toISOString() })
         .eq('id', id);
-    } catch (err) {
+      if (error) {
+        console.error('Supabase error toggling section visibility:', error);
+        throw new Error(`Failed to toggle visibility: ${error.message}`);
+      }
+      return await getServerHomepageSections();
+    } catch (err: any) {
       console.error('Error toggling homepage section visibility in Supabase:', err);
+      throw err;
     }
   }
 
@@ -650,9 +663,10 @@ export async function updateServerSectionContent(id: string, content: any): Prom
   let updatedSection: HomepageSection | undefined;
   data.sections = data.sections.map((s) => {
     if (s.id === id) {
-      const { subtitle, ...restContent } = content;
+      const { subtitle, title, ...restContent } = content;
       updatedSection = {
         ...s,
+        title: title !== undefined ? title : s.title,
         subtitle: subtitle !== undefined ? subtitle : s.subtitle,
         content: { ...s.content, ...restContent },
       };
@@ -665,15 +679,26 @@ export async function updateServerSectionContent(id: string, content: any): Prom
   const supabase = getAdminSupabase();
   if (supabase && updatedSection) {
     try {
-      await supabase
+      const { error } = await supabase
         .from('homepage_sections')
-        .update({
+        .upsert({
+          id: updatedSection.id,
+          section_type: updatedSection.section_type,
+          title: updatedSection.title,
           subtitle: updatedSection.subtitle,
           content: updatedSection.content,
-        })
-        .eq('id', id);
-    } catch (err) {
+          display_order: updatedSection.display_order,
+          is_visible: updatedSection.is_visible,
+          updated_at: new Date().toISOString(),
+        });
+      if (error) {
+        console.error('Supabase update error on homepage_sections:', error);
+        throw new Error(`Database error updating section: ${error.message || error.details}`);
+      }
+      return await getServerHomepageSections();
+    } catch (err: any) {
       console.error('Error updating homepage section in Supabase:', err);
+      throw err;
     }
   }
 
@@ -705,13 +730,19 @@ export async function updateServerNavigation(navigation: NavItem[]): Promise<Nav
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
-      await supabase.from('store_settings').upsert({
+      const { error } = await supabase.from('store_settings').upsert({
         id: 1,
         navigation,
         updated_at: new Date().toISOString(),
       });
-    } catch (err) {
+      if (error) {
+        console.error('Supabase navigation update error:', error);
+        throw new Error(`Database error updating navigation: ${error.message}`);
+      }
+      return await getServerNavigation();
+    } catch (err: any) {
       console.error('Error updating navigation in Supabase:', err);
+      throw err;
     }
   }
   return data.navigation;
@@ -742,13 +773,19 @@ export async function updateServerReviews(reviews: CustomerReview[]): Promise<Cu
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
-      await supabase.from('store_settings').upsert({
+      const { error } = await supabase.from('store_settings').upsert({
         id: 1,
         reviews,
         updated_at: new Date().toISOString(),
       });
-    } catch (err) {
+      if (error) {
+        console.error('Supabase reviews update error:', error);
+        throw new Error(`Database error updating reviews: ${error.message}`);
+      }
+      return await getServerReviews();
+    } catch (err: any) {
       console.error('Error updating reviews in Supabase:', err);
+      throw err;
     }
   }
   return data.reviews;

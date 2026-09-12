@@ -29,7 +29,15 @@ function purgeStorefrontCache() {
     revalidatePath('/about', 'page');
     revalidatePath('/custom', 'page');
     revalidatePath('/collections', 'layout');
+    revalidatePath('/collections/[slug]', 'page');
+    revalidatePath('/product/[slug]', 'page');
     revalidatePath('/admin', 'layout');
+    revalidatePath('/admin/homepage', 'page');
+    revalidatePath('/admin/products', 'page');
+    revalidatePath('/admin/collections', 'page');
+    revalidatePath('/admin/settings', 'page');
+    revalidatePath('/admin/navigation', 'page');
+    revalidatePath('/admin/reviews', 'page');
   } catch (err) {
     console.error('Error in purgeStorefrontCache:', err);
   }

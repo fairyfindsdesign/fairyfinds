@@ -310,9 +310,9 @@ export default async function HomePage() {
 
           case 'CUSTOM_MADE':
             return (
-              <section key={section.id} className="py-20 bg-white">
+              <section key={section.id} className="py-20 bg-white gsap-fade-up">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="bg-[#FAF9F6] border border-neutral-200 p-8 sm:p-12 lg:p-16 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                  <div className="bg-[#FAF9F6] border border-neutral-200 p-8 sm:p-12 lg:p-16 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center gsap-scale-in">
                     <div className="lg:col-span-7 space-y-6">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-neutral-200 text-[11px] uppercase tracking-widest text-[#FF55D2] font-semibold">
                         <Scissors className="w-3.5 h-3.5" />
@@ -334,7 +334,7 @@ export default async function HomePage() {
                             1
                           </span>
                           <p className="text-xs text-neutral-700">
-                            <strong>Submit Measurements & Inspiration:</strong> Provide your preferred silhouette and fabric choices.
+                            <strong>Choose Your Style & Fabric:</strong> Sarees, bridal lehengas, bespoke evening gowns, or blouses.
                           </p>
                         </div>
                         <div className="flex items-start gap-3">
@@ -385,14 +385,15 @@ export default async function HomePage() {
 
           case 'REVIEWS':
             return (
-              <ReviewsMarquee
-                key={section.id}
-                reviews={reviews}
-                heading={section.content?.heading}
-                subtitle={section.subtitle}
-                description={section.content?.description}
-                badge={section.content?.badge}
-              />
+              <div key={section.id} className="gsap-fade-up">
+                <ReviewsMarquee
+                  reviews={reviews}
+                  heading={section.content?.heading}
+                  subtitle={section.subtitle}
+                  description={section.content?.description}
+                  badge={section.content?.badge}
+                />
+              </div>
             );
 
           default:

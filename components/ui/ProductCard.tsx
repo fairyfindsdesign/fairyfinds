@@ -23,7 +23,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
   return (
     <div
-      className="group relative flex flex-col bg-white rounded-xs p-1.5 sm:p-0 hover:-translate-y-1 hover:shadow-md active:scale-[0.99] transition-all duration-300"
+      className="group relative flex flex-col bg-white rounded-xs p-1.5 sm:p-0 hover:-translate-y-1 hover:shadow-md active:scale-[0.99] transition-all duration-300 gsap-fade-up"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

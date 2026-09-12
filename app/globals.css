@@ -27,9 +27,12 @@
 }
 
 html {
-  scroll-behavior: smooth;
   text-rendering: optimizeLegibility;
   -webkit-tap-highlight-color: transparent;
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
 }
 
 /* Typography Base: Manrope for body, all paragraphs, small text, and UI controls */

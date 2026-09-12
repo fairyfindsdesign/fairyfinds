@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ShoppingBag, Menu, X, ChevronDown, Sparkles } from 'lucide-react';
+import { ShoppingBag, Menu, X, ChevronDown, Sparkles, Home, Compass } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { NavItem } from '@/lib/types';
 import { initialNavigation } from '@/lib/data/initial-data';
@@ -353,6 +353,122 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
           </div>
         </div>
       )}
+
+      {/* Mobile Bottom Docked Navigation Bar (Mobile Only - lg:hidden) */}
+      <nav
+        aria-label="Mobile Bottom Navigation"
+        className="fixed bottom-0 left-0 right-0 z-[70] lg:hidden bg-white/95 backdrop-blur-md border-t border-neutral-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] px-2 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))]"
+      >
+        <div className="flex items-center justify-around max-w-md mx-auto">
+          {/* 1. Home */}
+          <Link
+            href="/"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex flex-col items-center justify-center flex-1 py-1 transition-all active:scale-95 ${
+              pathname === '/'
+                ? 'text-[#FF55D2]'
+                : 'text-neutral-500 hover:text-neutral-900'
+            }`}
+          >
+            <div className="relative">
+              <Home className="w-5 h-5" />
+              {pathname === '/' && (
+                <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#FF55D2] rounded-full" />
+              )}
+            </div>
+            <span className="text-[10px] tracking-wider uppercase font-semibold mt-1">
+              Home
+            </span>
+          </Link>
+
+          {/* 2. Shop */}
+          <Link
+            href="/shop"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex flex-col items-center justify-center flex-1 py-1 transition-all active:scale-95 ${
+              pathname?.startsWith('/shop') || pathname?.startsWith('/collections')
+                ? 'text-[#FF55D2]'
+                : 'text-neutral-500 hover:text-neutral-900'
+            }`}
+          >
+            <div className="relative">
+              <Compass className="w-5 h-5" />
+              {(pathname?.startsWith('/shop') || pathname?.startsWith('/collections')) && (
+                <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#FF55D2] rounded-full" />
+              )}
+            </div>
+            <span className="text-[10px] tracking-wider uppercase font-semibold mt-1">
+              Shop
+            </span>
+          </Link>
+
+          {/* 3. Custom Atelier */}
+          <Link
+            href="/custom"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex flex-col items-center justify-center flex-1 py-1 transition-all active:scale-95 ${
+              pathname === '/custom'
+                ? 'text-[#FF55D2]'
+                : 'text-neutral-500 hover:text-neutral-900'
+            }`}
+          >
+            <div className="relative">
+              <Sparkles className="w-5 h-5" />
+              {pathname === '/custom' && (
+                <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#FF55D2] rounded-full" />
+              )}
+            </div>
+            <span className="text-[10px] tracking-wider uppercase font-semibold mt-1">
+              Atelier
+            </span>
+          </Link>
+
+          {/* 4. Bag / Cart */}
+          <Link
+            href="/cart"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`flex flex-col items-center justify-center flex-1 py-1 transition-all active:scale-95 relative ${
+              pathname === '/cart'
+                ? 'text-[#FF55D2]'
+                : 'text-neutral-500 hover:text-neutral-900'
+            }`}
+          >
+            <div className="relative">
+              <ShoppingBag className="w-5 h-5" />
+              {totalCount > 0 && (
+                <span className="absolute -top-1.5 -right-2.5 bg-[#FF55D2] text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs animate-cart-bounce">
+                  {totalCount}
+                </span>
+              )}
+              {pathname === '/cart' && totalCount === 0 && (
+                <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#FF55D2] rounded-full" />
+              )}
+            </div>
+            <span className="text-[10px] tracking-wider uppercase font-semibold mt-1">
+              Bag {totalCount > 0 ? `(${totalCount})` : ''}
+            </span>
+          </Link>
+
+          {/* 5. Menu Drawer Trigger */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className={`flex flex-col items-center justify-center flex-1 py-1 transition-all active:scale-95 cursor-pointer ${
+              mobileMenuOpen
+                ? 'text-[#FF55D2]'
+                : 'text-neutral-500 hover:text-neutral-900'
+            }`}
+            aria-label="Toggle navigation menu"
+          >
+            <div className="relative">
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </div>
+            <span className="text-[10px] tracking-wider uppercase font-semibold mt-1">
+              Menu
+            </span>
+          </button>
+        </div>
+      </nav>
     </>
   );
 }

@@ -136,19 +136,19 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                 )}
 
                 {/* Main Headline */}
-                <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-white font-light leading-[1.12] tracking-tight animate-in fade-in slide-in-from-bottom-3 duration-700">
+                <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-white font-light leading-[1.12] tracking-tight gsap-hero-title animate-in fade-in duration-700">
                   {slide.heading}
                 </h1>
 
                 {/* Narrative Description */}
                 {slide.description && (
-                  <p className="text-neutral-200 text-xs sm:text-sm md:text-base leading-relaxed font-light max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-800">
+                  <p className="text-neutral-200 text-xs sm:text-sm md:text-base leading-relaxed font-light max-w-xl gsap-hero-subtitle animate-in fade-in duration-800">
                     {slide.description}
                   </p>
                 )}
 
                 {/* Dual Action CTAs */}
-                <div className="pt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 animate-in fade-in slide-in-from-bottom-5 duration-900">
+                <div className="pt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 gsap-hero-cta animate-in fade-in duration-900">
                   {slide.button_text && (
                     <Link
                       href={slide.button_link || '/shop'}

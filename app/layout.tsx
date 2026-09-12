@@ -48,6 +48,8 @@ export const metadata: Metadata = {
 };
 
 import BackToTop from '@/components/ui/BackToTop';
+import ScrollReset from '@/components/ui/ScrollReset';
+import GSAPProvider from '@/components/animation/GSAPProvider';
 import { getNavigation, getSettings, getCollections } from '@/lib/data/store';
 
 export const dynamic = 'force-dynamic';
@@ -68,9 +70,12 @@ export default async function RootLayout({
     <html lang="en" className={`${cormorant.variable} ${manrope.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#FFFFFF] text-[#1A1A1A] font-sans selection:bg-[#FF55D2] selection:text-white">
         <CartProvider>
+          <ScrollReset />
           <AnnouncementBar message={settings.announcement_bar} />
           <Navbar initialNavigation={navigation} />
-          <main className="flex-1">{children}</main>
+          <GSAPProvider>
+            <main className="flex-1 pb-20 lg:pb-0">{children}</main>
+          </GSAPProvider>
           <BackToTop />
           <Footer settings={settings} collections={collections} />
         </CartProvider>

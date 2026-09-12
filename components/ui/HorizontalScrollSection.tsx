@@ -71,7 +71,7 @@ export default function HorizontalScrollSection({
     <section id={id} className={className}>
       <div className={innerClassName}>
         {/* Section Header with Top Corner Action & Scroll Buttons */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-4 gsap-fade-up">
           <div className="max-w-2xl">
             {badge && <div className="mb-2">{badge}</div>}
             {eyebrow && !badge && (
@@ -131,7 +131,7 @@ export default function HorizontalScrollSection({
         <div
           ref={scrollRef}
           onScroll={updateScrollButtons}
-          className="flex gap-4 sm:gap-6 overflow-x-auto scroll-smooth no-scrollbar snap-x snap-mandatory py-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+          className="flex gap-4 sm:gap-6 overflow-x-auto scroll-smooth no-scrollbar snap-x snap-mandatory py-2 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 gsap-stagger"
         >
           {children}
         </div>

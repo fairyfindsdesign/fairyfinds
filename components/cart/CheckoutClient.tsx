@@ -89,7 +89,7 @@ export default function CheckoutClient({ settings }: CheckoutClientProps) {
       </nav>
 
       {/* Header */}
-      <div className="border-b border-neutral-200 pb-6 mb-10">
+      <div className="border-b border-neutral-200 pb-6 mb-10 gsap-fade-up">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.25em] text-[#FF55D2] font-semibold mb-1">
@@ -112,7 +112,7 @@ export default function CheckoutClient({ settings }: CheckoutClientProps) {
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Left Column: Items Table */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-6 gsap-fade-up">
           <div className="bg-white border border-neutral-200 divide-y divide-neutral-100 shadow-xs">
             <div className="p-4 sm:p-5 bg-neutral-50 flex justify-between items-center text-xs uppercase tracking-wider text-neutral-500 font-medium">
               <span>Selected Garments ({totalCount})</span>
@@ -214,7 +214,7 @@ export default function CheckoutClient({ settings }: CheckoutClientProps) {
         </div>
 
         {/* Right Column: Customer Details & WhatsApp Checkout */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-5 gsap-fade-up">
           <div className="bg-white border border-neutral-200 p-6 sm:p-8 shadow-xs sticky top-28">
             <h2 className="font-serif text-2xl text-[#1A1A1A] font-light mb-1">
               Customer & Delivery Details

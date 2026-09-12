@@ -126,7 +126,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
         {/* Images Gallery (Left) */}
-        <div className="lg:col-span-7 flex flex-col-reverse sm:flex-row gap-4">
+        <div className="lg:col-span-7 flex flex-col-reverse sm:flex-row gap-4 gsap-fade-up">
           {/* Thumbnails */}
           {product.images && product.images.length > 1 && (
             <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-visible">
@@ -173,7 +173,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
         </div>
 
         {/* Product Details & Actions (Right) */}
-        <div className="lg:col-span-5 flex flex-col justify-between">
+        <div className="lg:col-span-5 flex flex-col justify-between gsap-fade-up">
           <div>
             {/* Collection / Category tag & Product Code */}
             <div className="flex flex-wrap items-center gap-2.5 mb-2">
@@ -465,7 +465,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <div className="mt-24 pt-12 border-t border-neutral-200">
+        <div className="mt-24 pt-12 border-t border-neutral-200 gsap-fade-up">
           <div className="text-center mb-10">
             <p className="text-xs uppercase tracking-[0.25em] text-[#FF55D2] font-semibold mb-1">
               COMPLEMENTARY PIECES
@@ -474,7 +474,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
               You May Also Admire
             </h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 gsap-stagger">
             {relatedProducts.slice(0, 4).map((relProduct) => (
               <ProductCard key={relProduct.id} product={relProduct} />
             ))}

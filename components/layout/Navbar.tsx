@@ -19,7 +19,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const { totalCount, setIsCartDrawerOpen } = useCart();
+  const { totalCount } = useCart();
 
   const navigation = (navProp || initialNavigation).filter((item) => item.is_visible);
 
@@ -195,8 +195,8 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
             })}
 
             {/* Inline Cart Icon alongside navbar links */}
-            <button
-              onClick={() => setIsCartDrawerOpen(true)}
+            <Link
+              href="/cart"
               className="relative p-1.5 text-neutral-800 hover:text-[#FF55D2] active:scale-90 transition-all cursor-pointer rounded-xs flex items-center gap-1.5 ml-2 pl-3 border-l border-neutral-200 group"
               aria-label={`Shopping Bag with ${totalCount} items`}
             >
@@ -211,13 +211,13 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
               <span className="text-xs uppercase tracking-wider font-semibold text-neutral-700 group-hover:text-[#FF55D2] transition-colors">
                 Bag {totalCount > 0 ? `(${totalCount})` : ''}
               </span>
-            </button>
+            </Link>
           </nav>
 
-          {/* Mobile Right Action: Shopping Bag Button */}
+          {/* Mobile Right Action: Shopping Bag Link to /cart */}
           <div className="flex items-center lg:hidden">
-            <button
-              onClick={() => setIsCartDrawerOpen(true)}
+            <Link
+              href="/cart"
               className="relative p-2 text-neutral-900 hover:text-[#FF55D2] active:scale-90 transition-all cursor-pointer rounded-xs"
               aria-label={`Shopping Bag with ${totalCount} items`}
             >
@@ -227,7 +227,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                   {totalCount}
                 </span>
               )}
-            </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -325,13 +325,10 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                   );
                 })}
 
-                {/* Mobile Drawer Shopping Bag Button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setIsCartDrawerOpen(true);
-                  }}
+                {/* Mobile Drawer Shopping Bag Link to /cart */}
+                <Link
+                  href="/cart"
+                  onClick={() => setMobileMenuOpen(false)}
                   className="w-full flex items-center justify-between min-h-[44px] px-3 text-base tracking-wider uppercase text-neutral-800 font-medium hover:text-[#FF55D2] transition-colors rounded-xs border-t border-neutral-200/60 pt-3 mt-2"
                 >
                   <span className="flex items-center gap-2.5">
@@ -343,7 +340,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                       {totalCount}
                     </span>
                   )}
-                </button>
+                </Link>
               </div>
             </div>
 

@@ -5,7 +5,6 @@ import { CartProvider } from '@/context/CartContext';
 import AnnouncementBar from '@/components/layout/AnnouncementBar';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import CartDrawer from '@/components/cart/CartDrawer';
 
 const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant',
@@ -71,7 +70,6 @@ export default async function RootLayout({
         <CartProvider>
           <AnnouncementBar message={settings.announcement_bar} />
           <Navbar initialNavigation={navigation} />
-          <CartDrawer />
           <main className="flex-1">{children}</main>
           <BackToTop />
           <Footer settings={settings} collections={collections} />

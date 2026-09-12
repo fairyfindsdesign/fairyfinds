@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Product, StoreSettings } from '@/lib/types';
 import { useCart } from '@/context/CartContext';
 import {
@@ -17,6 +18,8 @@ import {
   ChevronDown,
   ChevronUp,
   Copy,
+  Zap,
+  ArrowRight,
 } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
 
@@ -31,6 +34,7 @@ export default function ProductDetailClient({
   relatedProducts,
   settings,
 }: ProductDetailClientProps) {
+  const router = useRouter();
   const { addItem } = useCart();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string>(
@@ -42,6 +46,7 @@ export default function ProductDetailClient({
   const [careOpen, setCareOpen] = useState(false);
   const [addedNotice, setAddedNotice] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [sizePrompt, setSizePrompt] = useState(false);
 
   // Selected variant stock info
   const selectedVariant = product.variants?.find((v) => v.size === selectedSize);
@@ -50,10 +55,26 @@ export default function ProductDetailClient({
   const isLimitedStock = currentStock > 0 && currentStock <= 2;
 
   const handleAddToCart = () => {
-    if (!selectedSize || isOutOfStock) return;
+    if (!selectedSize) {
+      setSizePrompt(true);
+      setTimeout(() => setSizePrompt(false), 3000);
+      return;
+    }
+    if (isOutOfStock) return;
     addItem(product, selectedSize, quantity);
     setAddedNotice(true);
-    setTimeout(() => setAddedNotice(false), 2500);
+    setTimeout(() => setAddedNotice(false), 3500);
+  };
+
+  const handleBuyNow = () => {
+    if (!selectedSize) {
+      setSizePrompt(true);
+      setTimeout(() => setSizePrompt(false), 3000);
+      return;
+    }
+    if (isOutOfStock) return;
+    addItem(product, selectedSize, quantity);
+    router.push('/cart');
   };
 
   const handleCopyCode = () => {
@@ -289,33 +310,76 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
                 </div>
               )}
 
-              {/* Add to Bag Button */}
+              {/* Add to Bag & Buy Now Action Buttons */}
               <div className="mt-8 space-y-3">
-                <button
-                  type="button"
-                  disabled={isOutOfStock || !selectedSize}
-                  onClick={handleAddToCart}
-                  className={`w-full py-4 px-6 text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-sm ${
-                    isOutOfStock || !selectedSize
-                      ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
-                      : 'bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white'
-                  }`}
-                >
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>
-                    {isOutOfStock
-                      ? 'Sold Out in Selected Size'
-                      : addedNotice
-                      ? 'Added to Bag!'
-                      : 'Add to Bag'}
-                  </span>
-                </button>
+                {sizePrompt && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-xs flex items-center gap-2 animate-in fade-in duration-200">
+                    <span className="font-semibold">Notice:</span>
+                    <span>Please select an available size above before proceeding.</span>
+                  </div>
+                )}
+
+                {/* Primary Dual Action: Add to Bag + Buy Now */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Add to Bag */}
+                  <button
+                    type="button"
+                    disabled={isOutOfStock || !selectedSize}
+                    onClick={handleAddToCart}
+                    className={`w-full py-4 px-5 text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-xs cursor-pointer rounded-xs border ${
+                      isOutOfStock || !selectedSize
+                        ? 'bg-neutral-100 border-neutral-200 text-neutral-400 cursor-not-allowed'
+                        : 'bg-[#1A1A1A] hover:bg-neutral-800 border-[#1A1A1A] text-white active:scale-[0.98]'
+                    }`}
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>
+                      {isOutOfStock
+                        ? 'Sold Out'
+                        : addedNotice
+                        ? 'Added to Bag!'
+                        : 'Add to Bag'}
+                    </span>
+                  </button>
+
+                  {/* Buy Now */}
+                  <button
+                    type="button"
+                    disabled={isOutOfStock || !selectedSize}
+                    onClick={handleBuyNow}
+                    className={`w-full py-4 px-5 text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-sm cursor-pointer rounded-xs ${
+                      isOutOfStock || !selectedSize
+                        ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+                        : 'bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white active:scale-[0.98]'
+                    }`}
+                  >
+                    <Zap className="w-4 h-4 fill-white" />
+                    <span>Buy Now</span>
+                  </button>
+                </div>
+
+                {/* Added to Bag Inline Notification with Direct Link to /cart */}
+                {addedNotice && (
+                  <div className="p-3.5 bg-neutral-900 text-white text-xs flex items-center justify-between rounded-xs shadow-md animate-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-[#FF55D2]" />
+                      <span>Added to your shopping bag ({selectedSize}, qty: {quantity})</span>
+                    </div>
+                    <Link
+                      href="/cart"
+                      className="text-[#FF55D2] hover:text-white uppercase tracking-wider font-semibold text-[11px] underline underline-offset-4 flex items-center gap-1 transition-colors"
+                    >
+                      <span>View Bag</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                )}
 
                 {/* Direct WhatsApp Consultation */}
                 <button
                   type="button"
                   onClick={directWhatsAppInquiry}
-                  className="w-full py-3.5 px-6 border border-neutral-300 hover:border-[#1A1A1A] text-[#1A1A1A] text-xs uppercase tracking-widest font-medium flex items-center justify-center gap-2 transition-colors bg-white"
+                  className="w-full py-3.5 px-6 border border-neutral-300 hover:border-[#1A1A1A] text-[#1A1A1A] text-xs uppercase tracking-widest font-medium flex items-center justify-center gap-2 transition-colors bg-white cursor-pointer rounded-xs"
                 >
                   <MessageCircle className="w-4 h-4 text-emerald-600" />
                   <span>Ask Stylist via WhatsApp</span>

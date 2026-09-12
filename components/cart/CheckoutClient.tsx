@@ -78,7 +78,16 @@ export default function CheckoutClient({ settings }: CheckoutClientProps) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-14">
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="text-xs text-neutral-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        <Link href="/" className="hover:text-black transition-colors">Home</Link>
+        <span>/</span>
+        <Link href="/shop" className="hover:text-black transition-colors">Shop</Link>
+        <span>/</span>
+        <span className="text-neutral-800 font-medium">Shopping Bag</span>
+      </nav>
+
       {/* Header */}
       <div className="border-b border-neutral-200 pb-6 mb-10">
         <div className="flex items-center justify-between">

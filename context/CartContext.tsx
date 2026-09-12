@@ -76,8 +76,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         },
       ];
     });
-
-    setIsCartDrawerOpen(true);
   };
 
   const removeItem = (itemId: string) => {

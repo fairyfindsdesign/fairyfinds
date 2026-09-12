@@ -1,0 +1,646 @@
+{
+  "settings": {
+    "whatsapp_number": "6282629144",
+    "store_name": "Fairy Finds ",
+    "contact_email": "hello@fairyfindsboutique.com",
+    "instagram_url": "https://instagram.com/fairyfinds.boutique",
+    "address": "Fairy Finds Boutique, Neendoor, Kottayam, Kerala",
+    "announcement_bar": "Free Delivery about Rs2000 Order • Order Directly via WhatsApp",
+    "currency_symbol": "Rs."
+  },
+  "navigation": [
+    {
+      "id": "nav-home",
+      "label": "Home",
+      "href": "/",
+      "is_visible": true
+    },
+    {
+      "id": "nav-featured",
+      "label": "Featured",
+      "isDropdown": true,
+      "is_visible": true,
+      "dropdownItems": [
+        {
+          "id": "feat-home-section",
+          "label": "Featured Collections",
+          "href": "/#featured",
+          "description": "Explore all highlighted signature edits on our homepage"
+        },
+        {
+          "id": "feat-all",
+          "label": "All Ready-to-Wear",
+          "href": "/shop",
+          "description": "Browse our complete capsule collection of artisanal designs"
+        },
+        {
+          "id": "feat-red-saree",
+          "label": "Saree Collection",
+          "href": "/collections/red-saree",
+          "description": "Artisanal crimson silk drapes with pure gold zari accents"
+        },
+        {
+          "id": "feat-green-lehenga",
+          "label": "Lehenga Edit",
+          "href": "/collections/green-lehenga",
+          "description": "Regal micro-velvet & celebratory festive silhouettes"
+        },
+        {
+          "id": "feat-custom",
+          "label": "Custom Made Atelier",
+          "href": "/custom",
+          "description": "One-of-a-kind bespoke commissions made to your measurements"
+        }
+      ]
+    },
+    {
+      "id": "nav-about",
+      "label": "About",
+      "href": "/about",
+      "is_visible": true
+    },
+    {
+      "id": "nav-contact",
+      "label": "Contact",
+      "href": "/contact",
+      "is_visible": true
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-sarees",
+      "name": "Sarees",
+      "slug": "sarees",
+      "description": "Timeless drape and artisanal craftsmanship in pure silk, georgette, and organza.",
+      "image_url": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800",
+      "display_order": 1
+    },
+    {
+      "id": "cat-dresses",
+      "name": "Dresses",
+      "slug": "dresses",
+      "description": "Modern silhouettes cut from fluid fabrics for effortless, contemporary elegance.",
+      "image_url": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=800",
+      "display_order": 2
+    },
+    {
+      "id": "cat-blouses",
+      "name": "Tops & Blouses",
+      "slug": "blouses",
+      "description": "Intricately tailored blouses and structured tops designed to elevate any ensemble.",
+      "image_url": "https://images.unsplash.com/photo-1564257631407-4deb129f044b?auto=format&fit=crop&q=80&w=800",
+      "display_order": 3
+    },
+    {
+      "id": "cat-other",
+      "name": "Other Fashion",
+      "slug": "other",
+      "description": "Curated statement pieces and bespoke festive wear for special celebrations.",
+      "image_url": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=800",
+      "display_order": 4
+    }
+  ],
+  "collections": [
+    {
+      "id": "col-red-saree",
+      "name": "Red Saree",
+      "slug": "red-saree",
+      "description": "An evocative edit of crimson, vermilion, and scarlet sarees woven with pure gold zari accents.",
+      "image_url": "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=1200",
+      "show_on_home": true,
+      "has_dedicated_page": true,
+      "display_order": 1,
+      "is_published": true
+    },
+    {
+      "id": "col-green-lehenga",
+      "name": "Green Lehenga",
+      "slug": "green-lehenga",
+      "description": "Rich emerald hues, hand-embellished sequins, and voluminous silhouettes crafted for celebrations.",
+      "image_url": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=1200",
+      "show_on_home": true,
+      "has_dedicated_page": true,
+      "display_order": 2,
+      "is_published": true
+    },
+    {
+      "id": "col-1788591016882",
+      "name": "New Sareee",
+      "slug": "new-sareee",
+      "description": "amaixng",
+      "image_url": "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=1200",
+      "show_on_home": true,
+      "has_dedicated_page": true,
+      "display_order": 3,
+      "is_published": true
+    },
+    {
+      "id": "col-1788592675119",
+      "name": "uhvhlvb",
+      "slug": "uhvhlvb",
+      "description": "ihjbkjbkjnklnklnlkklj kjbolnkjk kj ionjl jknj kjkml jnk l",
+      "image_url": "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=1200",
+      "show_on_home": true,
+      "has_dedicated_page": true,
+      "display_order": 4,
+      "is_published": true
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-01",
+      "product_code": "FF-RS-001",
+      "name": "Crimson Heritage Kanjivaram Saree",
+      "slug": "crimson-heritage-kanjivaram-saree",
+      "description": "Handwoven in the traditional looms with pure mulberry silk and pure gold zari borders. Features traditional peacock and paisley motifs throughout the pallu.",
+      "price": 34500,
+      "product_type": "READY_MADE",
+      "category_id": "cat-sarees",
+      "category_name": "Sarees",
+      "collection_id": "col-red-saree",
+      "collection_name": "Red Saree",
+      "images": [
+        "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "fabric": "100% Pure Mulberry Silk with Gold Zari",
+      "care_instructions": "Dry clean only. Store wrapped in pure cotton or muslin fabric.",
+      "is_published": true,
+      "is_featured": true,
+      "variants": [
+        {
+          "id": "v-01-s",
+          "product_id": "prod-01",
+          "size": "Free Size (Saree)",
+          "stock_quantity": 3,
+          "sku": "FF-RS-001-FS"
+        }
+      ]
+    },
+    {
+      "id": "prod-02",
+      "product_code": "FF-GL-002",
+      "name": "Emerald Velvet Embroidered Lehenga",
+      "slug": "emerald-velvet-embroidered-lehenga",
+      "description": "A regal emerald green micro-velvet lehenga with resham threadwork, zardozi embroidery, and an ethereal organza dupatta.",
+      "price": 4800,
+      "product_type": "READY_MADE",
+      "category_id": "cat-other",
+      "category_name": "Other Fashion",
+      "collection_id": "col-green-lehenga",
+      "collection_name": "Green Lehenga",
+      "images": [
+        "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "fabric": "Micro Velvet Lehenga & Organza Dupatta",
+      "care_instructions": "Professional dry clean only. Do not iron directly on embroidery.",
+      "is_published": true,
+      "is_featured": false,
+      "variants": [
+        {
+          "id": "v-02-s",
+          "product_id": "prod-02",
+          "size": "S",
+          "stock_quantity": 2,
+          "sku": "FF-GL-002-S"
+        },
+        {
+          "id": "v-02-m",
+          "product_id": "prod-02",
+          "size": "M",
+          "stock_quantity": 1,
+          "sku": "FF-GL-002-M"
+        },
+        {
+          "id": "v-02-l",
+          "product_id": "prod-02",
+          "size": "L",
+          "stock_quantity": 0,
+          "sku": "FF-GL-002-L"
+        },
+        {
+          "id": "v-02-xl",
+          "product_id": "prod-02",
+          "size": "XL",
+          "stock_quantity": 1,
+          "sku": "FF-GL-002-XL"
+        }
+      ]
+    },
+    {
+      "id": "prod-03",
+      "product_code": "FF-DR-003",
+      "name": "Blush Georgette Tiered Midi Dress",
+      "slug": "blush-georgette-tiered-midi-dress",
+      "description": "Softly pleated blush dress featuring delicate flutter sleeves, a cinched waistline, and an effortless tiered skirt cut to tea length.",
+      "price": 18500,
+      "product_type": "READY_MADE",
+      "category_id": "cat-dresses",
+      "category_name": "Dresses",
+      "images": [
+        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "fabric": "Viscose Georgette with Butter Crepe Lining",
+      "care_instructions": "Gentle hand wash in cold water or dry clean. Hang dry in shade.",
+      "is_published": true,
+      "is_featured": true,
+      "variants": [
+        {
+          "id": "v-03-s",
+          "product_id": "prod-03",
+          "size": "S",
+          "stock_quantity": 4,
+          "sku": "FF-DR-003-S"
+        },
+        {
+          "id": "v-03-m",
+          "product_id": "prod-03",
+          "size": "M",
+          "stock_quantity": 3,
+          "sku": "FF-DR-003-M"
+        },
+        {
+          "id": "v-03-l",
+          "product_id": "prod-03",
+          "size": "L",
+          "stock_quantity": 2,
+          "sku": "FF-DR-003-L"
+        },
+        {
+          "id": "v-03-xl",
+          "product_id": "prod-03",
+          "size": "XL",
+          "stock_quantity": 2,
+          "sku": "FF-DR-003-XL"
+        }
+      ]
+    },
+    {
+      "id": "prod-04",
+      "product_code": "FF-BL-004",
+      "name": "Plum Hand-Embroidered Raw Silk Blouse",
+      "slug": "plum-hand-embroidered-raw-silk-blouse",
+      "description": "Crafted in pure deep plum raw silk with antique gold dori work on the sweetheart neckline and elbow-length sleeves with artisan latkan detailing.",
+      "price": 12500,
+      "product_type": "READY_MADE",
+      "category_id": "cat-blouses",
+      "category_name": "Tops & Blouses",
+      "images": [
+        "https://images.unsplash.com/photo-1564257631407-4deb129f044b?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "fabric": "Raw Silk with Pure Cotton Lining",
+      "care_instructions": "Dry clean only.",
+      "is_published": true,
+      "is_featured": false,
+      "variants": [
+        {
+          "id": "v-04-34",
+          "product_id": "prod-04",
+          "size": "34 (S)",
+          "stock_quantity": 2,
+          "sku": "FF-BL-004-34"
+        },
+        {
+          "id": "v-04-36",
+          "product_id": "prod-04",
+          "size": "36 (M)",
+          "stock_quantity": 3,
+          "sku": "FF-BL-004-36"
+        },
+        {
+          "id": "v-04-38",
+          "product_id": "prod-04",
+          "size": "38 (L)",
+          "stock_quantity": 1,
+          "sku": "FF-BL-004-38"
+        }
+      ]
+    },
+    {
+      "id": "prod-05",
+      "product_code": "FF-RS-005",
+      "name": "Scarlet Organza Floral Embroidered Saree",
+      "slug": "scarlet-organza-floral-embroidered-saree",
+      "description": "Sheer scarlet organza drape with hand-painted watercolor floral motifs framed by delicate scalloped embroidery on all borders.",
+      "price": 26000,
+      "product_type": "READY_MADE",
+      "category_id": "cat-sarees",
+      "category_name": "Sarees",
+      "collection_id": "col-red-saree",
+      "collection_name": "Red Saree",
+      "images": [
+        "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=1000",
+        "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "fabric": "Pure Silk Organza",
+      "care_instructions": "Dry clean only. Steam press with low heat.",
+      "is_published": true,
+      "is_featured": true,
+      "variants": [
+        {
+          "id": "v-05-s",
+          "product_id": "prod-05",
+          "size": "Free Size (Saree)",
+          "stock_quantity": 2,
+          "sku": "FF-RS-005-FS"
+        }
+      ]
+    },
+    {
+      "id": "prod-06",
+      "product_code": "FF-GL-006",
+      "name": "Sage Mint Floral Organza Lehenga",
+      "slug": "sage-mint-floral-organza-lehenga",
+      "description": "Lightweight festive lehenga in soft sage and mint hues, featuring handcrafted foil mirror accents and a complementary raw silk blouse piece.",
+      "price": 38500,
+      "product_type": "READY_MADE",
+      "category_id": "cat-other",
+      "category_name": "Other Fashion",
+      "collection_id": "col-green-lehenga",
+      "collection_name": "Green Lehenga",
+      "images": [
+        "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "fabric": "Organza & Silk Blend with Satin Silk Lining",
+      "care_instructions": "Dry clean recommended.",
+      "is_published": true,
+      "is_featured": false,
+      "variants": [
+        {
+          "id": "v-06-s",
+          "product_id": "prod-06",
+          "size": "S",
+          "stock_quantity": 3,
+          "sku": "FF-GL-006-S"
+        },
+        {
+          "id": "v-06-m",
+          "product_id": "prod-06",
+          "size": "M",
+          "stock_quantity": 2,
+          "sku": "FF-GL-006-M"
+        },
+        {
+          "id": "v-06-l",
+          "product_id": "prod-06",
+          "size": "L",
+          "stock_quantity": 1,
+          "sku": "FF-GL-006-L"
+        }
+      ]
+    },
+    {
+      "id": "prod-07",
+      "product_code": "FF-DR-007",
+      "name": "Ivory Pleated Crepe Evening Gown",
+      "slug": "ivory-pleated-crepe-evening-gown",
+      "description": "Sculptural elegance in heavy ivory crepe with sunburst micro-pleating and an asymmetric draped neckline.",
+      "price": 29500,
+      "product_type": "READY_MADE",
+      "category_id": "cat-dresses",
+      "category_name": "Dresses",
+      "images": [
+        "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "fabric": "Double Face Japanese Crepe",
+      "care_instructions": "Specialist dry clean only.",
+      "is_published": true,
+      "is_featured": false,
+      "variants": [
+        {
+          "id": "v-07-s",
+          "product_id": "prod-07",
+          "size": "S",
+          "stock_quantity": 2,
+          "sku": "FF-DR-007-S"
+        },
+        {
+          "id": "v-07-m",
+          "product_id": "prod-07",
+          "size": "M",
+          "stock_quantity": 2,
+          "sku": "FF-DR-007-M"
+        },
+        {
+          "id": "v-07-l",
+          "product_id": "prod-07",
+          "size": "L",
+          "stock_quantity": 0,
+          "sku": "FF-DR-007-L"
+        }
+      ]
+    },
+    {
+      "id": "prod-08",
+      "product_code": "FF-BL-008",
+      "name": "Golden Zari Backless Silk Crop Top",
+      "slug": "golden-zari-backless-silk-crop-top",
+      "description": "Versatile brocade crop top with antique dull-gold weaving, tie-up dori back with pearl drops.",
+      "price": 9800,
+      "product_type": "READY_MADE",
+      "category_id": "cat-blouses",
+      "category_name": "Tops & Blouses",
+      "images": [
+        "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=1000"
+      ],
+      "fabric": "Banarasi Silk Brocade",
+      "care_instructions": "Dry clean only.",
+      "is_published": true,
+      "is_featured": false,
+      "variants": [
+        {
+          "id": "v-08-s",
+          "product_id": "prod-08",
+          "size": "S",
+          "stock_quantity": 5,
+          "sku": "FF-BL-008-S"
+        },
+        {
+          "id": "v-08-m",
+          "product_id": "prod-08",
+          "size": "M",
+          "stock_quantity": 3,
+          "sku": "FF-BL-008-M"
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec-hero",
+      "section_type": "HERO",
+      "title": "Hero Section",
+      "content": {
+        "heading": "Artisanal Elegance, Crafted for the Modern Muse",
+        "description": "Discover curated ready-to-wear silhouettes and bespoke couture tailored exclusively to your measurements.",
+        "button_text": "Explore Ready-to-Wear",
+        "button_link": "/shop",
+        "secondary_button_text": "Custom Tailoring",
+        "secondary_button_link": "/custom",
+        "image_url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1600",
+        "badge": "New Season 2026",
+        "autoplay_interval": 5000,
+        "slides": [
+          {
+            "id": "slide-1",
+            "heading": "Artisanal Elegance, Crafted for the Modern Muse",
+            "badge": "New Season 2026",
+            "description": "Discover curated ready-to-wear silhouettes and bespoke couture tailored exclusively to your measurements.",
+            "button_text": "Explore Ready-to-Wear",
+            "button_link": "/shop",
+            "secondary_button_text": "Custom Tailoring",
+            "secondary_button_link": "/custom",
+            "image_url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1600"
+          },
+          {
+            "id": "slide-2",
+            "heading": "Regal Heritage Silk Drapes & Festive Edits",
+            "badge": "Atelier Signature Sarees",
+            "description": "Handwoven pure mulberry silk sarees and bridal lehengas featuring traditional gold zari borders and intricate hand finishes.",
+            "button_text": "Explore Saree Edit",
+            "button_link": "/collections/red-saree",
+            "secondary_button_text": "All Collections",
+            "secondary_button_link": "/#featured",
+            "image_url": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1600"
+          },
+          {
+            "id": "slide-3",
+            "heading": "One-of-a-Kind Bespoke Commissions",
+            "badge": "Made-to-Measure Couture",
+            "description": "Looking for a custom cut, specific fabric, or made-to-measure drape? Work directly with our designer via WhatsApp.",
+            "button_text": "Start Custom Order",
+            "button_link": "/custom",
+            "secondary_button_text": "View Catalog",
+            "secondary_button_link": "/shop",
+            "image_url": "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=1600"
+          }
+        ]
+      },
+      "display_order": 1,
+      "is_visible": true
+    },
+    {
+      "id": "sec-featured-collection",
+      "section_type": "FEATURED_COLLECTIONS",
+      "title": "Featured Collections & Highlights",
+      "subtitle": "FEATURED ATELIER EDITS",
+      "content": {
+        "heading": "Featured Collections & Highlights",
+        "description": "Hand-curated capsule edits and signature drapes crafted in limited batches for celebratory grace.",
+        "button_text": "Explore All Styles",
+        "button_link": "/shop",
+        "image_url": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1600"
+      },
+      "display_order": 2,
+      "is_visible": true
+    },
+    {
+      "id": "sec-reviews",
+      "section_type": "REVIEWS",
+      "title": "Client Reviews & Testimonials",
+      "subtitle": "CLIENT VOICES & ATELIER LOVE",
+      "content": {
+        "heading": "Cherished by Our Muses",
+        "badge": "Client Voices & Atelier Love",
+        "description": "Authentic stories from patrons who have celebrated their most treasured moments in our artisanal silks and bespoke garments."
+      },
+      "display_order": 3,
+      "is_visible": true
+    },
+    {
+      "id": "sec-featured-products",
+      "section_type": "FEATURED_PRODUCTS",
+      "title": "Featured Atelier Pieces",
+      "subtitle": "HANDPICKED BY DESIGNER",
+      "content": {
+        "heading": "Featured Atelier Pieces",
+        "description": "Curated ready-to-wear highlights and couture masterpieces hand-selected for the season.",
+        "button_text": "View Entire Catalog",
+        "button_link": "/shop"
+      },
+      "display_order": 4,
+      "is_visible": false
+    },
+    {
+      "id": "sec-new-arrivals",
+      "section_type": "PRODUCT_COLLECTION",
+      "title": "New Arrivals",
+      "subtitle": "THE LATEST EDIT",
+      "content": {
+        "heading": "Fresh Additions to the Atelier",
+        "description": "Handcrafted garments in limited batches, available for immediate WhatsApp ordering.",
+        "product_limit": 4,
+        "button_text": "View All Products",
+        "button_link": "/shop"
+      },
+      "display_order": 5,
+      "is_visible": true
+    },
+    {
+      "id": "sec-categories",
+      "section_type": "CATEGORY_CARDS",
+      "title": "Shop by Category",
+      "subtitle": "CURATED PIECES",
+      "content": {
+        "heading": "Explore Our Categories",
+        "description": "Select your preferred style from sarees, dresses, blouses, and festive sets."
+      },
+      "display_order": 6,
+      "is_visible": false
+    },
+    {
+      "id": "sec-custom-made",
+      "section_type": "CUSTOM_MADE",
+      "title": "Custom-Made Orders",
+      "subtitle": "BESPOKE TAILORING",
+      "content": {
+        "heading": "Bring Your Dream Outfit to Life",
+        "description": "Looking for a custom cut, specific fabric, or made-to-measure bridal drape? Work directly with our designer through WhatsApp to create a one-of-a-kind garment.",
+        "button_text": "Start Your Custom Order",
+        "button_link": "/custom",
+        "image_url": "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=1200"
+      },
+      "display_order": 7,
+      "is_visible": true
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev-01",
+      "customer_name": "Amara Senanayake",
+      "avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200",
+      "rating": 5,
+      "comment": "The Crimson Heritage Kanjivaram saree exceeded every expectation. The silk has such a regal weight and the gold zari border caught the light wonderfully at my reception.",
+      "location": "Colombo, Sri Lanka",
+      "tag": "Bridal Silk Edit",
+      "is_visible": true,
+      "display_order": 1,
+      "created_at": "2026-08-14T10:00:00Z"
+    },
+    {
+      "id": "rev-04",
+      "customer_name": "Nivanka Rathnayake",
+      "avatar_url": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=200",
+      "rating": 5,
+      "comment": "Fairy Finds is my go-to atelier now. The Banarasi silk crop top paired effortlessly with both my ethnic skirts and modern tailored trousers. 10/10 craftsmanship.",
+      "location": "Mount Lavinia",
+      "tag": "Tops & Blouses Edit",
+      "is_visible": true,
+      "display_order": 4,
+      "created_at": "2026-09-01T16:20:00Z"
+    },
+    {
+      "id": "rev-05",
+      "customer_name": "Tharushi Fernando",
+      "avatar_url": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&q=80&w=200",
+      "rating": 5,
+      "comment": "Impeccable customer service! I placed the order directly via WhatsApp and the team shared styling photos and dispatch tracking within hours. Truly premium.",
+      "location": "Negombo, Sri Lanka",
+      "tag": "WhatsApp Order",
+      "is_visible": true,
+      "display_order": 5,
+      "created_at": "2026-09-03T11:45:00Z"
+    }
+  ]
+}

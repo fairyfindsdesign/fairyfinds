@@ -31,10 +31,16 @@ export default function ProductListClient({ initialProducts }: ProductListClient
   const handleDelete = async (id: string, name: string) => {
     if (confirm(`Are you sure you want to delete "${name}" from your catalog?`)) {
       setDeletingId(id);
-      await deleteProductAction(id);
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-      router.refresh();
-      setDeletingId(null);
+      try {
+        await deleteProductAction(id);
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+        router.refresh();
+      } catch (err: any) {
+        console.error('Failed to delete product:', err);
+        alert('Could not delete product: ' + (err?.message || 'Server action failed'));
+      } finally {
+        setDeletingId(null);
+      }
     }
   };
 

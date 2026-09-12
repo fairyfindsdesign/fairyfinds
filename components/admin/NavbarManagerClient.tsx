@@ -52,11 +52,17 @@ export default function NavbarManagerClient({
   const handleSaveNavigation = async (updatedNav: NavItem[]) => {
     setIsSaving(true);
     setNavigation(updatedNav);
-    await saveNavigationAction(updatedNav);
-    router.refresh();
-    setIsSaving(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2000);
+    try {
+      await saveNavigationAction(updatedNav);
+      router.refresh();
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2000);
+    } catch (err: any) {
+      console.error('Save navigation error:', err);
+      alert(`Could not save navigation: ${err?.message || 'Database error'}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Toggle top-level item visibility

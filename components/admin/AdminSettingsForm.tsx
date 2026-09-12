@@ -23,11 +23,17 @@ export default function AdminSettingsForm({ initialSettings }: AdminSettingsForm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    await saveSettingsAction(settings);
-    router.refresh();
-    setIsSaving(false);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 2500);
+    try {
+      await saveSettingsAction(settings);
+      router.refresh();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2500);
+    } catch (err: any) {
+      console.error('Save settings error:', err);
+      alert(`Could not save settings: ${err?.message || 'Database error'}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

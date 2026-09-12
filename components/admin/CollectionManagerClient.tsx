@@ -139,9 +139,14 @@ export default function CollectionManagerClient({
     if (target) {
       const updated = { ...target, show_on_home: !target.show_on_home };
       setCollections((prev) => prev.map((c) => (c.id === id ? updated : c)));
-      await saveCollectionAction(updated);
-      router.refresh();
-      showToast(`Collection "${target.name}" ${!target.show_on_home ? 'featured on' : 'hidden from'} homepage.`);
+      try {
+        await saveCollectionAction(updated);
+        router.refresh();
+        showToast(`Collection "${target.name}" ${!target.show_on_home ? 'featured on' : 'hidden from'} homepage.`);
+      } catch (err: any) {
+        setCollections((prev) => prev.map((c) => (c.id === id ? target : c)));
+        alert(`Failed to update collection: ${err?.message || 'Database error'}`);
+      }
     }
   };
 
@@ -151,9 +156,14 @@ export default function CollectionManagerClient({
     if (target) {
       const updated = { ...target, is_published: !target.is_published };
       setCollections((prev) => prev.map((c) => (c.id === id ? updated : c)));
-      await saveCollectionAction(updated);
-      router.refresh();
-      showToast(`Collection "${target.name}" set to ${!target.is_published ? 'Published' : 'Draft'}.`);
+      try {
+        await saveCollectionAction(updated);
+        router.refresh();
+        showToast(`Collection "${target.name}" set to ${!target.is_published ? 'Published' : 'Draft'}.`);
+      } catch (err: any) {
+        setCollections((prev) => prev.map((c) => (c.id === id ? target : c)));
+        alert(`Failed to update collection: ${err?.message || 'Database error'}`);
+      }
     }
   };
 
@@ -164,14 +174,20 @@ export default function CollectionManagerClient({
     }
 
     setDeletingId(col.id);
-    await deleteCollectionAction(col.id);
-    setCollections((prev) => prev.filter((c) => c.id !== col.id));
-    router.refresh();
-    setDeletingId(null);
-    if (editingCollection?.id === col.id) {
-      handleCloseForm();
+    try {
+      await deleteCollectionAction(col.id);
+      setCollections((prev) => prev.filter((c) => c.id !== col.id));
+      router.refresh();
+      if (editingCollection?.id === col.id) {
+        handleCloseForm();
+      }
+      showToast(`Collection "${col.name}" deleted.`);
+    } catch (err: any) {
+      console.error('Delete collection error:', err);
+      alert(`Could not delete collection: ${err?.message || 'Database error'}. Ensure the latest schema.sql has been executed in Supabase.`);
+    } finally {
+      setDeletingId(null);
     }
-    showToast(`Collection "${col.name}" deleted.`);
   };
 
   // Submit create or edit form
@@ -195,19 +211,25 @@ export default function CollectionManagerClient({
       is_published: isPublished,
     };
 
-    const saved = await saveCollectionAction(payload);
+    try {
+      const saved = await saveCollectionAction(payload);
 
-    if (isNew) {
-      setCollections((prev) => [...prev, saved]);
-      showToast(`New collection "${saved.name}" created successfully!`);
-    } else {
-      setCollections((prev) => prev.map((c) => (c.id === saved.id ? saved : c)));
-      showToast(`Collection "${saved.name}" updated successfully!`);
+      if (isNew) {
+        setCollections((prev) => [...prev, saved]);
+        showToast(`New collection "${saved.name}" created successfully!`);
+      } else {
+        setCollections((prev) => prev.map((c) => (c.id === saved.id ? saved : c)));
+        showToast(`Collection "${saved.name}" updated successfully!`);
+      }
+
+      router.refresh();
+      handleCloseForm();
+    } catch (err: any) {
+      console.error('Save collection error:', err);
+      alert(`Could not save collection: ${err?.message || 'Database error'}. Ensure the latest schema.sql has been executed in Supabase.`);
+    } finally {
+      setIsSaving(false);
     }
-
-    router.refresh();
-    setIsSaving(false);
-    handleCloseForm();
   };
 
   return (

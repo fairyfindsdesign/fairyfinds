@@ -159,14 +159,19 @@ export default function ProductFormClient({
       variants: sanitizedVariants,
     };
 
-    await saveProductAction(payload);
-    setIsSaving(false);
-    setSavedSuccess(true);
-
-    setTimeout(() => {
-      router.push('/admin/products');
-      router.refresh();
-    }, 800);
+    try {
+      await saveProductAction(payload);
+      setSavedSuccess(true);
+      setTimeout(() => {
+        router.push('/admin/products');
+        router.refresh();
+      }, 600);
+    } catch (err: any) {
+      console.error('Save product error:', err);
+      alert(`Could not save product: ${err?.message || 'Database error'}. If you are using Supabase, ensure the latest schema.sql has been executed.`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

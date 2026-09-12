@@ -1,12 +1,12 @@
 -- FAIRY FINDS BOUTIQUE - SUPABASE DATABASE SCHEMA & SEED SCRIPT
 -- Paste this script into Supabase SQL Editor to set up your database tables and initial boutique data.
 
--- 1. Enable UUID extension
+-- 1. Enable UUID extension for default ID generation
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 2. Categories Table
 CREATE TABLE IF NOT EXISTS categories (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   description TEXT,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS categories (
 
 -- 3. Collections Table
 CREATE TABLE IF NOT EXISTS collections (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   description TEXT,
@@ -31,15 +31,15 @@ CREATE TABLE IF NOT EXISTS collections (
 
 -- 4. Products Table (Ready-Made Inventory)
 CREATE TABLE IF NOT EXISTS products (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   product_code TEXT UNIQUE,
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   description TEXT,
   price DECIMAL(10, 2) NOT NULL,
   product_type TEXT CHECK (product_type IN ('READY_MADE')) DEFAULT 'READY_MADE',
-  category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
-  collection_id UUID REFERENCES collections(id) ON DELETE SET NULL,
+  category_id TEXT REFERENCES categories(id) ON DELETE SET NULL,
+  collection_id TEXT REFERENCES collections(id) ON DELETE SET NULL,
   images JSONB DEFAULT '[]'::jsonb,
   size_chart_url TEXT,
   fabric TEXT,
@@ -52,8 +52,8 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- 5. Product Variants / Stock per Size
 CREATE TABLE IF NOT EXISTS product_variants (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  product_id TEXT REFERENCES products(id) ON DELETE CASCADE,
   size TEXT NOT NULL,
   stock_quantity INT DEFAULT 0,
   sku TEXT,
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS product_variants (
 
 -- 6. Homepage CMS Sections Table
 CREATE TABLE IF NOT EXISTS homepage_sections (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   section_type TEXT NOT NULL,
   title TEXT,
   subtitle TEXT,
@@ -87,6 +87,52 @@ CREATE TABLE IF NOT EXISTS store_settings (
   reviews JSONB DEFAULT '[]'::jsonb,
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Safe migration from UUID to TEXT if tables were previously created with UUID
+DO $$ 
+DECLARE
+  r RECORD;
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'products' AND column_name = 'id' AND data_type = 'uuid'
+  ) THEN
+    -- Drop all existing foreign keys referencing products, categories, collections
+    FOR r IN (
+      SELECT conname, relname 
+      FROM pg_constraint c 
+      JOIN pg_class cl ON cl.oid = c.conrelid 
+      WHERE c.contype = 'f' 
+        AND cl.relname IN ('products', 'product_variants')
+    ) LOOP
+      EXECUTE 'ALTER TABLE ' || quote_ident(r.relname) || ' DROP CONSTRAINT IF EXISTS ' || quote_ident(r.conname);
+    END LOOP;
+
+    -- Alter column types to TEXT
+    ALTER TABLE categories ALTER COLUMN id TYPE TEXT USING id::text;
+    ALTER TABLE categories ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
+
+    ALTER TABLE collections ALTER COLUMN id TYPE TEXT USING id::text;
+    ALTER TABLE collections ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
+
+    ALTER TABLE products ALTER COLUMN id TYPE TEXT USING id::text;
+    ALTER TABLE products ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
+    ALTER TABLE products ALTER COLUMN category_id TYPE TEXT USING category_id::text;
+    ALTER TABLE products ALTER COLUMN collection_id TYPE TEXT USING collection_id::text;
+
+    ALTER TABLE product_variants ALTER COLUMN id TYPE TEXT USING id::text;
+    ALTER TABLE product_variants ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
+    ALTER TABLE product_variants ALTER COLUMN product_id TYPE TEXT USING product_id::text;
+
+    ALTER TABLE homepage_sections ALTER COLUMN id TYPE TEXT USING id::text;
+    ALTER TABLE homepage_sections ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
+
+    -- Re-attach foreign keys with ON DELETE SET NULL / CASCADE
+    ALTER TABLE products ADD CONSTRAINT products_category_id_fkey FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL;
+    ALTER TABLE products ADD CONSTRAINT products_collection_id_fkey FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE SET NULL;
+    ALTER TABLE product_variants ADD CONSTRAINT product_variants_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 
 -- Ensure columns exist if tables were created previously
 ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS navigation JSONB DEFAULT '[]'::jsonb;
@@ -158,5 +204,3 @@ CREATE POLICY "Public Read boutique-assets" ON storage.objects FOR SELECT USING 
 
 DROP POLICY IF EXISTS "Admin All boutique-assets" ON storage.objects;
 CREATE POLICY "Admin All boutique-assets" ON storage.objects FOR ALL USING (bucket_id = 'boutique-assets') WITH CHECK (bucket_id = 'boutique-assets');
-
-

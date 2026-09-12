@@ -58,11 +58,17 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
   const handleSave = async (updatedReviews: CustomerReview[]) => {
     setIsSaving(true);
     setReviews(updatedReviews);
-    await saveReviewsAction(updatedReviews);
-    router.refresh();
-    setIsSaving(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+    try {
+      await saveReviewsAction(updatedReviews);
+      router.refresh();
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch (err: any) {
+      console.error('Save reviews error:', err);
+      alert(`Could not save reviews: ${err?.message || 'Database error'}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Add new review

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, StoreSettings } from '../types';
 import { initialCategories, initialCollections, initialNavigation, initialProducts, initialReviews, initialSections, initialSettings } from './initial-data';
 import { getAdminSupabase } from '../supabase/admin';
@@ -8,32 +9,43 @@ const DATA_FILE = path.join(process.cwd(), 'data', 'store.json');
 
 interface StoreData {
   settings: StoreSettings;
-  navigation?: NavItem[];
+  navigation: NavItem[];
   categories: Category[];
   collections: Collection[];
   products: Product[];
   sections: HomepageSection[];
-  reviews?: CustomerReview[];
+  reviews: CustomerReview[];
 }
 
-function getLocalData(): StoreData {
+// Global in-memory cache for serverless environments (Vercel) where the filesystem is read-only
+const globalStore = globalThis as unknown as { __fairyStoreData?: StoreData };
+
+export function getLocalData(): StoreData {
+  if (globalStore.__fairyStoreData) {
+    return globalStore.__fairyStoreData;
+  }
+
   try {
     if (fs.existsSync(DATA_FILE)) {
       const content = fs.readFileSync(DATA_FILE, 'utf-8');
       const parsed = JSON.parse(content);
-      if (!parsed.navigation) {
-        parsed.navigation = initialNavigation;
-      }
-      if (!parsed.reviews) {
-        parsed.reviews = initialReviews;
-      }
-      return parsed;
+      const data: StoreData = {
+        settings: parsed.settings || initialSettings,
+        navigation: parsed.navigation || initialNavigation,
+        categories: parsed.categories || initialCategories,
+        collections: parsed.collections || initialCollections,
+        products: parsed.products || initialProducts,
+        sections: parsed.sections || initialSections,
+        reviews: parsed.reviews || initialReviews,
+      };
+      globalStore.__fairyStoreData = data;
+      return data;
     }
   } catch (err) {
     console.error('Error reading data/store.json:', err);
   }
 
-  return {
+  const defaultData: StoreData = {
     settings: initialSettings,
     navigation: initialNavigation,
     categories: initialCategories,
@@ -42,9 +54,15 @@ function getLocalData(): StoreData {
     sections: initialSections,
     reviews: initialReviews,
   };
+  globalStore.__fairyStoreData = defaultData;
+  return defaultData;
 }
 
-function saveLocalData(data: StoreData): void {
+export function saveLocalData(data: StoreData): void {
+  // Always update in-memory global cache first
+  globalStore.__fairyStoreData = data;
+
+  // Attempt to persist to filesystem for local development
   try {
     const dir = path.dirname(DATA_FILE);
     if (!fs.existsSync(dir)) {
@@ -52,7 +70,129 @@ function saveLocalData(data: StoreData): void {
     }
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
-    console.warn('Notice: Local filesystem write skipped or read-only (expected in Vercel serverless environment).');
+    // Read-only filesystem is normal on Vercel lambdas
+  }
+}
+
+// --- Auto-Seed Supabase on First Connect ---
+let isSeeding = false;
+let hasCheckedSeed = false;
+
+async function ensureSupabaseSeeded(supabase: any) {
+  if (hasCheckedSeed || isSeeding) return;
+  hasCheckedSeed = true;
+
+  try {
+    const { count, error } = await supabase
+      .from('products')
+      .select('*', { count: 'exact', head: true });
+
+    if (!error && count === 0) {
+      isSeeding = true;
+      console.log('[Supabase] Database tables are empty. Seeding boutique catalog...');
+      const local = getLocalData();
+
+      // Seed categories
+      if (local.categories?.length > 0) {
+        await supabase.from('categories').upsert(
+          local.categories.map((c) => ({
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            description: c.description,
+            image_url: c.image_url,
+            display_order: c.display_order,
+          }))
+        );
+      }
+
+      // Seed collections
+      if (local.collections?.length > 0) {
+        await supabase.from('collections').upsert(
+          local.collections.map((c) => ({
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            description: c.description,
+            image_url: c.image_url,
+            show_on_home: c.show_on_home,
+            has_dedicated_page: c.has_dedicated_page,
+            display_order: c.display_order,
+            is_published: c.is_published,
+          }))
+        );
+      }
+
+      // Seed products & variants
+      if (local.products?.length > 0) {
+        for (const prod of local.products) {
+          await supabase.from('products').upsert({
+            id: prod.id,
+            name: prod.name,
+            slug: prod.slug,
+            product_code: prod.product_code,
+            price: prod.price,
+            description: prod.description,
+            category_id: prod.category_id || null,
+            collection_id: prod.collection_id || null,
+            images: prod.images,
+            fabric: prod.fabric,
+            care_instructions: prod.care_instructions,
+            is_published: prod.is_published,
+            is_featured: prod.is_featured,
+            updated_at: new Date().toISOString(),
+          });
+
+          if (prod.variants?.length > 0) {
+            await supabase.from('product_variants').upsert(
+              prod.variants.map((v) => ({
+                id: crypto.randomUUID(),
+                product_id: prod.id,
+                size: v.size,
+                stock_quantity: v.stock_quantity,
+                sku: v.sku,
+              }))
+            );
+          }
+        }
+      }
+
+      // Seed homepage sections
+      if (local.sections?.length > 0) {
+        await supabase.from('homepage_sections').upsert(
+          local.sections.map((s) => ({
+            id: s.id,
+            section_type: s.section_type,
+            title: s.title,
+            subtitle: s.subtitle,
+            content: s.content,
+            display_order: s.display_order,
+            is_visible: s.is_visible,
+          }))
+        );
+      }
+
+      // Seed store settings
+      await supabase.from('store_settings').upsert({
+        id: 1,
+        whatsapp_number: local.settings.whatsapp_number,
+        store_name: local.settings.store_name,
+        contact_email: local.settings.contact_email,
+        instagram_url: local.settings.instagram_url,
+        address: local.settings.address,
+        announcement_bar: local.settings.announcement_bar,
+        currency_symbol: local.settings.currency_symbol || 'Rs.',
+        navigation: local.navigation,
+        reviews: local.reviews,
+        updated_at: new Date().toISOString(),
+      });
+
+      console.log('[Supabase] Initial catalog seeded successfully!');
+      isSeeding = false;
+    }
+  } catch (err) {
+    console.error('Error in ensureSupabaseSeeded:', err);
+    isSeeding = false;
   }
 }
 
@@ -61,6 +201,7 @@ export async function getServerSettings(): Promise<StoreSettings> {
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
+      await ensureSupabaseSeeded(supabase);
       const { data, error } = await supabase.from('store_settings').select('*').single();
       if (!error && data) {
         return {
@@ -81,6 +222,10 @@ export async function getServerSettings(): Promise<StoreSettings> {
 }
 
 export async function updateServerSettings(settings: Partial<StoreSettings>): Promise<StoreSettings> {
+  const data = getLocalData();
+  data.settings = { ...data.settings, ...settings };
+  saveLocalData(data);
+
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
@@ -91,15 +236,14 @@ export async function updateServerSettings(settings: Partial<StoreSettings>): Pr
       });
       if (error) {
         console.error('Supabase store_settings update error:', error);
+        throw new Error(`Database error updating settings: ${error.message || error.details}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error updating store_settings in Supabase:', err);
+      throw err;
     }
   }
 
-  const data = getLocalData();
-  data.settings = { ...data.settings, ...settings };
-  saveLocalData(data);
   return data.settings;
 }
 
@@ -108,12 +252,13 @@ export async function getServerProducts(): Promise<Product[]> {
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
+      await ensureSupabaseSeeded(supabase);
       const { data, error } = await supabase
         .from('products')
         .select('*, variants:product_variants(*), categories(name), collections(name)')
         .order('created_at', { ascending: false });
 
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         return data.map((item: any) => ({
           ...item,
           category_name: item.categories?.name,
@@ -135,7 +280,7 @@ export async function getServerProductBySlug(slug: string): Promise<Product | nu
 
 export async function saveServerProduct(product: Partial<Product>): Promise<Product> {
   const isNew = !product.id;
-  const id = isNew ? `prod-${Date.now()}` : product.id!;
+  const id = product.id || crypto.randomUUID();
   const data = getLocalData();
 
   let assignedCode = (product.product_code || '').trim().toUpperCase();
@@ -155,17 +300,19 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
     }
   }
 
+  const cleanSlug = product.slug?.trim() || (product.name ? product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : id);
+
   const newProduct: Product = {
     id,
     product_code: assignedCode,
     name: product.name || 'Untitled Product',
-    slug: product.slug || (product.name ? product.name.toLowerCase().replace(/\s+/g, '-') : id),
+    slug: cleanSlug,
     description: product.description || '',
     price: product.price || 0,
     product_type: 'READY_MADE',
-    category_id: product.category_id,
+    category_id: product.category_id || undefined,
     category_name: product.category_name,
-    collection_id: product.collection_id,
+    collection_id: product.collection_id || undefined,
     collection_name: product.collection_name,
     images: product.images && product.images.length > 0 ? product.images : [
       'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=1000'
@@ -174,10 +321,16 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
     care_instructions: product.care_instructions,
     is_published: product.is_published ?? true,
     is_featured: product.is_featured ?? false,
-    variants: product.variants || [
-      { id: `v-${id}-s`, product_id: id, size: 'S', stock_quantity: 2 },
-      { id: `v-${id}-m`, product_id: id, size: 'M', stock_quantity: 3 },
-      { id: `v-${id}-l`, product_id: id, size: 'L', stock_quantity: 1 },
+    variants: product.variants?.map((v) => ({
+      id: v.id || crypto.randomUUID(),
+      product_id: id,
+      size: v.size,
+      stock_quantity: v.stock_quantity,
+      sku: v.sku,
+    })) || [
+      { id: crypto.randomUUID(), product_id: id, size: 'S', stock_quantity: 2 },
+      { id: crypto.randomUUID(), product_id: id, size: 'M', stock_quantity: 3 },
+      { id: crypto.randomUUID(), product_id: id, size: 'L', stock_quantity: 1 },
     ],
   };
 
@@ -198,8 +351,8 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
         product_code: newProduct.product_code,
         price: newProduct.price,
         description: newProduct.description,
-        category_id: newProduct.category_id,
-        collection_id: newProduct.collection_id,
+        category_id: newProduct.category_id || null,
+        collection_id: newProduct.collection_id || null,
         images: newProduct.images,
         fabric: newProduct.fabric,
         care_instructions: newProduct.care_instructions,
@@ -209,11 +362,14 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
       });
       if (prodErr) {
         console.error('Supabase product upsert error:', prodErr);
+        throw new Error(`Database error saving product: ${prodErr.message || prodErr.details || 'Check table schema'}`);
       }
 
       if (newProduct.variants && newProduct.variants.length > 0) {
+        // Delete old variants for clean update
+        await supabase.from('product_variants').delete().eq('product_id', newProduct.id);
         const variantsToUpsert = newProduct.variants.map((v) => ({
-          id: v.id,
+          id: v.id || crypto.randomUUID(),
           product_id: newProduct.id,
           size: v.size,
           stock_quantity: v.stock_quantity,
@@ -222,10 +378,12 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
         const { error: varErr } = await supabase.from('product_variants').upsert(variantsToUpsert);
         if (varErr) {
           console.error('Supabase product_variants upsert error:', varErr);
+          throw new Error(`Database error saving product variants: ${varErr.message || varErr.details}`);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving product to Supabase:', err);
+      throw err;
     }
   }
 
@@ -240,24 +398,29 @@ export async function deleteServerProduct(id: string): Promise<boolean> {
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
+      await supabase.from('product_variants').delete().eq('product_id', id);
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) {
         console.error('Supabase product delete error:', error);
+        throw new Error(`Database error deleting product: ${error.message || error.details}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error deleting product from Supabase:', err);
+      throw err;
     }
   }
+
   return true;
 }
 
-// --- Categories & Collections ---
+// --- Categories ---
 export async function getServerCategories(): Promise<Category[]> {
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
+      await ensureSupabaseSeeded(supabase);
       const { data, error } = await supabase.from('categories').select('*').order('display_order');
-      if (!error && data && data.length > 0) return data;
+      if (!error && data) return data;
     } catch (err) {
       console.error('Error fetching categories from Supabase:', err);
     }
@@ -265,12 +428,14 @@ export async function getServerCategories(): Promise<Category[]> {
   return getLocalData().categories;
 }
 
+// --- Collections ---
 export async function getServerCollections(): Promise<Collection[]> {
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
+      await ensureSupabaseSeeded(supabase);
       const { data, error } = await supabase.from('collections').select('*').order('display_order');
-      if (!error && data && data.length > 0) return data;
+      if (!error && data) return data;
     } catch (err) {
       console.error('Error fetching collections from Supabase:', err);
     }
@@ -285,11 +450,13 @@ export async function getServerCollectionBySlug(slug: string): Promise<Collectio
 
 export async function saveServerCollection(collection: Partial<Collection>): Promise<Collection> {
   const isNew = !collection.id;
-  const id = isNew ? `col-${Date.now()}` : collection.id!;
+  const id = collection.id || crypto.randomUUID();
+  const cleanSlug = collection.slug?.trim() || (collection.name ? collection.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : id);
+
   const newCol: Collection = {
     id,
     name: collection.name || 'New Collection',
-    slug: collection.slug || id,
+    slug: cleanSlug,
     description: collection.description || '',
     image_url: collection.image_url || '',
     show_on_home: collection.show_on_home ?? true,
@@ -328,9 +495,11 @@ export async function saveServerCollection(collection: Partial<Collection>): Pro
       });
       if (error) {
         console.error('Supabase collection upsert error:', error);
+        throw new Error(`Database error saving collection: ${error.message || error.details}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving collection to Supabase:', err);
+      throw err;
     }
   }
 
@@ -351,12 +520,16 @@ export async function deleteServerCollection(id: string): Promise<boolean> {
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
+      // Unlink products in this collection
+      await supabase.from('products').update({ collection_id: null }).eq('collection_id', id);
       const { error } = await supabase.from('collections').delete().eq('id', id);
       if (error) {
         console.error('Supabase collection delete error:', error);
+        throw new Error(`Database error deleting collection: ${error.message || error.details}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error deleting collection from Supabase:', err);
+      throw err;
     }
   }
 
@@ -368,8 +541,9 @@ export async function getServerHomepageSections(): Promise<HomepageSection[]> {
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
+      await ensureSupabaseSeeded(supabase);
       const { data, error } = await supabase.from('homepage_sections').select('*').order('display_order');
-      if (!error && data && data.length > 0) return data;
+      if (!error && data) return data;
     } catch (err) {
       console.error('Error fetching homepage_sections from Supabase:', err);
     }
@@ -468,8 +642,9 @@ export async function getServerNavigation(): Promise<NavItem[]> {
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
+      await ensureSupabaseSeeded(supabase);
       const { data, error } = await supabase.from('store_settings').select('navigation').eq('id', 1).single();
-      if (!error && data?.navigation && Array.isArray(data.navigation) && data.navigation.length > 0) {
+      if (!error && data?.navigation && Array.isArray(data.navigation)) {
         return data.navigation;
       }
     } catch (err) {
@@ -504,8 +679,9 @@ export async function getServerReviews(): Promise<CustomerReview[]> {
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
+      await ensureSupabaseSeeded(supabase);
       const { data, error } = await supabase.from('store_settings').select('reviews').eq('id', 1).single();
-      if (!error && data?.reviews && Array.isArray(data.reviews) && data.reviews.length > 0) {
+      if (!error && data?.reviews && Array.isArray(data.reviews)) {
         return data.reviews;
       }
     } catch (err) {

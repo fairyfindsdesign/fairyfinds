@@ -28,6 +28,8 @@ function purgeStorefrontCache() {
     revalidatePath('/contact', 'page');
     revalidatePath('/about', 'page');
     revalidatePath('/custom', 'page');
+    revalidatePath('/collections', 'layout');
+    revalidatePath('/admin', 'layout');
   } catch (err) {
     console.error('Error in purgeStorefrontCache:', err);
   }

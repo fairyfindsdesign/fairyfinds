@@ -155,3 +155,47 @@ button, a {
   animation-play-state: paused;
 }
 
+/* Luxury Shimmer Effect for Skeleton Loaders */
+@keyframes luxury-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f4f3ef 0%,
+    #eae8e2 35%,
+    #ffffff 50%,
+    #eae8e2 65%,
+    #f4f3ef 100%
+  );
+  background-size: 200% 100%;
+  animation: luxury-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Fluid Entrance Animation */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Image Smooth Loading & Crossfade */
+.img-fade-in {
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+

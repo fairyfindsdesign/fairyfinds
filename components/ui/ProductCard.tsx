@@ -32,14 +32,30 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         href={`/product/${product.slug}`}
         className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100 block rounded-xs"
       >
+        {/* Primary Image */}
         <Image
-          src={isHovered ? secondaryImage : primaryImage}
+          src={primaryImage}
           alt={product.name}
           fill
           priority={priority}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
-          className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+          className={`object-cover object-center transition-all duration-700 ease-out group-hover:scale-105 ${
+            isHovered && secondaryImage !== primaryImage ? 'opacity-0' : 'opacity-100'
+          }`}
         />
+
+        {/* Secondary Image crossfade on hover */}
+        {secondaryImage !== primaryImage && (
+          <Image
+            src={secondaryImage}
+            alt={`${product.name} alternate view`}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
+            className={`object-cover object-center absolute inset-0 transition-all duration-700 ease-out group-hover:scale-105 ${
+              isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+          />
+        )}
 
         {/* Stock / Type Badges */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">

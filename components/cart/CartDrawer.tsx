@@ -17,10 +17,21 @@ export default function CartDrawer() {
     setIsCartDrawerOpen,
   } = useCart();
 
+  React.useEffect(() => {
+    if (isCartDrawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isCartDrawerOpen]);
+
   if (!isCartDrawerOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden" aria-labelledby="cart-title" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[90] overflow-hidden" aria-labelledby="cart-title" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-300"

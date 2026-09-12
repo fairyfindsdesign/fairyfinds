@@ -125,18 +125,26 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
             </div>
           )}
 
-          {/* Main Selected Image */}
+          {/* Main Selected Image with Smooth Crossfade */}
           <div className="relative aspect-[3/4] flex-1 bg-neutral-100 overflow-hidden border border-neutral-200 shadow-sm">
-            <Image
-              src={product.images[selectedImageIndex] || 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=1200'}
-              alt={product.name}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 600px"
-              className="object-cover object-top"
-            />
+            {(product.images && product.images.length > 0
+              ? product.images
+              : ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=1200']
+            ).map((img, idx) => (
+              <Image
+                key={idx}
+                src={img}
+                alt={`${product.name} view ${idx + 1}`}
+                fill
+                priority={idx === 0}
+                sizes="(max-width: 1024px) 100vw, 600px"
+                className={`object-cover object-top transition-opacity duration-500 ${
+                  selectedImageIndex === idx ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
+                }`}
+              />
+            ))}
             {isOutOfStock && (
-              <div className="absolute top-4 left-4 bg-[#1A1A1A] text-white text-xs uppercase tracking-widest font-semibold px-3 py-1.5 shadow">
+              <div className="absolute top-4 left-4 bg-[#1A1A1A] text-white text-xs uppercase tracking-widest font-semibold px-3 py-1.5 shadow z-20">
                 Out of Stock in {selectedSize}
               </div>
             )}

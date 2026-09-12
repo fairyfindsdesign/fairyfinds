@@ -52,6 +52,18 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Lock body scroll when mobile menu is open to prevent underlying sections from scrolling
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   // Hide main navbar on admin pages for cleaner CMS dashboard
   if (pathname?.startsWith('/admin')) {
     return null;
@@ -63,16 +75,8 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
     return pathname?.startsWith(href);
   };
 
-  const isTransparent = pathname === '/' && !isScrolled;
-
   return (
-    <header
-      className={`sticky top-0 z-40 transition-all duration-300 ${
-        isTransparent
-          ? 'bg-transparent border-b border-transparent backdrop-blur-none lg:bg-white/95 lg:border-neutral-200 lg:backdrop-blur-md'
-          : 'bg-white/95 border-b border-neutral-200 backdrop-blur-md shadow-xs'
-      }`}
-    >
+    <header className="sticky top-0 z-40 bg-white/98 backdrop-blur-md border-b border-neutral-200/90 shadow-xs transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Mobile menu trigger */}
@@ -235,7 +239,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="fixed inset-y-0 left-0 max-w-xs w-full bg-[#FAF9F6] border-r border-neutral-200/80 shadow-2xl p-6 flex flex-col justify-between z-10 animate-in slide-in-from-left duration-300">
+          <div className="fixed inset-y-0 left-0 w-full max-w-[340px] sm:max-w-sm bg-white border-r border-neutral-200 shadow-2xl p-6 flex flex-col justify-between z-10 animate-in slide-in-from-left duration-300">
             <div>
               {/* Mobile Drawer Header */}
               <div className="flex items-center justify-between pb-6 border-b border-neutral-200/60">

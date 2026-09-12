@@ -21,6 +21,8 @@ import {
   SlidersHorizontal,
   Grid,
   Layers,
+  LayoutGrid,
+  Shuffle,
   MessageCircle,
   ExternalLink,
   Camera,
@@ -33,6 +35,19 @@ interface CustomerMusesClientProps {
   settings?: StoreSettings;
 }
 
+const COLLAGE_SPAN_PATTERNS = [
+  { span: 'col-span-1 sm:col-span-2 row-span-2 min-h-[380px] sm:min-h-[460px]', hasTape: true }, // Hero mosaic card
+  { span: 'col-span-1 row-span-2 min-h-[360px] sm:min-h-[440px]' }, // Tall portrait
+  { span: 'col-span-1 row-span-1 min-h-[220px] sm:min-h-[240px]' }, // Standard square
+  { span: 'col-span-1 sm:col-span-2 row-span-1 min-h-[220px] sm:min-h-[240px]', hasTape: true }, // Wide landscape
+  { span: 'col-span-1 row-span-1 min-h-[220px] sm:min-h-[240px]' }, // Standard portrait
+  { span: 'col-span-1 row-span-2 min-h-[360px] sm:min-h-[440px]' }, // Another tall card
+  { span: 'col-span-1 row-span-1 min-h-[220px] sm:min-h-[240px]' }, // Standard square
+];
+
+const COLLAGE_ROTATIONS = ['rotate-0', '-rotate-1', 'rotate-1', '-rotate-1.5', 'rotate-1.5', 'rotate-0', '-rotate-2'];
+const COLLAGE_STICKERS = ['Atelier Spotlight', 'Handcrafted Silk', 'Heirloom Zari', 'Bespoke Grace', 'Couture Commission', 'Celebratory Muse'];
+
 export default function CustomerMusesClient({
   initialPhotos,
   settings,
@@ -42,7 +57,10 @@ export default function CustomerMusesClient({
   );
 
   const [activeOccasion, setActiveOccasion] = useState<string>('ALL');
-  const [viewLayout, setViewLayout] = useState<'masonry' | 'polaroid'>('masonry');
+  const [viewLayout, setViewLayout] = useState<'collage' | 'masonry' | 'polaroid'>('collage');
+  const [collageSeed, setCollageSeed] = useState<number>(0);
+  const [isShuffling, setIsShuffling] = useState(false);
+  const [shuffledOrder, setShuffledOrder] = useState<CustomerPhoto[]>([]);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -75,6 +93,46 @@ export default function CustomerMusesClient({
     if (activeOccasion === 'ALL') return photos;
     return photos.filter((p) => p.occasion === activeOccasion);
   }, [photos, activeOccasion]);
+
+  // Keep shuffled order synchronized with active filtered photos
+  useEffect(() => {
+    setShuffledOrder(filteredPhotos);
+  }, [filteredPhotos]);
+
+  // Handle Shuffle Collage Action
+  const handleShuffleCollage = () => {
+    setIsShuffling(true);
+    setCollageSeed((prev) => prev + 1);
+    setShuffledOrder((prev) => {
+      const next = [...prev];
+      for (let i = next.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [next[i], next[j]] = [next[j], next[i]];
+      }
+      return next;
+    });
+    setTimeout(() => setIsShuffling(false), 500);
+  };
+
+  // Compute randomized collage layout items
+  const collageItems = useMemo(() => {
+    return shuffledOrder.map((photo, idx) => {
+      const patternIdx = (idx + collageSeed) % COLLAGE_SPAN_PATTERNS.length;
+      const rotIdx = (idx * 3 + collageSeed) % COLLAGE_ROTATIONS.length;
+      const stickerIdx = (idx * 2 + collageSeed) % COLLAGE_STICKERS.length;
+      const base = COLLAGE_SPAN_PATTERNS[patternIdx];
+
+      return {
+        ...photo,
+        config: {
+          span: base.span,
+          rotation: COLLAGE_ROTATIONS[rotIdx],
+          hasTape: !!base.hasTape,
+          sticker: idx % 3 === 0 ? COLLAGE_STICKERS[stickerIdx] : undefined,
+        },
+      };
+    });
+  }, [shuffledOrder, collageSeed]);
 
   // Active photo in lightbox
   const currentPhoto = selectedPhotoIndex !== null ? filteredPhotos[selectedPhotoIndex] : null;
@@ -263,12 +321,34 @@ export default function CustomerMusesClient({
             })}
           </div>
 
-          {/* Layout Mode Toggle */}
-          <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
-            <span className="text-[10px] uppercase font-semibold text-neutral-400 tracking-wider">
-              Layout:
-            </span>
+          {/* Layout Mode Toggle & Shuffle Button */}
+          <div className="flex items-center gap-2.5 self-end md:self-auto shrink-0 flex-wrap">
+            {/* Shuffle Button (Prominent for randomized collage) */}
+            <button
+              type="button"
+              onClick={handleShuffleCollage}
+              className="px-3.5 py-1.5 bg-white hover:bg-pink-50 text-[#1A1A1A] hover:text-[#FF55D2] border border-neutral-300 hover:border-[#FF55D2] text-xs font-semibold rounded-full flex items-center gap-1.5 transition-all shadow-xs active:scale-95 cursor-pointer"
+              title="Shuffle and re-randomize collage arrangement"
+            >
+              <Shuffle className={`w-3.5 h-3.5 text-[#FF55D2] ${isShuffling ? 'animate-spin' : ''}`} />
+              <span>Shuffle Collage</span>
+            </button>
+
             <div className="flex items-center border border-neutral-200 rounded-xs overflow-hidden bg-white p-0.5 shadow-xs">
+              <button
+                type="button"
+                onClick={() => setViewLayout('collage')}
+                className={`px-2.5 py-1 text-xs rounded-xs flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  viewLayout === 'collage'
+                    ? 'bg-[#1A1A1A] text-white font-medium shadow-xs'
+                    : 'text-neutral-500 hover:text-black'
+                }`}
+                title="Randomized Editorial Collage"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span className="text-[11px] hidden sm:inline">Collage</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setViewLayout('masonry')}
@@ -317,6 +397,123 @@ export default function CustomerMusesClient({
             >
               View All Moments
             </button>
+          </div>
+        ) : viewLayout === 'collage' ? (
+          /* RANDOMIZED EDITORIAL COLLAGE / MOODBOARD */
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 auto-rows-[220px] sm:auto-rows-[240px] items-stretch transition-all duration-500">
+            {collageItems.map((photo) => {
+              const isLiked = userLikedMap[photo.id];
+              const likesCount = likesMap[photo.id] || 0;
+              const hasFloatingHeart = floatingHeartMap[photo.id];
+              const { span, rotation, hasTape, sticker } = photo.config;
+
+              return (
+                <div
+                  key={`${photo.id}-${collageSeed}`}
+                  onClick={() => {
+                    const originalIdx = filteredPhotos.findIndex((p) => p.id === photo.id);
+                    setSelectedPhotoIndex(originalIdx !== -1 ? originalIdx : 0);
+                  }}
+                  className={`group relative ${span} bg-white border border-neutral-200/90 rounded-xs overflow-hidden shadow-xs hover:shadow-2xl transition-all duration-500 cursor-pointer ${rotation} hover:rotate-0 hover:scale-[1.015] hover:z-30 gsap-fade-up`}
+                >
+                  {/* Tape Accent for scrap-book feel */}
+                  {hasTape && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-white/70 backdrop-blur-md border border-neutral-300/60 rotate-2 opacity-80 z-30 pointer-events-none shadow-xs" />
+                  )}
+
+                  {/* Collage Moodboard Sticker */}
+                  {sticker && (
+                    <div className="absolute top-3 right-3 z-30 pointer-events-none animate-in fade-in">
+                      <span className="px-2.5 py-1 bg-black/80 backdrop-blur-md text-white text-[9px] uppercase tracking-widest font-mono font-bold rounded-xs border border-white/20 shadow-md">
+                        {sticker}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Photo Container */}
+                  <div className="relative w-full h-full bg-neutral-900 overflow-hidden">
+                    <Image
+                      src={photo.image_url}
+                      alt={photo.customer_name}
+                      fill
+                      className="object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10 opacity-70 group-hover:opacity-90 transition-opacity duration-300 pointer-events-none" />
+
+                    {/* Floating Heart Micro-Animation */}
+                    {hasFloatingHeart && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30 animate-in fade-in zoom-in duration-300">
+                        <Heart className="w-16 h-16 fill-[#FF55D2] text-[#FF55D2] drop-shadow-lg animate-bounce" />
+                      </div>
+                    )}
+
+                    {/* Top Badges */}
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 z-20">
+                      {photo.is_featured ? (
+                        <span className="px-2.5 py-0.5 bg-[#FF55D2] text-white text-[9px] uppercase tracking-wider font-bold rounded-full shadow-xs flex items-center gap-1">
+                          <Star className="w-2.5 h-2.5 fill-white" />
+                          <span>Spotlight</span>
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 bg-black/60 backdrop-blur-xs text-white text-[9px] uppercase tracking-wider font-semibold rounded-xs">
+                          {photo.occasion || 'Celebration'}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Interactive Like Reaction Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleLike(e, photo.id)}
+                      className={`absolute bottom-3 right-3 z-30 p-2 rounded-full backdrop-blur-md transition-all active:scale-75 cursor-pointer ${
+                        isLiked
+                          ? 'bg-[#FF55D2] text-white shadow-xs'
+                          : 'bg-black/40 text-white hover:bg-black/70 hover:text-pink-300'
+                      }`}
+                      title="Applaud this look"
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-white' : ''}`} />
+                    </button>
+
+                    {/* Bottom Details Overlay */}
+                    <div className="absolute bottom-3 left-3 right-14 z-20 text-white space-y-1">
+                      <div className="flex items-center gap-1 text-[11px] text-pink-200/90 font-mono">
+                        {photo.city && (
+                          <span className="flex items-center gap-0.5">
+                            <MapPin className="w-2.5 h-2.5 text-[#FF55D2]" />
+                            {photo.city}
+                          </span>
+                        )}
+                        {photo.instagram_handle && (
+                          <span className="truncate">• {photo.instagram_handle}</span>
+                        )}
+                      </div>
+
+                      <h3 className="font-serif text-base sm:text-lg md:text-xl font-medium tracking-wide leading-tight text-white drop-shadow-xs truncate">
+                        {photo.customer_name}
+                      </h3>
+
+                      {photo.caption && (
+                        <p className="text-xs text-neutral-200/90 font-light italic line-clamp-1 group-hover:line-clamp-2 transition-all">
+                          “{photo.caption}”
+                        </p>
+                      )}
+
+                      {/* Tagged product pill */}
+                      {photo.product_name && (
+                        <div className="pt-0.5 flex items-center gap-1.5 text-[10px] text-neutral-300">
+                          <Tag className="w-2.5 h-2.5 text-[#FF55D2] shrink-0" />
+                          <span className="truncate font-medium">{photo.product_name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : viewLayout === 'masonry' ? (
           /* MASONRY EDITORIAL GRID */

@@ -76,7 +76,8 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/98 backdrop-blur-md border-b border-neutral-200/90 shadow-xs transition-colors duration-200">
+    <>
+      <header className="sticky top-0 z-[60] bg-white border-b border-neutral-200 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Mobile menu trigger */}
@@ -230,16 +231,17 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
           </div>
         </div>
       </div>
+      </header>
 
-      {/* Mobile Slide-over Drawer */}
+      {/* Mobile Slide-over Drawer - Rendered as a sibling so it is NOT trapped in header's stacking context */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-[100] lg:hidden">
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="fixed inset-y-0 left-0 w-full max-w-[340px] sm:max-w-sm bg-white border-r border-neutral-200 shadow-2xl p-6 flex flex-col justify-between z-10 animate-in slide-in-from-left duration-300">
+          <div className="fixed inset-y-0 left-0 w-full max-w-[340px] sm:max-w-sm bg-white border-r border-neutral-200 shadow-2xl p-6 flex flex-col justify-between z-[101] animate-in slide-in-from-left duration-300">
             <div>
               {/* Mobile Drawer Header */}
               <div className="flex items-center justify-between pb-6 border-b border-neutral-200/60">
@@ -354,6 +356,6 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

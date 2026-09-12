@@ -52,8 +52,9 @@ export async function saveNavigationAction(navigation: NavItem[]) {
 export async function saveProductAction(product: Partial<Product>) {
   const result = await saveServerProduct(product);
   purgeStorefrontCache();
-  if (product.slug) {
-    revalidatePath(`/product/${product.slug}`, 'page');
+  const slug = result?.slug || product.slug;
+  if (slug) {
+    revalidatePath(`/product/${slug}`, 'page');
   }
   revalidatePath('/admin/products', 'page');
   revalidatePath('/admin', 'layout');
@@ -71,8 +72,9 @@ export async function deleteProductAction(id: string) {
 export async function saveCollectionAction(collection: Partial<Collection>) {
   const result = await saveServerCollection(collection);
   purgeStorefrontCache();
-  if (collection.slug) {
-    revalidatePath(`/collections/${collection.slug}`, 'page');
+  const slug = result?.slug || collection.slug;
+  if (slug) {
+    revalidatePath(`/collections/${slug}`, 'page');
   }
   revalidatePath('/admin/collections', 'page');
   revalidatePath('/admin', 'layout');

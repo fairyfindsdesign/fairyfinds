@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getProducts, getCollections, getSettings, getHomepageSections } from '@/lib/data/store';
 import { Package, Layers, LayoutTemplate, Phone, AlertCircle, ArrowRight, Plus } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AdminDashboardPage() {

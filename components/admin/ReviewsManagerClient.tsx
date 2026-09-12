@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { CustomerReview } from '@/lib/types';
@@ -30,6 +30,10 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
   const [reviews, setReviews] = useState<CustomerReview[]>(initialReviews);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    setReviews(initialReviews);
+  }, [initialReviews]);
 
   // Add review form state
   const [isAdding, setIsAdding] = useState(false);

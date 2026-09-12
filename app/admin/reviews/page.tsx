@@ -2,6 +2,7 @@ import React from 'react';
 import { getReviews } from '@/lib/data/store';
 import ReviewsManagerClient from '@/components/admin/ReviewsManagerClient';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AdminReviewsPage() {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { HomepageSection, HeroSlide } from '@/lib/types';
@@ -40,6 +40,10 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
   const [sections, setSections] = useState<HomepageSection[]>(initialSections);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editFields, setEditFields] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    setSections(initialSections);
+  }, [initialSections]);
 
   // Hero Carousel CMS state
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);

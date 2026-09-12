@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -53,6 +53,10 @@ export default function CollectionManagerClient({
   const [collections, setCollections] = useState<Collection[]>(initialCollections);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
+
+  useEffect(() => {
+    setCollections(initialCollections);
+  }, [initialCollections]);
 
   // Form Fields
   const [name, setName] = useState('');

@@ -83,6 +83,8 @@ CREATE TABLE IF NOT EXISTS store_settings (
   address TEXT DEFAULT 'Boutique Atelier, Colombo, Sri Lanka',
   announcement_bar TEXT DEFAULT 'Complimentary Styling Consultation • Direct Orders & Custom Fitting via WhatsApp',
   currency_symbol TEXT DEFAULT 'Rs.',
+  navigation JSONB DEFAULT '[]'::jsonb,
+  reviews JSONB DEFAULT '[]'::jsonb,
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -107,10 +109,10 @@ CREATE POLICY "Public Read Product Variants" ON product_variants FOR SELECT USIN
 CREATE POLICY "Public Read Homepage Sections" ON homepage_sections FOR SELECT USING (true);
 CREATE POLICY "Public Read Store Settings" ON store_settings FOR SELECT USING (true);
 
--- Authenticated Admin Full Access Policies
-CREATE POLICY "Admin All Categories" ON categories FOR ALL TO authenticated USING (true);
-CREATE POLICY "Admin All Collections" ON collections FOR ALL TO authenticated USING (true);
-CREATE POLICY "Admin All Products" ON products FOR ALL TO authenticated USING (true);
-CREATE POLICY "Admin All Variants" ON product_variants FOR ALL TO authenticated USING (true);
-CREATE POLICY "Admin All Homepage Sections" ON homepage_sections FOR ALL TO authenticated USING (true);
-CREATE POLICY "Admin All Store Settings" ON store_settings FOR ALL TO authenticated USING (true);
+-- Full CMS Admin Mutation Policies
+CREATE POLICY "Admin All Categories" ON categories FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin All Collections" ON collections FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin All Products" ON products FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin All Variants" ON product_variants FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin All Homepage Sections" ON homepage_sections FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin All Store Settings" ON store_settings FOR ALL USING (true) WITH CHECK (true);

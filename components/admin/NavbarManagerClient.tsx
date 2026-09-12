@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { NavItem, NavDropdownItem } from '@/lib/types';
 import { saveNavigationAction } from '@/app/actions/store';
@@ -30,6 +30,10 @@ export default function NavbarManagerClient({
   const [navigation, setNavigation] = useState<NavItem[]>(initialNavigation);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    setNavigation(initialNavigation);
+  }, [initialNavigation]);
 
   // New dropdown item form state
   const [isAddingSubItem, setIsAddingSubItem] = useState(false);

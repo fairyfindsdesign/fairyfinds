@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { StoreSettings } from '@/lib/types';
 import { saveSettingsAction } from '@/app/actions/store';
@@ -15,6 +15,10 @@ export default function AdminSettingsForm({ initialSettings }: AdminSettingsForm
   const [settings, setSettings] = useState<StoreSettings>(initialSettings);
   const [isSaving, setIsSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    setSettings(initialSettings);
+  }, [initialSettings]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

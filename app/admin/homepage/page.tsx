@@ -2,6 +2,7 @@ import React from 'react';
 import { getHomepageSections } from '@/lib/data/store';
 import HomepageCMSClient from '@/components/admin/HomepageCMSClient';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AdminHomepageCMSPage() {

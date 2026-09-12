@@ -2,6 +2,7 @@ import React from 'react';
 import { getSettings } from '@/lib/data/store';
 import AdminSettingsForm from '@/components/admin/AdminSettingsForm';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AdminSettingsPage() {

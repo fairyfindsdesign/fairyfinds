@@ -81,8 +81,10 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
   };
 
   const handleToggleVisibility = async (id: string, currentVisibility: boolean) => {
-    const updated = await toggleSectionVisibilityAction(id, !currentVisibility);
-    setSections(updated);
+    const res = await toggleSectionVisibilityAction(id, !currentVisibility);
+    if (res.success && res.sections) {
+      setSections(res.sections);
+    }
     router.refresh();
   };
 
@@ -191,8 +193,10 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
     }
 
     try {
-      const updated = await updateSectionContentAction(section.id, payload);
-      setSections(updated);
+      const res = await updateSectionContentAction(section.id, payload);
+      if (res.success && res.sections) {
+        setSections(res.sections);
+      }
       router.refresh();
       setEditingId(null);
       setSavedSuccess(true);

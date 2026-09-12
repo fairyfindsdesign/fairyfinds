@@ -59,7 +59,11 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
     setIsSaving(true);
     setReviews(updatedReviews);
     try {
-      await saveReviewsAction(updatedReviews);
+      const res = await saveReviewsAction(updatedReviews);
+      if (!res.success) {
+        alert(`Could not save reviews: ${res.error}`);
+        return;
+      }
       router.refresh();
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2500);

@@ -53,7 +53,11 @@ export default function NavbarManagerClient({
     setIsSaving(true);
     setNavigation(updatedNav);
     try {
-      await saveNavigationAction(updatedNav);
+      const res = await saveNavigationAction(updatedNav);
+      if (!res.success) {
+        alert(`Could not save navigation: ${res.error}`);
+        return;
+      }
       router.refresh();
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2000);

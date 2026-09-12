@@ -1,5 +1,9 @@
--- FAIRY FINDS BOUTIQUE - SUPABASE DATABASE SCHEMA & SEED SCRIPT
--- Paste this script into Supabase SQL Editor to set up your database tables and initial boutique data.
+-- FAIRY FINDS BOUTIQUE - SUPABASE DATABASE SCHEMA & SETUP SCRIPT
+-- Paste this entire script into your Supabase SQL Editor and click "Run".
+--
+-- NOTE: If you previously created tables with UUID errors and want a 100% clean reset,
+-- you can uncomment and run this line FIRST:
+-- DROP TABLE IF EXISTS product_variants, products, collections, categories, homepage_sections CASCADE;
 
 -- 1. Enable UUID extension for default ID generation
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -108,6 +112,13 @@ BEGIN
       EXECUTE 'ALTER TABLE ' || quote_ident(r.relname) || ' DROP CONSTRAINT IF EXISTS ' || quote_ident(r.conname);
     END LOOP;
 
+    -- Drop column defaults first so Postgres doesn't block changing UUID to TEXT
+    ALTER TABLE categories ALTER COLUMN id DROP DEFAULT;
+    ALTER TABLE collections ALTER COLUMN id DROP DEFAULT;
+    ALTER TABLE products ALTER COLUMN id DROP DEFAULT;
+    ALTER TABLE product_variants ALTER COLUMN id DROP DEFAULT;
+    ALTER TABLE homepage_sections ALTER COLUMN id DROP DEFAULT;
+
     -- Alter column types to TEXT
     ALTER TABLE categories ALTER COLUMN id TYPE TEXT USING id::text;
     ALTER TABLE categories ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
@@ -135,9 +146,17 @@ BEGIN
 END $$;
 
 -- Ensure columns exist if tables were created previously
+ALTER TABLE products ADD COLUMN IF NOT EXISTS product_code TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS size_chart_url TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS fabric TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS care_instructions TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
 ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS navigation JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS reviews JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE collections ADD COLUMN IF NOT EXISTS show_on_home BOOLEAN DEFAULT false;
+ALTER TABLE collections ADD COLUMN IF NOT EXISTS has_dedicated_page BOOLEAN DEFAULT true;
+ALTER TABLE collections ADD COLUMN IF NOT EXISTS display_order INT DEFAULT 0;
+ALTER TABLE collections ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;
 ALTER TABLE collections ADD COLUMN IF NOT EXISTS has_dedicated_page BOOLEAN DEFAULT true;
 ALTER TABLE collections ADD COLUMN IF NOT EXISTS display_order INT DEFAULT 0;
 ALTER TABLE collections ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;

@@ -32,7 +32,11 @@ export default function ProductListClient({ initialProducts }: ProductListClient
     if (confirm(`Are you sure you want to delete "${name}" from your catalog?`)) {
       setDeletingId(id);
       try {
-        await deleteProductAction(id);
+        const res = await deleteProductAction(id);
+        if (!res.success) {
+          alert(`Could not delete product: ${res.error}`);
+          return;
+        }
         setProducts((prev) => prev.filter((p) => p.id !== id));
         router.refresh();
       } catch (err: any) {

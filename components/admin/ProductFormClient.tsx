@@ -160,7 +160,12 @@ export default function ProductFormClient({
     };
 
     try {
-      await saveProductAction(payload);
+      const res = await saveProductAction(payload);
+      if (!res.success) {
+        alert(`Could not save product: ${res.error}\n\nIf you are using Supabase, please ensure you ran the updated supabase/schema.sql in your Supabase SQL Editor.`);
+        setIsSaving(false);
+        return;
+      }
       setSavedSuccess(true);
       setTimeout(() => {
         router.push('/admin/products');
@@ -168,7 +173,7 @@ export default function ProductFormClient({
       }, 600);
     } catch (err: any) {
       console.error('Save product error:', err);
-      alert(`Could not save product: ${err?.message || 'Database error'}. If you are using Supabase, ensure the latest schema.sql has been executed.`);
+      alert(`Could not save product: ${err?.message || 'Network error'}`);
     } finally {
       setIsSaving(false);
     }

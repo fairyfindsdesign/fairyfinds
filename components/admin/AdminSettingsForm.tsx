@@ -24,7 +24,11 @@ export default function AdminSettingsForm({ initialSettings }: AdminSettingsForm
     e.preventDefault();
     setIsSaving(true);
     try {
-      await saveSettingsAction(settings);
+      const res = await saveSettingsAction(settings);
+      if (!res.success) {
+        alert(`Could not save settings: ${res.error}`);
+        return;
+      }
       router.refresh();
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2500);

@@ -140,7 +140,12 @@ export default function CollectionManagerClient({
       const updated = { ...target, show_on_home: !target.show_on_home };
       setCollections((prev) => prev.map((c) => (c.id === id ? updated : c)));
       try {
-        await saveCollectionAction(updated);
+        const res = await saveCollectionAction(updated);
+        if (!res.success) {
+          setCollections((prev) => prev.map((c) => (c.id === id ? target : c)));
+          alert(`Failed to update collection: ${res.error}`);
+          return;
+        }
         router.refresh();
         showToast(`Collection "${target.name}" ${!target.show_on_home ? 'featured on' : 'hidden from'} homepage.`);
       } catch (err: any) {
@@ -157,7 +162,12 @@ export default function CollectionManagerClient({
       const updated = { ...target, is_published: !target.is_published };
       setCollections((prev) => prev.map((c) => (c.id === id ? updated : c)));
       try {
-        await saveCollectionAction(updated);
+        const res = await saveCollectionAction(updated);
+        if (!res.success) {
+          setCollections((prev) => prev.map((c) => (c.id === id ? target : c)));
+          alert(`Failed to update collection: ${res.error}`);
+          return;
+        }
         router.refresh();
         showToast(`Collection "${target.name}" set to ${!target.is_published ? 'Published' : 'Draft'}.`);
       } catch (err: any) {
@@ -175,7 +185,11 @@ export default function CollectionManagerClient({
 
     setDeletingId(col.id);
     try {
-      await deleteCollectionAction(col.id);
+      const res = await deleteCollectionAction(col.id);
+      if (!res.success) {
+        alert(`Could not delete collection: ${res.error}`);
+        return;
+      }
       setCollections((prev) => prev.filter((c) => c.id !== col.id));
       router.refresh();
       if (editingCollection?.id === col.id) {
@@ -212,8 +226,14 @@ export default function CollectionManagerClient({
     };
 
     try {
-      const saved = await saveCollectionAction(payload);
+      const res = await saveCollectionAction(payload);
+      if (!res.success) {
+        alert(`Could not save collection: ${res.error}`);
+        setIsSaving(false);
+        return;
+      }
 
+      const saved = res.collection!;
       if (isNew) {
         setCollections((prev) => [...prev, saved]);
         showToast(`New collection "${saved.name}" created successfully!`);

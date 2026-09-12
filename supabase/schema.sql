@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS store_settings (
   currency_symbol TEXT DEFAULT 'Rs.',
   navigation JSONB DEFAULT '[]'::jsonb,
   reviews JSONB DEFAULT '[]'::jsonb,
+  customer_photos JSONB DEFAULT '[]'::jsonb,
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -298,3 +299,7 @@ VALUES
   true
 )
 ON CONFLICT (id) DO NOTHING;
+
+-- Ensure customer_photos column exists on existing store_settings installations
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS customer_photos JSONB DEFAULT '[]'::jsonb;
+

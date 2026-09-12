@@ -109,6 +109,9 @@ export interface StoreSettings {
   address: string;
   announcement_bar: string;
   currency_symbol: string;
+  navigation?: NavItem[];
+  reviews?: CustomerReview[];
+  customer_photos?: CustomerPhoto[];
 }
 
 export interface CartItem {
@@ -162,6 +165,27 @@ export interface CustomerReview {
   tag?: string; // e.g., "Custom Bridal Client" or "Verified Purchase"
   is_visible: boolean;
   display_order?: number;
+  created_at?: string;
+}
+
+export interface CustomerPhoto {
+  id: string;
+  customer_name: string;
+  instagram_handle?: string; // e.g. "@ananya.singhania"
+  image_url: string;
+  caption?: string; // quote / testimonial / story
+  occasion?: string; // e.g., "Sangeet Soirée", "Reception Gala", "Diwali Soirée", "Cocktail Evening", "Atelier Bespoke"
+  city?: string; // e.g., "Mumbai", "London", "Dubai", "Colombo"
+  product_id?: string; // optional linked product
+  product_name?: string; // e.g., "The Crimson Heritage Banarasi Saree"
+  product_slug?: string; // for direct "Shop The Look" link
+  product_price?: number;
+  product_image?: string;
+  rating?: number; // 5
+  likes_count?: number; // interactive applause counter
+  is_featured: boolean;
+  is_visible: boolean;
+  display_order: number;
   created_at?: string;
 }
 

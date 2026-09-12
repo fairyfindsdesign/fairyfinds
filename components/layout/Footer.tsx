@@ -127,6 +127,12 @@ export default function Footer({ settings, collections }: FooterProps) {
             </h3>
             <ul className="space-y-2 text-xs text-neutral-400">
               <li>
+                <Link href="/muses" className="text-white hover:text-[#FF55D2] transition-colors flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FF55D2]" />
+                  Client Diaries & Muses
+                </Link>
+              </li>
+              <li>
                 <Link href="/custom" className="text-[#FF55D2] hover:underline transition-colors flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#FF55D2]" />
                   Custom Made Orders

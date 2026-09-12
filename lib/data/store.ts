@@ -18,6 +18,8 @@ import {
   updateServerNavigation,
   getServerReviews,
   updateServerReviews,
+  getServerCustomerPhotos,
+  updateServerCustomerPhotos,
 } from './server-store';
 
 export async function getNavigation() {
@@ -95,4 +97,13 @@ export async function getReviews() {
 export async function updateReviews(reviews: any) {
   return updateServerReviews(reviews);
 }
+
+export async function getCustomerPhotos() {
+  return getServerCustomerPhotos();
+}
+
+export async function updateCustomerPhotos(photos: any) {
+  return updateServerCustomerPhotos(photos);
+}
+
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -47,6 +47,7 @@ export default function ProductDetailClient({
   const [addedNotice, setAddedNotice] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [sizePrompt, setSizePrompt] = useState(false);
+  const sizeSelectorRef = useRef<HTMLDivElement>(null);
 
   // Selected variant stock info
   const selectedVariant = product.variants?.find((v) => v.size === selectedSize);
@@ -57,6 +58,7 @@ export default function ProductDetailClient({
   const handleAddToCart = () => {
     if (!selectedSize) {
       setSizePrompt(true);
+      sizeSelectorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => setSizePrompt(false), 3000);
       return;
     }
@@ -69,6 +71,7 @@ export default function ProductDetailClient({
   const handleBuyNow = () => {
     if (!selectedSize) {
       setSizePrompt(true);
+      sizeSelectorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => setSizePrompt(false), 3000);
       return;
     }
@@ -105,7 +108,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 pb-28 lg:pb-16">
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="text-xs text-neutral-400 uppercase tracking-widest mb-8 flex items-center gap-2">
         <Link href="/" className="hover:text-black transition-colors">Home</Link>
@@ -221,7 +224,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
             </p>
 
             {/* Size Selector */}
-            <div className="mt-8 pt-6 border-t border-neutral-200">
+            <div ref={sizeSelectorRef} className="mt-8 pt-6 border-t border-neutral-200 scroll-mt-24">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs uppercase tracking-widest font-semibold text-neutral-900">
                   Select Size:
@@ -482,30 +485,76 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
         </div>
       )}
 
-      {/* Mobile Sticky Bottom Purchase Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-neutral-200 p-3 z-30 shadow-lg flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-300">
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-sans text-[#1A1A1A] font-medium truncate">{product.name}</p>
-          <p className="text-xs font-semibold text-[#FF55D2]">
-            Rs. {product.price.toLocaleString()}{' '}
-            <span className="text-[10px] text-neutral-400 font-normal">({selectedSize || 'Select Size'})</span>
-          </p>
+      {/* Mobile Sticky Bottom Purchase Bar with Dual Actions: Add to Cart & Buy Now */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-neutral-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] px-3 pt-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] animate-in slide-in-from-bottom duration-300">
+        {/* Compact Product info line */}
+        <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-neutral-100 text-xs">
+          <div className="min-w-0 flex-1 pr-2 flex items-center gap-2">
+            <span className="font-serif text-[#1A1A1A] font-medium truncate text-xs">
+              {product.name}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="font-semibold text-[#FF55D2] text-xs">
+              Rs. {product.price.toLocaleString()}
+            </span>
+            <button
+              type="button"
+              onClick={() => sizeSelectorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              className={`text-[10px] px-2 py-0.5 rounded-xs border font-medium transition-colors ${
+                selectedSize
+                  ? 'border-neutral-900 bg-neutral-900 text-white'
+                  : 'border-[#FF55D2] bg-pink-50 text-[#FF55D2] animate-pulse'
+              }`}
+            >
+              {selectedSize ? `Size: ${selectedSize}` : 'Select Size'}
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          disabled={isOutOfStock || !selectedSize}
-          onClick={handleAddToCart}
-          className={`px-5 py-3 text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5 transition-all shadow-sm shrink-0 active:scale-95 rounded-xs ${
-            isOutOfStock || !selectedSize
-              ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
-              : addedNotice
-              ? 'bg-emerald-700 text-white'
-              : 'bg-[#1A1A1A] hover:bg-[#FF55D2] text-white'
-          }`}
-        >
-          <ShoppingBag className="w-3.5 h-3.5" />
-          <span>{addedNotice ? 'Added!' : 'Add to Bag'}</span>
-        </button>
+
+        {/* Dual Button Grid: Add to Cart + Buy Now */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Button 1: Add to Cart */}
+          <button
+            type="button"
+            disabled={isOutOfStock}
+            onClick={handleAddToCart}
+            className={`min-h-[44px] px-3 py-2.5 text-[11px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs shrink-0 active:scale-95 rounded-xs border ${
+              isOutOfStock
+                ? 'bg-neutral-100 border-neutral-200 text-neutral-400 cursor-not-allowed'
+                : addedNotice
+                ? 'bg-emerald-700 border-emerald-700 text-white'
+                : 'bg-white hover:bg-neutral-50 border-[#1A1A1A] text-[#1A1A1A]'
+            }`}
+          >
+            {addedNotice ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-white" />
+                <span>Added!</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag className="w-3.5 h-3.5 text-[#1A1A1A]" />
+                <span>Add to Bag</span>
+              </>
+            )}
+          </button>
+
+          {/* Button 2: Buy Now */}
+          <button
+            type="button"
+            disabled={isOutOfStock}
+            onClick={handleBuyNow}
+            className={`min-h-[44px] px-3 py-2.5 text-[11px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm shrink-0 active:scale-95 rounded-xs ${
+              isOutOfStock
+                ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+                : 'bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white shadow-[#FF55D2]/25'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 fill-white" />
+            <span>Buy Now</span>
+          </button>
+        </div>
       </div>
     </div>
   );

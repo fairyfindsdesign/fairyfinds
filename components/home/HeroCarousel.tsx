@@ -121,12 +121,12 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
             </div>
 
             {/* Dark Editorial Vignette Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/30 sm:to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+            <div className="absolute inset-0 bg-black/45" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/45" />
 
-            {/* Slide Content Container */}
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[85vh] lg:min-h-[90vh] flex items-center z-20">
-              <div className="max-w-2xl py-24 space-y-6">
+            {/* Slide Content Container - Centered */}
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center z-20 text-center">
+              <div className="max-w-2xl py-24 flex flex-col items-center text-center space-y-4 sm:space-y-5">
                 {/* Eyebrow Badge */}
                 {slide.badge && (
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-black/40 backdrop-blur-md border border-white/20 text-[11px] uppercase tracking-widest font-semibold text-[#FF55D2] rounded-xs animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -135,24 +135,24 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                   </div>
                 )}
 
-                {/* Main Headline */}
-                <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-white font-light leading-[1.12] tracking-tight gsap-hero-title animate-in fade-in duration-700">
+                {/* Main Headline - Centered, 32px */}
+                <h1 className="font-serif text-[26px] sm:text-[32px] text-white font-normal leading-snug tracking-tight max-w-xl mx-auto gsap-hero-title animate-in fade-in duration-700">
                   {slide.heading}
                 </h1>
 
-                {/* Narrative Description */}
+                {/* Narrative Description under Headline */}
                 {slide.description && (
-                  <p className="text-neutral-200 text-xs sm:text-sm md:text-base leading-relaxed font-light max-w-xl gsap-hero-subtitle animate-in fade-in duration-800">
+                  <p className="text-neutral-200 text-xs sm:text-sm md:text-[15px] leading-relaxed font-light max-w-lg mx-auto gsap-hero-subtitle animate-in fade-in duration-800">
                     {slide.description}
                   </p>
                 )}
 
-                {/* Dual Action CTAs */}
-                <div className="pt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 gsap-hero-cta animate-in fade-in duration-900">
+                {/* Dual Action CTAs after Description */}
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3.5 gsap-hero-cta animate-in fade-in duration-900 w-full sm:w-auto">
                   {slide.button_text && (
                     <Link
                       href={slide.button_link || '/shop'}
-                      className="px-8 py-4 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-widest font-semibold transition-all shadow-lg flex items-center justify-center gap-2 rounded-xs active:scale-95"
+                      className="w-full sm:w-auto px-8 py-3.5 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-widest font-semibold transition-all shadow-lg flex items-center justify-center gap-2 rounded-xs active:scale-95"
                     >
                       <span>{slide.button_text}</span>
                       <ArrowRight className="w-4 h-4" />
@@ -162,7 +162,7 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                   {slide.secondary_button_text && (
                     <Link
                       href={slide.secondary_button_link || '/custom'}
-                      className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white border border-white/30 hover:border-white text-xs uppercase tracking-widest font-semibold transition-all backdrop-blur-xs text-center rounded-xs active:scale-95"
+                      className="w-full sm:w-auto px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/30 hover:border-white text-xs uppercase tracking-widest font-semibold transition-all backdrop-blur-xs text-center rounded-xs active:scale-95"
                     >
                       <span>{slide.secondary_button_text}</span>
                     </Link>

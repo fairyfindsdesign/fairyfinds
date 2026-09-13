@@ -158,10 +158,12 @@ export interface CustomerReview {
   id: string;
   customer_name: string;
   avatar_url?: string;
+  image_url?: string; // Photo of customer wearing the product
+  product_name?: string; // Garment/product worn by customer
   rating: number; // 1 to 5
   comment: string;
   location?: string;
-  tag?: string; // e.g., "Custom Bridal Client" or "Verified Purchase"
+  tag?: string; // e.g., "Bridal Silk Edit" or "Verified Purchase"
   is_visible: boolean;
   display_order?: number;
   created_at?: string;

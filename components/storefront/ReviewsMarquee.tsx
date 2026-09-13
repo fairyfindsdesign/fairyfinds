@@ -74,82 +74,112 @@ export default function ReviewsMarquee({
 
 function ReviewCard({ review }: { review: CustomerReview }) {
   const [imgError, setImgError] = useState(false);
-
-  // Helper to extract initials for avatar fallback
-  const initials = review.customer_name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+  const customerPhoto = review.image_url || review.avatar_url;
 
   return (
-    <div className="w-[280px] sm:w-[380px] shrink-0 bg-[#FAF9F6] border border-neutral-200/90 p-5 sm:p-7 rounded-xs flex flex-col justify-between hover:border-[#FF55D2]/50 hover:shadow-md transition-all duration-300 group">
-      {/* Top Card: Rating Stars & Quote Icon */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          {/* Star Rating */}
-          <div className="flex items-center gap-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-3.5 h-3.5 ${
-                  i < review.rating
-                    ? 'text-[#FF55D2] fill-[#FF55D2]'
-                    : 'text-neutral-300 fill-transparent'
-                }`}
-              />
-            ))}
+    <div className="w-[290px] sm:w-[350px] md:w-[370px] shrink-0 bg-white border border-neutral-200/90 rounded-xs overflow-hidden flex flex-col hover:border-[#FF55D2]/50 hover:shadow-xl transition-all duration-500 group select-none">
+      {/* 1. Customer Wearing Product Photo */}
+      <div className="relative w-full aspect-[4/5] sm:h-80 bg-neutral-100 overflow-hidden shrink-0">
+        {customerPhoto && !imgError ? (
+          <Image
+            src={customerPhoto}
+            alt={`${review.customer_name} wearing ${review.product_name || 'Fairy Finds'}`}
+            fill
+            sizes="(max-width: 640px) 290px, 370px"
+            className="object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#FAF0F8] to-neutral-100 text-neutral-400 p-6 text-center">
+            <span className="font-serif text-4xl font-light text-[#FF55D2] mb-1">
+              {review.customer_name.charAt(0)}
+            </span>
+            <span className="text-xs uppercase tracking-widest text-neutral-500 font-semibold">
+              Boutique Muse
+            </span>
           </div>
+        )}
 
-          <Quote className="w-5 h-5 text-neutral-300 group-hover:text-[#FF55D2]/40 transition-colors" />
-        </div>
+        {/* Soft Vignette Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 via-30% to-transparent pointer-events-none" />
 
-        {/* Comment Body */}
-        <p className="font-sans text-sm sm:text-base text-neutral-700 leading-relaxed font-normal">
-          "{review.comment}"
-        </p>
-      </div>
-
-      {/* Bottom Card: Customer Profile */}
-      <div className="pt-6 mt-6 border-t border-neutral-200/60 flex items-center gap-3.5">
-        {/* Profile Avatar */}
-        <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border border-neutral-200 bg-white ring-2 ring-[#FF55D2]/20">
-          {review.avatar_url && !imgError ? (
-            <Image
-              src={review.avatar_url}
-              alt={review.customer_name}
-              fill
-              sizes="44px"
-              className="object-cover"
-              onError={() => setImgError(true)}
-            />
+        {/* Floating Top Badge: Product Worn / Verified Muse */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+          {review.tag ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] uppercase tracking-wider font-semibold rounded-xs shadow-xs">
+              <Sparkles className="w-3 h-3 text-[#FF55D2]" />
+              <span>{review.tag}</span>
+            </span>
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-[#FAF0F8] text-[#FF55D2] font-semibold text-xs tracking-wider font-sans">
-              {initials}
-            </div>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] uppercase tracking-wider font-semibold rounded-xs shadow-xs">
+              <Sparkles className="w-3 h-3 text-[#FF55D2]" />
+              <span>Boutique Muse</span>
+            </span>
+          )}
+
+          {review.product_name && (
+            <span className="ml-auto inline-flex items-center px-2.5 py-0.5 bg-white/95 backdrop-blur-md text-neutral-900 text-[10px] font-medium tracking-tight rounded-xs truncate max-w-[160px] shadow-xs">
+              {review.product_name}
+            </span>
           )}
         </div>
 
-        {/* Customer Details */}
-        <div className="min-w-0 flex-1">
+        {/* Customer Name & Location Overlay on Photo */}
+        <div className="absolute bottom-3.5 left-4 right-4 z-10 text-white pointer-events-none">
           <div className="flex items-center gap-1.5">
-            <h4 className="font-sans text-sm font-semibold text-[#1A1A1A] truncate">
+            <h4 className="font-serif text-lg sm:text-xl font-normal text-white drop-shadow-md tracking-wide truncate">
               {review.customer_name}
             </h4>
             <span title="Verified Customer">
-              <CheckCircle className="w-3 h-3 text-[#FF55D2] shrink-0" />
+              <CheckCircle className="w-4 h-4 text-[#FF55D2] fill-[#FF55D2] shrink-0 drop-shadow-xs" />
             </span>
           </div>
-
-          <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 font-light truncate">
-            {review.tag && (
-              <span className="text-neutral-600 font-medium">{review.tag}</span>
-            )}
-            {review.tag && review.location && <span>•</span>}
-            {review.location && <span>{review.location}</span>}
-          </div>
+          {review.location && (
+            <p className="text-xs text-white/80 font-light mt-0.5 drop-shadow-xs">
+              📍 {review.location}
+            </p>
+          )}
         </div>
+      </div>
+
+      {/* 2. Rating & Customer Comment */}
+      <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between bg-[#FAF9F6]">
+        <div>
+          {/* Star Rating & Quote Icon */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-3.5 h-3.5 ${
+                    i < review.rating
+                      ? 'text-[#FF55D2] fill-[#FF55D2]'
+                      : 'text-neutral-300 fill-transparent'
+                  }`}
+                />
+              ))}
+              <span className="ml-2 text-xs font-semibold text-neutral-800">
+                {review.rating}.0
+              </span>
+            </div>
+            <Quote className="w-4 h-4 text-neutral-300 group-hover:text-[#FF55D2]/50 transition-colors" />
+          </div>
+
+          {/* Customer Testimonial Comment */}
+          <p className="font-sans text-xs sm:text-sm text-neutral-700 leading-relaxed font-normal italic">
+            "{review.comment}"
+          </p>
+        </div>
+
+        {/* Product Worn Footer Indicator */}
+        {review.product_name && (
+          <div className="mt-4 pt-3 border-t border-neutral-200/60 flex items-center justify-between text-[11px] text-neutral-500">
+            <span className="font-light">Wearing:</span>
+            <span className="font-medium text-neutral-800 truncate ml-1">
+              {review.product_name}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

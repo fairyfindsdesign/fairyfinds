@@ -40,6 +40,7 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
   const [isAdding, setIsAdding] = useState(false);
   const [name, setName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [productName, setProductName] = useState('');
   const [rating, setRating] = useState<number>(5);
   const [comment, setComment] = useState('');
   const [location, setLocation] = useState('');
@@ -50,6 +51,7 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editAvatarUrl, setEditAvatarUrl] = useState('');
+  const [editProductName, setEditProductName] = useState('');
   const [editRating, setEditRating] = useState<number>(5);
   const [editComment, setEditComment] = useState('');
   const [editLocation, setEditLocation] = useState('');
@@ -84,6 +86,8 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
       id: `rev-${Date.now()}`,
       customer_name: name.trim(),
       avatar_url: avatarUrl.trim() || undefined,
+      image_url: avatarUrl.trim() || undefined,
+      product_name: productName.trim() || undefined,
       rating,
       comment: comment.trim(),
       location: location.trim() || undefined,
@@ -99,6 +103,7 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
     // Reset form
     setName('');
     setAvatarUrl('');
+    setProductName('');
     setRating(5);
     setComment('');
     setLocation('');
@@ -126,7 +131,8 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
   const startEdit = (r: CustomerReview) => {
     setEditingId(r.id);
     setEditName(r.customer_name);
-    setEditAvatarUrl(r.avatar_url || '');
+    setEditAvatarUrl(r.image_url || r.avatar_url || '');
+    setEditProductName(r.product_name || '');
     setEditRating(r.rating);
     setEditComment(r.comment);
     setEditLocation(r.location || '');
@@ -143,6 +149,8 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
             ...r,
             customer_name: editName.trim(),
             avatar_url: editAvatarUrl.trim() || undefined,
+            image_url: editAvatarUrl.trim() || undefined,
+            product_name: editProductName.trim() || undefined,
             rating: editRating,
             comment: editComment.trim(),
             location: editLocation.trim() || undefined,
@@ -251,18 +259,32 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
               </div>
             </div>
 
-            {/* Profile Picture Upload */}
+            {/* Customer Wearing Product Photo Upload */}
             <div>
               <ImageUpload
                 multiple={false}
                 value={avatarUrl}
                 onChange={setAvatarUrl}
-                label="Profile Picture (Optional)"
-                helperText="Upload patron photo. Scaled and compressed to square avatar."
-                aspectRatio="aspect-square"
-                isAvatar={true}
-                maxWidth={400}
-                maxHeight={400}
+                label="Customer Wearing Product Photo (UGC)"
+                helperText="Upload photo of patron styled in this garment for the marquee card."
+                aspectRatio="aspect-[4/5]"
+                isAvatar={false}
+                maxWidth={800}
+                maxHeight={1000}
+              />
+            </div>
+
+            {/* Garment / Product Worn */}
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-neutral-700 font-semibold mb-1.5">
+                Garment / Product Worn (Optional)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Crimson Heritage Saree, Emerald Velvet Lehenga"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                className="w-full px-3 py-2 bg-neutral-50/50 border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2] focus:bg-white"
               />
             </div>
 
@@ -423,12 +445,25 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
                             multiple={false}
                             value={editAvatarUrl}
                             onChange={setEditAvatarUrl}
-                            label="Customer Profile Photo"
-                            helperText="Upload new patron photo or replace avatar."
-                            aspectRatio="aspect-square"
-                            isAvatar={true}
-                            maxWidth={400}
-                            maxHeight={400}
+                            label="Customer Wearing Product Photo (UGC)"
+                            helperText="Upload photo of patron styled in this garment for the marquee card."
+                            aspectRatio="aspect-[4/5]"
+                            isAvatar={false}
+                            maxWidth={800}
+                            maxHeight={1000}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] uppercase tracking-wider text-neutral-600 font-semibold mb-1">
+                            Garment / Product Worn
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Crimson Heritage Saree"
+                            value={editProductName}
+                            onChange={(e) => setEditProductName(e.target.value)}
+                            className="w-full px-3 py-1.5 bg-white border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2]"
                           />
                         </div>
 
@@ -444,7 +479,7 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
                           />
                         </div>
 
-                        <div>
+                        <div className="sm:col-span-2">
                           <label className="block text-[11px] uppercase tracking-wider text-neutral-600 font-semibold mb-1">
                             Garment Tag
                           </label>
@@ -490,15 +525,15 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
                     /* Review Card Row */
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-start gap-4">
-                        {/* Avatar */}
-                        <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 border border-neutral-200 bg-neutral-100 ring-2 ring-[#FF55D2]/20">
-                          {r.avatar_url ? (
+                        {/* Customer Outfit Photo */}
+                        <div className="relative w-12 h-15 rounded-xs overflow-hidden shrink-0 border border-neutral-200 bg-neutral-100 shadow-2xs">
+                          {r.image_url || r.avatar_url ? (
                             <Image
-                              src={r.avatar_url}
+                              src={r.image_url || r.avatar_url!}
                               alt={r.customer_name}
                               fill
                               sizes="48px"
-                              className="object-cover"
+                              className="object-cover object-top"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-[#FAF0F8] text-[#FF55D2] font-semibold text-xs">
@@ -529,6 +564,10 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
                           </div>
 
                           <div className="flex items-center gap-2 text-[11px] text-neutral-400">
+                            {r.product_name && (
+                              <span className="text-[#FF55D2] font-medium">Wearing: {r.product_name}</span>
+                            )}
+                            {r.product_name && (r.tag || r.location) && <span>•</span>}
                             {r.tag && <span className="text-neutral-600 font-medium">{r.tag}</span>}
                             {r.tag && r.location && <span>•</span>}
                             {r.location && <span>{r.location}</span>}

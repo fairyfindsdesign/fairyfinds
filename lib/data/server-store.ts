@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, StoreSettings } from '../types';
 import { initialCategories, initialCollections, initialNavigation, initialProducts, initialReviews, initialSections, initialSettings } from './initial-data';
 import { getAdminSupabase } from '../supabase/admin';
+import { generateUniqueProductCode } from '../utils/product-code';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'store.json');
 
@@ -309,19 +310,14 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
 
   let assignedCode = (product.product_code || '').trim().toUpperCase();
   if (!assignedCode) {
-    const existingCodes = new Set(
-      data.products.map((p) => (p.product_code || '').trim().toUpperCase())
-    );
-    for (let i = 1; i <= 999; i++) {
-      const candidate = `FF-PRD-${String(i).padStart(3, '0')}`;
-      if (!existingCodes.has(candidate)) {
-        assignedCode = candidate;
-        break;
-      }
-    }
-    if (!assignedCode) {
-      assignedCode = `FF-PRD-${Math.floor(100 + Math.random() * 900)}`;
-    }
+    assignedCode = generateUniqueProductCode({
+      productName: product.name,
+      categoryId: product.category_id,
+      categoryName: product.category_name,
+      categories: data.categories,
+      existingProducts: data.products,
+      currentProductId: product.id,
+    });
   }
 
   const cleanSlug = product.slug?.trim() || (product.name ? product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : id);

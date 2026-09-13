@@ -15,36 +15,7 @@ interface ProductFormClientProps {
   collections: Collection[];
 }
 
-function generateUniqueBoutiqueCode(
-  existingList: Product[],
-  currentCatId?: string,
-  categoriesList: Category[] = []
-): string {
-  const usedCodes = new Set(
-    (existingList || [])
-      .map((p) => (p.product_code || '').trim().toUpperCase())
-      .filter(Boolean)
-  );
-
-  let prefix = 'FF-PRD';
-  const cat = categoriesList.find((c) => c.id === currentCatId);
-  if (cat) {
-    const slug = (cat.slug || cat.name || '').toLowerCase();
-    if (slug.includes('saree')) prefix = 'FF-SR';
-    else if (slug.includes('dress')) prefix = 'FF-DR';
-    else if (slug.includes('blouse') || slug.includes('top')) prefix = 'FF-BL';
-    else if (slug.includes('lehenga')) prefix = 'FF-LH';
-    else prefix = 'FF-AT';
-  }
-
-  for (let i = 1; i <= 999; i++) {
-    const candidate = `${prefix}-${String(i).padStart(3, '0')}`;
-    if (!usedCodes.has(candidate)) {
-      return candidate;
-    }
-  }
-  return `${prefix}-${Math.floor(100 + Math.random() * 900)}`;
-}
+import { generateUniqueProductCode } from '@/lib/utils/product-code';
 
 export default function ProductFormClient({
   initialProduct,
@@ -59,14 +30,61 @@ export default function ProductFormClient({
   const [categoryId, setCategoryId] = useState(
     initialProduct?.category_id || categories[0]?.id || ''
   );
+  // Track if admin manually edited the product code
+  const [isCustomCodeEdited, setIsCustomCodeEdited] = useState(
+    () => isEditing && !!initialProduct?.product_code
+  );
+
   const [productCode, setProductCode] = useState(() => {
     if (initialProduct?.product_code) return initialProduct.product_code;
-    return generateUniqueBoutiqueCode(
-      existingProducts || [],
-      initialProduct?.category_id || categories[0]?.id,
-      categories
-    );
+    return generateUniqueProductCode({
+      productName: initialProduct?.name || '',
+      categoryId: initialProduct?.category_id || categories[0]?.id,
+      categories,
+      existingProducts,
+      currentProductId: initialProduct?.id,
+    });
   });
+
+  const handleNameChange = (newName: string) => {
+    setName(newName);
+    if (!isCustomCodeEdited) {
+      const autoCode = generateUniqueProductCode({
+        productName: newName,
+        categoryId,
+        categories,
+        existingProducts,
+        currentProductId: initialProduct?.id,
+      });
+      setProductCode(autoCode);
+    }
+  };
+
+  const handleCategoryChange = (newCatId: string) => {
+    setCategoryId(newCatId);
+    if (!isCustomCodeEdited) {
+      const autoCode = generateUniqueProductCode({
+        productName: name,
+        categoryId: newCatId,
+        categories,
+        existingProducts,
+        currentProductId: initialProduct?.id,
+      });
+      setProductCode(autoCode);
+    }
+  };
+
+  const handleRegenerateCode = () => {
+    setIsCustomCodeEdited(false);
+    const newCode = generateUniqueProductCode({
+      productName: name,
+      categoryId,
+      categories,
+      existingProducts,
+      currentProductId: initialProduct?.id,
+    });
+    setProductCode(newCode);
+  };
   const [price, setPrice] = useState(initialProduct?.price || 15000);
   const [collectionId, setCollectionId] = useState(initialProduct?.collection_id || '');
   const [description, setDescription] = useState(initialProduct?.description || '');
@@ -232,7 +250,7 @@ export default function ProductFormClient({
               required
               placeholder="e.g. Crimson Heritage Kanjivaram Saree"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
             />
           </div>
@@ -245,27 +263,23 @@ export default function ProductFormClient({
               </label>
               <button
                 type="button"
-                onClick={() => {
-                  const newCode = generateUniqueBoutiqueCode(
-                    existingProducts || [],
-                    categoryId,
-                    categories
-                  );
-                  setProductCode(newCode);
-                }}
-                className="text-[11px] text-[#FF55D2] hover:text-[#FD00B9] font-medium flex items-center gap-1 transition-colors active:scale-95"
-                title="Generate another collision-free unique ID"
+                onClick={handleRegenerateCode}
+                className="text-[11px] text-[#FF55D2] hover:text-[#FD00B9] font-medium flex items-center gap-1 transition-colors active:scale-95 cursor-pointer"
+                title="Auto-generate collision-free unique ID from Name + Category + Number"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Generate Unique ID</span>
+                <span>Auto-Generate ID</span>
               </button>
             </div>
             <input
               type="text"
               required
-              placeholder="e.g. FF-SR-001"
+              placeholder="e.g. FF-SAR-CHKS-001"
               value={productCode}
-              onChange={(e) => setProductCode(e.target.value.toUpperCase().replace(/\s+/g, ''))}
+              onChange={(e) => {
+                setIsCustomCodeEdited(true);
+                setProductCode(e.target.value.toUpperCase().replace(/\s+/g, ''));
+              }}
               className={`w-full px-3.5 py-2.5 bg-neutral-50 border text-xs text-[#1A1A1A] focus:bg-white focus:outline-none rounded-xs font-mono font-semibold tracking-wider ${
                 hasDuplicateCode
                   ? 'border-red-500 focus:border-red-500 ring-1 ring-red-500/20'
@@ -277,13 +291,30 @@ export default function ProductFormClient({
                 <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                 <span>
                   <strong>Duplicate ID:</strong> &quot;{productCode}&quot; is already in use by{' '}
-                  <em>{duplicateProduct?.name}</em>. Product IDs must be unique for WhatsApp order tracking.
+                  <em>{duplicateProduct?.name}</em>. Product IDs must be unique for catalog and order tracking.
                 </span>
               </div>
             ) : (
-              <p className="text-[11px] text-neutral-400 mt-1">
-                Unique identifier automatically delivered to your WhatsApp when customers place an order.
-              </p>
+              <div className="flex items-center justify-between text-[11px] mt-1.5">
+                {!isCustomCodeEdited ? (
+                  <span className="text-emerald-700 font-medium flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-[#FF55D2]" />
+                    <span>Auto-syncing: [FF]-[Category]-[Name]-[#]</span>
+                  </span>
+                ) : (
+                  <span className="text-neutral-500 flex items-center gap-1">
+                    Custom ID •{' '}
+                    <button
+                      type="button"
+                      onClick={handleRegenerateCode}
+                      className="text-[#FF55D2] hover:underline font-semibold cursor-pointer"
+                    >
+                      Re-sync with Name
+                    </button>
+                  </span>
+                )}
+                <span className="text-neutral-400 font-mono text-[10px]">Zero replication</span>
+              </div>
             )}
           </div>
         </div>
@@ -311,7 +342,7 @@ export default function ProductFormClient({
             </label>
             <select
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
+              onChange={(e) => handleCategoryChange(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
             >
               {categories.map((cat) => (

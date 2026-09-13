@@ -9,10 +9,10 @@
 export interface CompressionOptions {
   maxWidth?: number;
   maxHeight?: number;
-  quality?: number; // 0.1 to 1.0 (default: 0.30 for 30% quality)
+  quality?: number; // 0.1 to 1.0 (default: 0.80 for 80% quality)
   outputFormat?: 'image/webp' | 'image/jpeg' | 'image/png';
   minSizeToCompress?: number; // Minimum file size in bytes to trigger compression (default: 1MB = 1048576)
-  targetMaxRatio?: number; // Max size ratio vs original (default: 0.30 for 30% of original size)
+  targetMaxRatio?: number; // Max size ratio vs original (default: 0.80 for 80% of original size)
 }
 
 export interface CompressionResult {
@@ -45,7 +45,7 @@ export function formatBytes(bytes: number, decimals = 1): string {
  * 
  * Criteria:
  * 1. Only compresses if the file size is > 1MB (1,048,576 bytes). Files <= 1MB are left untouched.
- * 2. Compresses image at 30% quality and ensures the final file size is at most 30% of the original size.
+ * 2. Compresses image at 80% quality and ensures the final file size is at most 80% of the original size.
  */
 export async function compressImage(
   file: File,
@@ -54,10 +54,10 @@ export async function compressImage(
   const {
     maxWidth = 1600,
     maxHeight = 1600,
-    quality = 0.30, // 30% quality
+    quality = 0.80, // 80% quality
     outputFormat = 'image/webp',
     minSizeToCompress = 1024 * 1024, // 1MB threshold (1,048,576 bytes)
-    targetMaxRatio = 0.30, // Max 30% of original size (70% reduction)
+    targetMaxRatio = 0.80, // Max 80% of original size
   } = options;
 
   return new Promise((resolve, reject) => {
@@ -142,16 +142,16 @@ export async function compressImage(
 
         (async () => {
           try {
-            let currentQuality = quality; // 0.30 (30% quality)
+            let currentQuality = quality; // 0.80 (80% quality)
             let blob = await getBlob(currentQuality);
 
             if (!blob) {
               return reject(new Error('Canvas compression returned empty blob.'));
             }
 
-            // If the blob exceeds 30% of original size, adjust quality / dimensions
+            // If the blob exceeds 80% of original size, adjust quality / dimensions
             if (blob.size > maxAllowedSize) {
-              const qualitySteps = [0.25, 0.20, 0.15];
+              const qualitySteps = [0.70, 0.60, 0.50];
               for (const qStep of qualitySteps) {
                 if (blob.size <= maxAllowedSize) break;
                 const nextBlob = await getBlob(qStep);
@@ -161,7 +161,7 @@ export async function compressImage(
                 }
               }
 
-              // If still over 30% of original size, downscale dimensions
+              // If still over 80% of original size, downscale dimensions
               if (blob.size > maxAllowedSize && width > 400) {
                 let scaleDown = 0.85;
                 while (blob.size > maxAllowedSize && scaleDown >= 0.5) {

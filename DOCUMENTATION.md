@@ -6,12 +6,12 @@ Master operational, architectural, and design reference for the **Fairy Finds Bo
 
 ## 1. Executive Summary & Brand Positioning
 
-**Fairy Finds Boutique** is a modern, feminine fashion web application offering a curated selection of ready-to-wear garments alongside custom-made couture commissions.
+**Fairy Finds Boutique** is a modern, feminine luxury fashion web application offering a curated selection of ready-to-wear artisanal garments alongside bespoke couture commissions.
 
 ### Brand Identity & Aesthetic Principles
 - **Atmosphere**: Minimal, Elegant, Feminine, Soft, Modern, Premium, and Trustworthy.
 - **Design Rule**: Generous whitespace, clean editorial typography, minimal cards without heavy drop shadows, no arbitrary gradients, and visual focus kept firmly on product photography.
-- **CMS Principle**: **Owner controls content; Developer controls design.** The boutique owner can manage inventory, pricing, text, and homepage section order, while core typography tokens, responsive layouts, and aesthetic constraints remain protected.
+- **CMS Principle**: **Owner controls content; Developer controls design.** The boutique owner can manage inventory, categories, collections, pricing, text, reviews, and homepage section order, while core typography tokens, responsive layouts, and aesthetic constraints remain protected.
 
 ### Final Approved Color System
 | Token | HEX | Purpose |
@@ -32,15 +32,17 @@ Master operational, architectural, and design reference for the **Fairy Finds Bo
 
 ## 2. Technology Stack & Architecture
 
-- **Framework**: [Next.js 15](https://nextjs.org/) with App Router and Turbopack
+- **Framework**: [Next.js 16](https://nextjs.org/) with App Router and Turbopack
 - **Language**: TypeScript (strict mode enabled)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with centralized CSS variables (`app/globals.css`)
 - **Icons**: [Lucide React](https://lucide.dev/) + custom high-precision SVG brand icons
 - **State Management**: React Context (`context/CartContext.tsx`) with localStorage persistence and stock checks
-- **Server Mutations**: Next.js Server Actions (`app/actions/store.ts`) with immediate `revalidatePath` cache clearing
+- **Edge Routing & Auth**: Next.js 16 Edge Proxy (`proxy.ts`) with encrypted session cookie validation
+- **Image Processing**: Client-side Apple HEIC/HEIF decoding (`heic2any`) with fast-path magic byte detection and 80% compression
+- **Server Mutations**: Next.js Server Actions (`app/actions/store.ts`, `app/actions/auth.ts`) with immediate `purgeStorefrontCache()` revalidation
 - **Storage Layer**:
   - **Local Development / Offline**: Resilient server-side JSON persistence (`data/store.json`) ensuring all dashboard edits persist permanently even without database credentials.
-  - **Production Cloud**: [Supabase](https://supabase.com/) (PostgreSQL with Row Level Security, Supabase Auth for `/admin`, and Supabase Storage for product assets).
+  - **Production Cloud**: [Supabase](https://supabase.com/) (PostgreSQL with Row Level Security, Supabase Auth, and Supabase Storage).
 
 ---
 
@@ -48,7 +50,7 @@ Master operational, architectural, and design reference for the **Fairy Finds Bo
 
 | Route | Render Type | Purpose |
 |---|---|---|
-| **`/`** | Dynamic (`ƒ`) | **Section-based CMS Homepage** with Hero, New Arrivals, Banners, Categories, and Bespoke Tailoring. |
+| **`/`** | Dynamic (`ƒ`) | **Section-based CMS Homepage** with 1920×1080 Hero, New Arrivals, Featured Collections, Categories, Bespoke Tailoring, and Customer UGC Reviews. |
 | **`/shop`** | Dynamic (`ƒ`) | **Ready-to-Wear Catalog** with category filter pills, collection filters, size picker, and in-stock toggles. |
 | **`/product/[slug]`** | Dynamic (`ƒ`) | **Product Detail Page** with image thumbnail gallery, size/stock matrix, size guide, and direct WhatsApp inquiry. |
 | **`/collections/[slug]`** | Dynamic (`ƒ`) | **Signature Collection Showcases** (e.g., *Red Saree*, *Green Lehenga*). |
@@ -56,16 +58,17 @@ Master operational, architectural, and design reference for the **Fairy Finds Bo
 | **`/cart`** | Static (`○`) | **Bag Review & WhatsApp Checkout** collecting customer delivery details and launching WhatsApp. |
 | **`/about`** | Static (`○`) | **Brand Story & Atelier Heritage** explaining craftsmanship values. |
 | **`/contact`** | Static (`○`) | **Atelier Location & Hotline** with direct WhatsApp chat, email, and opening hours. |
-| **`/admin`** | Dynamic (`ƒ`) | **Owner Dashboard Overview** with inventory health, stock alerts, and quick actions. |
-| **`/admin/navigation`** | Dynamic (`ƒ`) | **Navigation & Dropdown CMS** to manage top-level nav visibility and customize the *Featured* dropdown menu links. |
-| **`/admin/products`** | Dynamic (`ƒ`) | **Product & Stock Manager** with search, per-size stock breakdown, and delete actions. |
-| **`/admin/products/new`** | Dynamic (`ƒ`) | **Create Garment** form with image preview, pricing, and size matrix. |
-| **`/admin/products/[id]`** | Dynamic (`ƒ`) | **Edit Garment** form to update pricing, descriptions, and stock counts. |
-| **`/admin/collections`** | Dynamic (`ƒ`) | **Collections Manager** to create collections and toggle homepage visibility. |
+| **`/admin`** | Dynamic (`ƒ`) | **Protected Owner Dashboard** with inventory metrics, categories count, stock alerts, and quick action cards. |
+| **`/admin/products`** | Dynamic (`ƒ`) | **Product & Stock Manager** with search, per-size stock breakdown, auto-generated product code, and delete actions. |
+| **`/admin/products/new`** | Dynamic (`ƒ`) | **Create Garment Form** with live unique product code auto-sync, inline "+ New Category" modal, and size matrix. |
+| **`/admin/products/[id]`** | Dynamic (`ƒ`) | **Edit Garment Form** to update pricing, descriptions, images, category, and stock counts. |
+| **`/admin/categories`** | Dynamic (`ƒ`) | **Category Management Portal** to create, edit, search, re-order, and delete categories with product count tracking. |
+| **`/admin/collections`** | Dynamic (`ƒ`) | **Collections Manager** to create collections, edit editorial narratives, and toggle homepage visibility. |
 | **`/admin/homepage`** | Dynamic (`ƒ`) | **Homepage CMS** with Move Up / Move Down reordering, visibility toggles, and text editor. |
-| **`/admin/reviews`** | Dynamic (`ƒ`) | **Customer Reviews CMS** to add, edit, rate (1-5 stars), add customer photos, and manage testimonials in the marquee. |
+| **`/admin/navigation`** | Dynamic (`ƒ`) | **Navigation & Dropdown CMS** to manage top-level nav visibility and customize the *Featured* dropdown menu links. |
+| **`/admin/reviews`** | Dynamic (`ƒ`) | **Customer Reviews CMS** to manage customer UGC outfit photos, testimonials, ratings, and worn product references. |
 | **`/admin/settings`** | Dynamic (`ƒ`) | **Store Settings** to configure the business WhatsApp phone number, store details, and announcement bar. |
-| **`/admin/login`** | Static (`○`) | **Owner Sign-in Portal** for administrative access (accessed directly via URL). |
+| **`/admin/login`** | Dynamic (`ƒ`) | **Owner Sign-in Portal** protected by password authentication (`fairyfinds@123`). |
 
 ---
 
@@ -75,12 +78,71 @@ The complete SQL migration script is located at [`fairy-finds/supabase/schema.sq
 
 ### Table Definitions
 
-1. **`categories`**: `id`, `name`, `slug`, `description`, `image_url`, `display_order`, `created_at`
-2. **`collections`**: `id`, `name`, `slug`, `description`, `image_url`, `show_on_home`, `has_dedicated_page`, `display_order`, `is_published`
-3. **`products`**: `id`, `product_code`, `name`, `slug`, `description`, `price`, `product_type`, `category_id`, `collection_id`, `images`, `fabric`, `care_instructions`, `is_published`, `is_featured`
-4. **`product_variants`**: `id`, `product_id`, `size`, `stock_quantity`, `sku` (Unique on `(product_id, size)`)
-5. **`homepage_sections`**: `id`, `section_type`, `title`, `subtitle`, `content`, `display_order`, `is_visible`
-6. **`store_settings`**: `id`, `whatsapp_number`, `store_name`, `contact_email`, `instagram_url`, `address`, `announcement_bar`, `currency_symbol`
+1. **`categories`**:
+   - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
+   - `name TEXT NOT NULL`
+   - `slug TEXT UNIQUE NOT NULL`
+   - `description TEXT`
+   - `image_url TEXT`
+   - `display_order INT DEFAULT 0`
+   - `created_at TIMESTAMPTZ DEFAULT now()`
+
+2. **`collections`**:
+   - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
+   - `name TEXT NOT NULL`
+   - `slug TEXT UNIQUE NOT NULL`
+   - `description TEXT`
+   - `image_url TEXT`
+   - `show_on_home BOOLEAN DEFAULT false`
+   - `has_dedicated_page BOOLEAN DEFAULT true`
+   - `display_order INT DEFAULT 0`
+   - `is_published BOOLEAN DEFAULT true`
+   - `created_at TIMESTAMPTZ DEFAULT now()`
+
+3. **`products`**:
+   - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
+   - `product_code TEXT UNIQUE` (Standardized unique ID: `FF-[CAT]-[NAME]-[NUM]`)
+   - `name TEXT NOT NULL`
+   - `slug TEXT UNIQUE NOT NULL`
+   - `description TEXT`
+   - `price DECIMAL(10, 2) NOT NULL`
+   - `product_type TEXT CHECK (product_type IN ('READY_MADE')) DEFAULT 'READY_MADE'`
+   - `category_id TEXT REFERENCES categories(id) ON DELETE SET NULL`
+   - `collection_id TEXT REFERENCES collections(id) ON DELETE SET NULL`
+   - `images JSONB DEFAULT '[]'::jsonb`
+   - `fabric TEXT`
+   - `care_instructions TEXT`
+   - `is_published BOOLEAN DEFAULT true`
+   - `is_featured BOOLEAN DEFAULT false`
+   - `created_at TIMESTAMPTZ DEFAULT now()`
+   - `updated_at TIMESTAMPTZ DEFAULT now()`
+
+4. **`product_variants`**:
+   - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
+   - `product_id TEXT REFERENCES products(id) ON DELETE CASCADE`
+   - `size TEXT NOT NULL`
+   - `stock_quantity INT DEFAULT 0`
+   - `sku TEXT`
+   - `UNIQUE(product_id, size)`
+
+5. **`homepage_sections`**:
+   - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
+   - `section_type TEXT NOT NULL`
+   - `title TEXT`
+   - `subtitle TEXT`
+   - `content JSONB DEFAULT '{}'::jsonb`
+   - `display_order INT DEFAULT 0`
+   - `is_visible BOOLEAN DEFAULT true`
+
+6. **`store_settings`**:
+   - `id TEXT PRIMARY KEY DEFAULT 'default'`
+   - `whatsapp_number TEXT NOT NULL`
+   - `store_name TEXT NOT NULL`
+   - `contact_email TEXT`
+   - `instagram_url TEXT`
+   - `address TEXT`
+   - `announcement_bar TEXT`
+   - `currency_symbol TEXT DEFAULT 'Rs.'`
 
 ---
 
@@ -156,139 +218,143 @@ _(I will share reference images and photos directly in this chat)_
 
 Accessed at [`/admin`](http://localhost:3000/admin).
 
-### 7.1 Dashboard Overview (`/admin`)
-- Real-time inventory counter (Total Products & Total Stock Units).
-- Stock alert counter showing variants at 0 inventory.
-- Active WhatsApp order hotline with single-click edit shortcut.
-- Recent products snapshot table.
+### 7.1 Security & Route Authentication
+- **Password Authentication**: Access to `/admin/*` requires entering the secure administrative passkey (`fairyfinds@123`, configurable via `ADMIN_PASSWORD` environment variable).
+- **Session Cookies**: Validated logins receive an `httpOnly`, `sameSite: 'lax'` session cookie (`admin_session`) valid for 7 days.
+- **Edge Route Protection ([`proxy.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/proxy.ts))**: Automatically intercepts all unauthenticated `/admin/*` traffic and performs a `307` temporary redirect to `/admin/login?from=[path]`.
+- **Sign Out**: Available in both the desktop header and mobile slide-over drawer, immediately clearing session cookies and returning to `/admin/login`.
+- **Storefront Login Shortcut**: Discreet "Admin Login" links are present in the public website footer and copyright bar for owner convenience.
 
-### 7.2 Products & Stock Manager (`/admin/products`)
+### 7.2 Unique Product ID Auto-Generation System
+- **Generation Formula**: `FF-[CATEGORY]-[NAME]-[NUMBER]`
+  - Brand Prefix: `FF`
+  - Category Code: 2–4 uppercase letters derived from category taxonomy (`SAR`, `LEH`, `DRS`, `TOP`, `KRT`, `JWL`, `BAG`, `SHOE`, `CST`, or first 3 alphanumeric letters).
+  - Product Name Code: Initials of significant words (e.g. *"Crimson Heritage Saree"* ➔ `CHS`) or first 3–4 letters for single-word titles.
+  - Sequential Number: Guaranteed collision-free 3-digit number (`001`, `002`, `003`...).
+- **Live Reactivity ([`ProductFormClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/ProductFormClient.tsx))**:
+  - Dynamically updates as the admin types the title or changes the category.
+  - Manual override toggle with a one-click "Re-sync with Name" button.
+  - Immediate duplicate prevention check preventing form submission if an ID collides.
+
+### 7.3 Category Management Portal ([`/admin/categories`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/categories/page.tsx))
+- **Taxonomy Overview**: View all active categories with thumbnail images, slug, description, display order, and active garment count in the atelier.
+- **Search & Filter**: Search categories by name, slug, or keywords.
+- **Add New Category**:
+  - Name with real-time automatic URL slug generation (e.g. typing *"Abayas & Kaftans"* ➔ `abayas-kaftans`).
+  - Optional description.
+  - Curated atelier texture presets (Crimson Silk, Emerald Velvet, Pastel Organza, Banarasi Brocade, etc.) or direct image upload.
+  - Display order preference for filter tabs.
+- **Edit & Re-order**: Modify titles, descriptions, and sort order with instant storefront cache clearing.
+- **Safe Deletion Guard**: Warns if products are currently assigned to that category and unlinks them safely without deleting garments.
+- **Inline Quick-Add in Garment Form**: Administrators can click `+ New Category` directly beside the Category selector when adding or editing a product, creating and selecting a category on the fly without losing unsaved progress.
+
+### 7.4 Products & Stock Manager ([`/admin/products`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/products/page.tsx))
 - Search by product title, product code (SKU), or category.
-- Add New Piece form ([`/admin/products/new`](http://localhost:3000/admin/products/new)):
-  - Title, SKU Code, Price, Category, Collection dropdown.
-  - Multi-image URL management.
+- **Add New Piece Form** ([`/admin/products/new`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/products/new/page.tsx)):
+  - Title, unique product ID with auto-sync, price, category selector (with inline `+ New Category` modal), and collection dropdown.
+  - Multi-image gallery uploader with drag-and-drop, Apple HEIC support, and automatic 80% compression.
   - Fabric composition and care instructions.
-  - **Size & Stock Matrix**: Interactive counters for S, M, L, XL, plus "Add Another Size" button for custom sizes (e.g., 38, Free Size, XXL).
-- Edit Piece form ([`/admin/products/[id]`](http://localhost:3000/admin/products/prod-01)).
+  - **Size & Stock Matrix**: Interactive counters for S, M, L, XL, plus "Add Another Size" for custom sizes.
+- **Edit Piece Form** ([`/admin/products/[id]`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/products/[id]/page.tsx)).
 - Delete confirmation with instant catalog update.
 
-### 7.3 Collections Management (`/admin/collections`)
-- **Full Creation & Editing Suite**: Full control over all content fields when creating new signature collections or editing existing ones:
-  - **Collection Title**: Title displayed in collection banners and headers.
-  - **URL Handle / Slug**: Custom URL slug with live route preview (`/collections/{slug}`). Auto-generated from title by default, with complete manual customization support.
-  - **Editorial Banner Image**: Direct URL input with real-time visual thumbnail preview and one-tap luxury image presets.
-  - **Editorial Narrative**: Form for storytelling about textiles, weave craftsmanship, and occasion.
-  - **Display Order**: Precise integer sorting across storefront menus and landing pages.
-  - **Homepage Feature Toggle**: Instant toggle (`show_on_home`) to feature in signature homepage edits.
-  - **Dedicated Page Toggle**: Controls whether `/collections/{slug}` is accessible as a dedicated landing page.
-  - **Publish Status Toggle**: Toggle between `Published` (live on storefront) and `Draft`.
-- **Card-Level Management**:
-  - **Edit Collection**: Opens the comprehensive pre-filled editor with smooth scrolling.
-  - **Quick Home Toggle**: One-tap `Featured on Home` switch with instant feedback.
-  - **Publish / Unpublish**: One-tap status switcher.
-  - **Delete Collection**: Deletes the collection with confirmation, preserving all associated catalog garments.
-  - **Live Page Preview**: Direct link to `/collections/{slug}`.
-  - **Catalog Link**: Quick jump to `/shop?collection={slug}`.
+### 7.5 Collections Management ([`/admin/collections`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/collections/page.tsx))
+- Full control over collection titles, URL slugs, editorial banners, storytelling text, display order, and publication status.
+- Quick `Featured on Home` toggle to feature capsule collections on the homepage.
+- Deletion safety: deletes the collection while preserving all associated products.
 
-### 7.4 Homepage Section CMS (`/admin/homepage`)
+### 7.6 Customer Reviews & UGC CMS ([`/admin/reviews`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/reviews/page.tsx))
+- **Customer Outfit Photos (UGC)**: Replaced generic circular avatar icons with editorial 4:5 fashion portraits of patrons wearing their purchased garments.
+- **Worn Product Attribution**: Record the exact garment worn (e.g. *Wearing: Crimson Heritage Saree*).
+- **Customer Details**: Name, location, verified buyer status, star rating (1–5), and testimonial text.
+- **Storefront Display**: Responsive infinite marquee on desktop with edge fade masks and hover-to-pause; touch-scrollable rail with active indicator dots on mobile.
+
+### 7.7 Homepage Section CMS ([`/admin/homepage`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/homepage/page.tsx))
 - **Move Up & Move Down**: Reorder homepage sections without touching code.
-- **Eye / EyeOff Toggle**: Hide seasonal sections or drafts from the live homepage instantly.
-- **Edit Text**: In-place editor to modify main headings, eyebrow subtitles, descriptions, button labels, button destination links, and background banner images.
+- **Visibility Toggle**: Hide seasonal sections or drafts from the live homepage instantly.
+- **Text & Banner Editor**: Edit headings, eyebrow badges, descriptions, CTAs, and background images.
 
-### 7.5 Navigation & Featured Dropdown CMS (`/admin/navigation`)
-- **Storefront Navbar Focus**: The public navigation bar strictly features **Home**, **Featured** (with dropdown), **About**, and **Contact**, along with the Shopping Bag counter.
-- **Removal of Owner Shortcut**: To maintain privacy and a seamless customer-facing luxury aesthetic, the "Owner" button/shortcut has been completely removed from public navigation. Boutique administrators access the dashboard directly at `/admin` or `/admin/login`.
-- **Top-Level Visibility Controls**: Toggle visibility (`Eye` / `EyeOff`) for any top-level navigation item.
-- **"Featured" Dropdown Link Manager**:
-  - Add custom links (Menu Label, Destination URL, and optional Subtitle).
-  - Move links **Up** or **Down** to reorder their appearance.
-  - Inline **Edit** mode to adjust link titles or URLs without recreating.
-  - **Delete** outdated collection links.
-  - All changes immediately sync to `data/store.json` via Server Actions and live-revalidate across all visitor pages.
+### 7.8 Navigation CMS ([`/admin/navigation`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/navigation/page.tsx))
+- Top-level menu visibility controls.
+- "Featured" dropdown link manager: add, edit, re-order, and delete custom collection links.
 
-### 7.6 Customer Reviews & Slow Marquee CMS (`/admin/reviews`)
-- **Storefront Display**: Elegant, infinite slow-scrolling horizontal marquee on the homepage showcasing genuine customer experiences, complete with soft edge gradient masks and hover-to-pause functionality.
-- **Star Rating Selector**: Interactive 1 to 5 star rating picker for each testimonial.
-- **Customer Details**: Manage customer name, profile avatar URL (with fallback monogram badge), city/location, and garment tag (e.g. *Bridal Silk Edit*, *Custom Bespoke Client*).
-- **Inline Editing & Management**:
-  - Live preview of avatar images.
-  - In-place editor to update existing review text, ratings, or tags.
-  - Delete expired or obsolete reviews.
-  - Visibility toggles (`Eye` / `EyeOff`) to instantly hide or show reviews on the storefront.
-  - Updates persist directly to `data/store.json` with immediate live revalidation.
-
-### 7.7 Store Settings (`/admin/settings`)
-- **Business WhatsApp Number**: Editing this number immediately redirects all checkout and inquiry buttons store-wide.
-- Store Name, Currency Symbol (`Rs.`), Email, Instagram profile link, and Atelier address.
-- Top Announcement Bar copy.
+### 7.9 Store Settings ([`/admin/settings`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/settings/page.tsx))
+- WhatsApp Business Order Hotline (immediately updates all checkout actions).
+- Store name, email, Instagram URL, and atelier address.
+- Announcement bar text and toggles.
 
 ---
 
-## 8. Mobile & UX Micro-Animation Architecture
+## 8. Storefront Aesthetics & Adaptive Design
 
-### 8.1 Mobile-First Viewport Enhancements
+### 8.1 Hero Section (1920×1080 Dimensions)
+- **Banner Proportions**: Sized to `max-w-[1920px] lg:h-[1080px]` matching 1080p Full HD resolution and 16:9 banner proportions.
+- **Visual Alignment**: Headline centered at 32px font size (`text-[26px] sm:text-[32px]`), with narrative description and centered dual CTAs ("Explore Ready-to-Wear" and "Commission Bespoke").
+- **Transparent Navbar Overlay**: When positioned over the homepage hero banner, the navbar background and borders become transparent (`bg-transparent border-transparent`) with white logo, white text links, and white action icons, smoothly transitioning to solid white upon scrolling down.
+
+### 8.2 Dark & Light Mode Adaptive Favicon
+- **Light Mode Browser**: Automatically displays the **black logo** favicon against light browser tab chrome.
+- **Dark Mode Browser**: Automatically displays the **white logo** favicon against dark browser tab chrome.
+- **Dual-Layer Architecture**:
+  - Declarative Next.js Metadata API delivering `media="(prefers-color-scheme: light)"` and `media="(prefers-color-scheme: dark)"` upon initial HTML render.
+  - Client-side reactive listener ([`DynamicFavicon.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/ui/DynamicFavicon.tsx)) monitoring live OS/browser theme switches.
+
+### 8.3 Mobile Touch-Scrollable Customer Reviews
+- **Touch Rail**: Replaced the non-interactive auto-running CSS marquee on mobile viewports with a native touch-friendly horizontal track (`overflow-x-auto snap-x snap-mandatory`).
+- **Interactive Controls**: Active pagination indicator dots with click-to-scroll support and tactile prev/next chevron buttons (`ChevronLeft` / `ChevronRight`).
+- **Compact Card Proportions**: Reduced card width to 215–260px and photo height to 208px (`aspect-[4/5]`), bringing total card height down from ~510px to ~350px (~35% reduction) for a comfortable mobile viewing experience.
+
+---
+
+## 9. Mobile & UX Micro-Animation Architecture
+
+### 9.1 Mobile-First Viewport Enhancements
 - **Modern 2-Column Catalog Grids**: Both the Homepage (New Arrivals & Categories) and Shop Catalog display as sleek 2-column grids on mobile (`grid-cols-2`), drastically reducing vertical scrolling fatigue while emulating top-tier luxury fashion mobile apps.
-- **Sticky Mobile Purchase Bar**: On product detail pages (`/product/[slug]`), a floating bottom bar keeps the piece name, selected size, price, and "Add to Bag" action immediately accessible at all times without scrolling back to the top.
+- **Sticky Mobile Purchase Bar**: On product detail pages (`/product/[slug]`), a floating bottom bar keeps the piece name, selected size, price, and "Add to Bag" action immediately accessible at all times.
 - **Touch-Optimized Targets**: All interactive buttons, size selector pills, and mobile menu links adhere to minimum 44×44px touch targets.
 - **iOS Safari Auto-Zoom Prevention**: Enforces a minimum 16px font-size rule on all `<input>`, `<select>`, and `<textarea>` elements on screens `< 640px` to eliminate involuntary mobile viewport zooming.
-- **Native Drawer Sheet**: Shopping bag drawer opens edge-to-edge on mobile with enlarged 28×28px quantity increment/decrement touch targets.
 
-### 8.2 Tactile Micro-Animations
+### 9.2 Tactile Micro-Animations
 - **Smooth Scrolling**: Global `scroll-behavior: smooth` and optimized font antialiasing across all pages.
-- **Tactile Button Press**: Interactive `active:scale-[0.98]` and `active:scale-95` press responses giving an organic tactile feel.
-- **Card Hover & Press**: Subtle lift `hover:-translate-y-1 hover:shadow-md` and tactile scale feedback.
+- **Tactile Button Press**: Interactive `active:scale-[0.98]` and `active:scale-90` press responses.
 - **Cart Badge Bounce**: CSS keyframe bounce (`animate-cart-bounce`) micro-animation whenever items are added or present in the bag.
-- **Floating Back-to-Top**: Discreet, luxury floating button that appears after 350px of vertical scroll, smoothly gliding the user back to the top.
-
-### 8.3 Admin Dashboard Mobile Architecture
-- **Horizontal Quick-Scroll Navigation Strip**: On mobile devices (`md:hidden`), a high-speed horizontal navigation bar sits directly under the top header, allowing the boutique owner to jump between all 7 management sections (`Dashboard`, `Products`, `Collections`, `Homepage`, `Navigation`, `Reviews`, `Settings`) in a single tap without opening a menu.
-- **Slide-Out Admin Navigation Drawer**: Full mobile drawer with section icons, route status indicators, and quick live storefront shortcuts.
-- **Sticky Mobile Bottom Action Bars**: Both **Product Creation/Editing** (`/admin/products/new` and `/admin/products/[id]`) and **Store & WhatsApp Settings** (`/admin/settings`) feature a fixed bottom action bar on mobile viewports. The boutique owner can edit long forms and save instantly with a single tap without scrolling back up to the top. Automatic `pb-24` padding guarantees bottom inputs are never hidden.
-- **2×2 Metrics Grid**: Compact 2-column mobile cards for garments count, units in stock, zero-stock alerts, and WhatsApp hotline.
-- **Mobile Product Card List**: Replaces cumbersome horizontal table scrolling with touch-optimized mobile product cards featuring thumbnails, SKU, prices, size breakdown, and full-width Edit & Delete actions.
-- **Mobile-Responsive Size & Stock Matrix**: Size variant stock inputs arrange in a clean 2-column grid (`grid-cols-2`) on phone viewports with comfortable 36px touch quantity inputs and quick size addition.
-- **Homepage Section Reordering Toolbar**: Dedicated mobile action bar for section Move Up, Move Down, Visibility, and Text Editing with tactile `active:scale-90` tap feedback.
-- **Customer Reviews CMS on Mobile**: Touch-first 5-star rating picker with 36px touch targets, responsive review cards with touch action toolbars, and full-width form buttons.
-- **Navigation CMS on Mobile**: 2-column top-level menu item cards and mobile-friendly dropdown link management with touch controls.
-- **Responsive Padding & Overflow Protection**: Fluid padding (`p-3.5 sm:p-6 md:p-8 lg:p-10`) prevents horizontal pinch and optimizes screen real estate on all mobile devices.
+- **Floating Back-to-Top**: Discreet floating button that appears after 350px of vertical scroll, smoothly gliding the user back to the top.
 
 ---
 
-## 9. Data Persistence Architecture
+## 10. Data Persistence & Cache Architecture
 
 ### How Changes Persist (Offline & Local Development)
 1. Whenever an admin form is submitted, it invokes a **Next.js Server Action** (`app/actions/store.ts`).
 2. The Server Action writes the updated data directly to disk at [`data/store.json`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/data/store.json).
-3. Next.js triggers `revalidatePath('/', 'layout')`, instantly invalidating the cached HTML and serving the fresh data.
-4. **All changes persist permanently** across page refreshes and server restarts.
+3. The server action executes `purgeStorefrontCache()`, calling `revalidatePath` on all relevant route layouts and pages.
+4. **All changes persist permanently** across page refreshes, browser sessions, and server restarts.
 
 ### Supabase Cloud Synchronization
-When you are ready to connect a live Supabase project:
-1. Create a project at [supabase.com](https://supabase.com).
-2. Run the SQL script from `fairy-finds/supabase/schema.sql` in the Supabase SQL Editor.
-3. In `fairy-finds`, create `.env.local` using `.env.example`:
+When connecting a live Supabase project:
+1. Run the SQL script from `fairy-finds/supabase/schema.sql` in the Supabase SQL Editor.
+2. In `fairy-finds`, create `.env.local` with:
    ```env
    NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   ADMIN_PASSWORD=your-secure-admin-password
    ```
-4. The server store will automatically query and synchronize with your live cloud database.
+3. The server store will automatically query and synchronize with your live cloud database while using local storage as a graceful fallback.
 
 ---
 
-## 9. How to Run, Test, and Build
+## 11. How to Run, Test, and Build
 
 ### Development Server
 ```bash
-cd fairy-finds
 npm run dev
 ```
 The application will be accessible at **http://localhost:3000**.
 
 ### Production Build
 ```bash
-cd fairy-finds
 npm run build
 npm run start
 ```
-Compiles with 0 TypeScript/ESLint warnings into an optimized production bundle.
+Compiles all 21 routes with 0 TypeScript/ESLint errors into an optimized production bundle.

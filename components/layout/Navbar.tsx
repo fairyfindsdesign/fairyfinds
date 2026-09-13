@@ -75,16 +75,29 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
     return pathname?.startsWith(href);
   };
 
+  const isHomepage = pathname === '/';
+  const isHeroTransparent = isHomepage && !isScrolled;
+
   return (
     <>
-      <header className="sticky top-0 z-[60] bg-white border-b border-neutral-200 shadow-xs">
+      <header
+        className={`sticky top-0 z-[60] transition-all duration-300 ${
+          isHeroTransparent
+            ? 'bg-transparent border-b border-transparent shadow-none'
+            : 'bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-xs'
+        }`}
+      >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Mobile menu trigger */}
           <div className="flex items-center lg:hidden">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="p-2 -ml-1 text-neutral-800 hover:text-[#FF55D2] active:scale-95 transition-all cursor-pointer rounded-xs"
+              className={`p-2 -ml-1 active:scale-95 transition-all cursor-pointer rounded-xs ${
+                isHeroTransparent
+                  ? 'text-white hover:text-[#FF55D2]'
+                  : 'text-neutral-800 hover:text-[#FF55D2]'
+              }`}
               aria-label="Open navigation menu"
             >
               <Menu className="w-6 h-6" />
@@ -96,7 +109,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
             <Link href="/" className="inline-flex items-center gap-2 sm:gap-2.5 group">
               <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <Image
-                  src="/logo.png"
+                  src={isHeroTransparent ? '/logo-white.png' : '/logo.png'}
                   alt="Fairy Finds"
                   fill
                   sizes="32px"
@@ -105,10 +118,20 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                 />
               </div>
               <div className="flex flex-col text-left">
-                <span className="font-serif text-lg sm:text-xl tracking-[0.18em] font-semibold text-[#1A1A1A] group-hover:text-[#FF55D2] transition-colors uppercase leading-none">
+                <span
+                  className={`font-serif text-lg sm:text-xl tracking-[0.18em] font-semibold transition-colors uppercase leading-none ${
+                    isHeroTransparent
+                      ? 'text-white group-hover:text-[#FF55D2]'
+                      : 'text-[#1A1A1A] group-hover:text-[#FF55D2]'
+                  }`}
+                >
                   Fairy Finds
                 </span>
-                <span className="text-[7.5px] sm:text-[8px] tracking-[0.3em] text-neutral-400 uppercase font-sans mt-0.5">
+                <span
+                  className={`text-[7.5px] sm:text-[8px] tracking-[0.3em] uppercase font-sans mt-0.5 transition-colors ${
+                    isHeroTransparent ? 'text-white/80' : 'text-neutral-400'
+                  }`}
+                >
                   Boutique Atelier
                 </span>
               </div>
@@ -130,13 +153,21 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                     <button
                       type="button"
                       onClick={() => setDropdownOpen(!dropdownOpen)}
-                      className="text-xs uppercase tracking-widest py-1 text-neutral-700 hover:text-[#FF55D2] transition-colors flex items-center gap-1.5 font-medium cursor-pointer"
+                      className={`text-xs uppercase tracking-widest py-1 transition-colors flex items-center gap-1.5 font-medium cursor-pointer ${
+                        isHeroTransparent
+                          ? 'text-white/90 hover:text-[#FF55D2]'
+                          : 'text-neutral-700 hover:text-[#FF55D2]'
+                      }`}
                       aria-expanded={dropdownOpen}
                     >
                       <span>{item.label}</span>
                       <ChevronDown
                         className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                          dropdownOpen ? 'rotate-180 text-[#FF55D2]' : 'text-neutral-400'
+                          dropdownOpen
+                            ? 'rotate-180 text-[#FF55D2]'
+                            : isHeroTransparent
+                            ? 'text-white/70'
+                            : 'text-neutral-400'
                         }`}
                       />
                     </button>
@@ -182,7 +213,11 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                   href={item.href || '/'}
                   className={`text-xs uppercase tracking-widest transition-colors relative py-1 ${
                     active
-                      ? 'text-[#1A1A1A] font-semibold'
+                      ? isHeroTransparent
+                        ? 'text-white font-semibold'
+                        : 'text-[#1A1A1A] font-semibold'
+                      : isHeroTransparent
+                      ? 'text-white/90 hover:text-[#FF55D2]'
                       : 'text-neutral-600 hover:text-[#FF55D2]'
                   }`}
                 >
@@ -197,18 +232,34 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
             {/* Inline Cart Icon alongside navbar links */}
             <Link
               href="/cart"
-              className="relative p-1.5 text-neutral-800 hover:text-[#FF55D2] active:scale-90 transition-all cursor-pointer rounded-xs flex items-center gap-1.5 ml-2 pl-3 border-l border-neutral-200 group"
+              className={`relative p-1.5 active:scale-90 transition-all cursor-pointer rounded-xs flex items-center gap-1.5 ml-2 pl-3 group ${
+                isHeroTransparent
+                  ? 'text-white hover:text-[#FF55D2] border-l border-white/25'
+                  : 'text-neutral-800 hover:text-[#FF55D2] border-l border-neutral-200'
+              }`}
               aria-label={`Shopping Bag with ${totalCount} items`}
             >
               <div className="relative">
-                <ShoppingBag className="w-4 h-4 text-neutral-800 group-hover:text-[#FF55D2] transition-colors" />
+                <ShoppingBag
+                  className={`w-4 h-4 transition-colors ${
+                    isHeroTransparent
+                      ? 'text-white group-hover:text-[#FF55D2]'
+                      : 'text-neutral-800 group-hover:text-[#FF55D2]'
+                  }`}
+                />
                 {totalCount > 0 && (
                   <span className="absolute -top-1.5 -right-2 bg-[#FF55D2] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs animate-cart-bounce">
                     {totalCount}
                   </span>
                 )}
               </div>
-              <span className="text-xs uppercase tracking-wider font-semibold text-neutral-700 group-hover:text-[#FF55D2] transition-colors">
+              <span
+                className={`text-xs uppercase tracking-wider font-semibold transition-colors ${
+                  isHeroTransparent
+                    ? 'text-white group-hover:text-[#FF55D2]'
+                    : 'text-neutral-700 group-hover:text-[#FF55D2]'
+                }`}
+              >
                 Bag {totalCount > 0 ? `(${totalCount})` : ''}
               </span>
             </Link>
@@ -218,7 +269,11 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
           <div className="flex items-center lg:hidden">
             <Link
               href="/cart"
-              className="relative p-2 text-neutral-900 hover:text-[#FF55D2] active:scale-90 transition-all cursor-pointer rounded-xs"
+              className={`relative p-2 active:scale-90 transition-all cursor-pointer rounded-xs ${
+                isHeroTransparent
+                  ? 'text-white hover:text-[#FF55D2]'
+                  : 'text-neutral-900 hover:text-[#FF55D2]'
+              }`}
               aria-label={`Shopping Bag with ${totalCount} items`}
             >
               <ShoppingBag className="w-5 h-5" />

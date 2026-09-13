@@ -87,7 +87,7 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
 
   return (
     <section
-      className="relative w-full min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#1A1A1A] select-none"
+      className="relative w-full min-h-[85vh] lg:min-h-[90vh] -mt-16 sm:-mt-20 flex items-center justify-center overflow-hidden bg-[#1A1A1A] select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -122,10 +122,10 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
 
             {/* Dark Editorial Vignette Overlays (Soft top, contrast-rich bottom for text) */}
             <div className="absolute inset-0 bg-black/20" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 via-35% to-black/15" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 via-35% to-black/30" />
 
             {/* Slide Content Container - Positioned at Bottom */}
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[85vh] lg:min-h-[90vh] flex items-end justify-center z-20 text-center pb-20 sm:pb-24 lg:pb-28">
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[85vh] lg:min-h-[90vh] flex items-end justify-center z-20 text-center pt-24 sm:pt-28 pb-20 sm:pb-24 lg:pb-28">
               <div className="max-w-2xl flex flex-col items-center text-center space-y-3.5 sm:space-y-4">
                 {/* Eyebrow Badge */}
                 {slide.badge && (

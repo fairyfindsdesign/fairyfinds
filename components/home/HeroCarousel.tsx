@@ -114,35 +114,35 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                 fill
                 priority={idx === 0}
                 sizes="100vw"
-                className={`object-cover object-center filter brightness-[0.82] transition-transform duration-[8000ms] ease-out ${
+                className={`object-cover object-center filter brightness-[0.93] transition-transform duration-[8000ms] ease-out ${
                   isActive ? 'scale-105' : 'scale-100'
                 }`}
               />
             </div>
 
-            {/* Dark Editorial Vignette Overlays */}
-            <div className="absolute inset-0 bg-black/45" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/45" />
+            {/* Dark Editorial Vignette Overlays (Soft top, contrast-rich bottom for text) */}
+            <div className="absolute inset-0 bg-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 via-35% to-black/15" />
 
-            {/* Slide Content Container - Centered */}
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center z-20 text-center">
-              <div className="max-w-2xl py-24 flex flex-col items-center text-center space-y-4 sm:space-y-5">
+            {/* Slide Content Container - Positioned at Bottom */}
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[85vh] lg:min-h-[90vh] flex items-end justify-center z-20 text-center pb-20 sm:pb-24 lg:pb-28">
+              <div className="max-w-2xl flex flex-col items-center text-center space-y-3.5 sm:space-y-4">
                 {/* Eyebrow Badge */}
                 {slide.badge && (
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-black/40 backdrop-blur-md border border-white/20 text-[11px] uppercase tracking-widest font-semibold text-[#FF55D2] rounded-xs animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-black/50 backdrop-blur-md border border-white/25 text-[11px] uppercase tracking-widest font-semibold text-[#FF55D2] rounded-xs animate-in fade-in slide-in-from-bottom-2 duration-500 shadow-md">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>{slide.badge}</span>
                   </div>
                 )}
 
                 {/* Main Headline - Centered, 32px */}
-                <h1 className="font-serif text-[26px] sm:text-[32px] text-white font-normal leading-snug tracking-tight max-w-xl mx-auto gsap-hero-title animate-in fade-in duration-700">
+                <h1 className="font-serif text-[26px] sm:text-[32px] text-white font-normal leading-snug tracking-tight max-w-xl mx-auto gsap-hero-title animate-in fade-in duration-700 drop-shadow-md">
                   {slide.heading}
                 </h1>
 
                 {/* Narrative Description under Headline */}
                 {slide.description && (
-                  <p className="text-neutral-200 text-xs sm:text-sm md:text-[15px] leading-relaxed font-light max-w-lg mx-auto gsap-hero-subtitle animate-in fade-in duration-800">
+                  <p className="text-neutral-200 text-xs sm:text-sm md:text-[15px] leading-relaxed font-light max-w-lg mx-auto gsap-hero-subtitle animate-in fade-in duration-800 drop-shadow-sm">
                     {slide.description}
                   </p>
                 )}
@@ -152,7 +152,7 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                   {slide.button_text && (
                     <Link
                       href={slide.button_link || '/shop'}
-                      className="w-full sm:w-auto px-8 py-3.5 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-widest font-semibold transition-all shadow-lg flex items-center justify-center gap-2 rounded-xs active:scale-95"
+                      className="w-full sm:w-auto px-8 py-3.5 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-widest font-semibold transition-all shadow-xl flex items-center justify-center gap-2 rounded-xs active:scale-95"
                     >
                       <span>{slide.button_text}</span>
                       <ArrowRight className="w-4 h-4" />
@@ -162,7 +162,7 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                   {slide.secondary_button_text && (
                     <Link
                       href={slide.secondary_button_link || '/custom'}
-                      className="w-full sm:w-auto px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/30 hover:border-white text-xs uppercase tracking-widest font-semibold transition-all backdrop-blur-xs text-center rounded-xs active:scale-95"
+                      className="w-full sm:w-auto px-8 py-3.5 bg-black/40 hover:bg-black/60 text-white border border-white/30 hover:border-white text-xs uppercase tracking-widest font-semibold transition-all backdrop-blur-md text-center rounded-xs active:scale-95 shadow-md"
                     >
                       <span>{slide.secondary_button_text}</span>
                     </Link>

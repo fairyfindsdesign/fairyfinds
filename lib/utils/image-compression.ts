@@ -42,6 +42,58 @@ export function formatBytes(bytes: number, decimals = 1): string {
 }
 
 /**
+ * Inspects file MIME type and magic bytes to detect if a file is already a
+ * browser-readable format (JPEG, PNG, WebP, GIF).
+ * This prevents unnecessary/failing conversion when iOS or desktop browsers
+ * automatically convert a HEIC photo to JPEG during file input selection while
+ * keeping the original .heic filename.
+ */
+export async function getBrowserReadableType(file: File): Promise<string | null> {
+  const type = (file.type || '').toLowerCase();
+  if (
+    type === 'image/jpeg' ||
+    type === 'image/jpg' ||
+    type === 'image/png' ||
+    type === 'image/webp' ||
+    type === 'image/gif'
+  ) {
+    return type === 'image/jpg' ? 'image/jpeg' : type;
+  }
+
+  try {
+    const slice = file.slice(0, 16);
+    const buffer = await slice.arrayBuffer();
+    const arr = new Uint8Array(buffer);
+    if (arr.length >= 3) {
+      // JPEG: FF D8 FF
+      if (arr[0] === 0xff && arr[1] === 0xd8 && arr[2] === 0xff) {
+        return 'image/jpeg';
+      }
+      // PNG: 89 50 4E 47
+      if (arr.length >= 4 && arr[0] === 0x89 && arr[1] === 0x50 && arr[2] === 0x4e && arr[3] === 0x47) {
+        return 'image/png';
+      }
+      // GIF: 47 49 46 38 ("GIF8")
+      if (arr.length >= 4 && arr[0] === 0x47 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x38) {
+        return 'image/gif';
+      }
+      // WebP: RIFF .... WEBP
+      if (
+        arr.length >= 12 &&
+        arr[0] === 0x52 && arr[1] === 0x49 && arr[2] === 0x46 && arr[3] === 0x46 &&
+        arr[8] === 0x57 && arr[9] === 0x45 && arr[10] === 0x42 && arr[11] === 0x50
+      ) {
+        return 'image/webp';
+      }
+    }
+  } catch {
+    // If arrayBuffer reading fails, fall through gracefully
+  }
+
+  return null;
+}
+
+/**
  * Detects whether a file is an Apple HEIC or HEIF format.
  * Checks both MIME types and file extensions (case-insensitive) because desktop browsers
  * (e.g. Windows Chrome, Edge) often report an empty string for file.type on .heic files.
@@ -58,28 +110,60 @@ export function isHeicFile(file: File): boolean {
 /**
  * Converts an Apple HEIC/HEIF file into a standard web-compatible JPEG File
  * using client-side WebAssembly / libheif in the browser.
+ * 
+ * Includes automatic detection and fallback for photos that are already browser readable
+ * (e.g. when iOS photo picker auto-transcodes to JPEG on file select).
  */
 export async function convertHeicToJpeg(file: File, quality = 0.92): Promise<File> {
   if (typeof window === 'undefined') {
     throw new Error('HEIC conversion can only be performed in browser environment.');
   }
 
-  const { default: heic2any } = await import('heic2any');
-  const result = await heic2any({
-    blob: file,
-    toType: 'image/jpeg',
-    quality,
-  });
+  // 1. Fast-path: check if file is already a browser-readable format (JPEG, PNG, WebP)
+  const existingType = await getBrowserReadableType(file);
+  if (existingType) {
+    const baseName = file.name.replace(/\.hei[cf]$/i, '') || 'photo';
+    const ext = existingType === 'image/png' ? 'png' : existingType === 'image/webp' ? 'webp' : 'jpg';
+    return new File([file], `${baseName}.${ext}`, {
+      type: existingType,
+      lastModified: file.lastModified || Date.now(),
+    });
+  }
 
-  const blob = Array.isArray(result) ? result[0] : result;
-  const baseName = file.name.replace(/\.hei[cf]$/i, '') || 'photo';
-  const newFilename = `${baseName}.jpg`;
+  // 2. Decode HEIC using WebAssembly / heic2any with graceful catch for ERR_USER
+  try {
+    const { default: heic2any } = await import('heic2any');
+    const result = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality,
+    });
 
-  return new File([blob], newFilename, {
-    type: 'image/jpeg',
-    lastModified: Date.now(),
-  });
+    const blob = Array.isArray(result) ? result[0] : result;
+    const baseName = file.name.replace(/\.hei[cf]$/i, '') || 'photo';
+    const newFilename = `${baseName}.jpg`;
+
+    return new File([blob], newFilename, {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    });
+  } catch (err: any) {
+    const msg = String(err?.message || err || '');
+    // If heic2any reports the image is already browser readable, normalize and return it cleanly
+    if (msg.includes('already browser readable') || msg.includes('ERR_USER')) {
+      const match = msg.match(/image\/[a-z0-9+-]+/i);
+      const fallbackType = match ? match[0] : 'image/jpeg';
+      const baseName = file.name.replace(/\.hei[cf]$/i, '') || 'photo';
+      const ext = fallbackType === 'image/png' ? 'png' : fallbackType === 'image/webp' ? 'webp' : 'jpg';
+      return new File([file], `${baseName}.${ext}`, {
+        type: fallbackType,
+        lastModified: file.lastModified || Date.now(),
+      });
+    }
+    throw err;
+  }
 }
+
 
 /**
  * Compresses an image file in the browser using HTML5 Canvas with full HEIC/HEIF support.

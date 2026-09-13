@@ -121,13 +121,13 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                 />
               </div>
 
-              {/* Dark Editorial Vignette Overlays (Soft top, contrast-rich bottom for text) */}
-              <div className="absolute inset-0 bg-black/20" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 via-35% to-black/30" />
+              {/* Dark Editorial Vignette Overlays */}
+              <div className="absolute inset-0 bg-black/35" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/60" />
 
-              {/* Slide Content Container - Positioned at Bottom */}
-              <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full h-full min-h-[600px] sm:min-h-[720px] lg:min-h-[1080px] flex items-end justify-center z-20 text-center pt-24 sm:pt-28 pb-20 sm:pb-24 lg:pb-28">
-              <div className="max-w-2xl flex flex-col items-center text-center space-y-3.5 sm:space-y-4">
+              {/* Slide Content Container - Centered Vertically & Horizontally */}
+              <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full h-full min-h-[600px] sm:min-h-[720px] lg:min-h-[1080px] flex items-center justify-center z-20 text-center py-20 sm:py-24">
+                <div className="max-w-2xl flex flex-col items-center text-center space-y-3.5 sm:space-y-4">
                 {/* Eyebrow Badge */}
                 {slide.badge && (
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-black/50 backdrop-blur-md border border-white/25 text-[11px] uppercase tracking-widest font-semibold text-[#FF55D2] rounded-xs animate-in fade-in slide-in-from-bottom-2 duration-500 shadow-md">

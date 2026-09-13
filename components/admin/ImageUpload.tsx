@@ -17,7 +17,7 @@ import {
   X,
   AlertCircle,
 } from 'lucide-react';
-import { compressImage, formatBytes, CompressionResult } from '@/lib/utils/image-compression';
+import { compressImage, formatBytes, isHeicFile, CompressionResult } from '@/lib/utils/image-compression';
 
 interface SingleImageUploadProps {
   multiple?: false;
@@ -57,7 +57,7 @@ export default function ImageUpload(props: ImageUploadProps) {
     values = [],
     onMultiChange,
     label = 'Upload Photo',
-    helperText = 'Select or drag photos from your device. Images over 1MB are automatically compressed to 80% size (WebP) before uploading.',
+    helperText = 'Select or drag photos from your device. Supports Apple HEIC, JPEG, PNG, and WebP. Images over 1MB are automatically compressed to 80% size (WebP).',
     aspectRatio = 'aspect-[3/4]',
     isAvatar = false,
     maxWidth = 1600,
@@ -74,9 +74,10 @@ export default function ImageUpload(props: ImageUploadProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleFiles = async (fileList: FileList | File[]) => {
-    const files = Array.from(fileList).filter((f) => f.type.startsWith('image/'));
+    const isSupportedImage = (f: File) => f.type.startsWith('image/') || isHeicFile(f);
+    const files = Array.from(fileList).filter(isSupportedImage);
     if (files.length === 0) {
-      setErrorMessage('Please select a valid image file (JPEG, PNG, WebP, etc.).');
+      setErrorMessage('Please select a valid image file (JPEG, PNG, WebP, Apple HEIC/HEIF).');
       return;
     }
 
@@ -89,17 +90,27 @@ export default function ImageUpload(props: ImageUploadProps) {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const isOver1MB = file.size > 1024 * 1024;
-        setProcessingStatus(
-          isOver1MB
-            ? files.length > 1
-              ? `Compressing image ${i + 1} of ${files.length} (${formatBytes(file.size)} > 1MB)...`
-              : `Compressing image (${formatBytes(file.size)} > 1MB)...`
-            : files.length > 1
-              ? `Uploading image ${i + 1} of ${files.length} (${formatBytes(file.size)} <= 1MB)...`
-              : `Uploading image (${formatBytes(file.size)} <= 1MB)...`
-        );
+        const isHeic = isHeicFile(file);
 
-        // 1. Client-side compression (only for files > 1MB, compressed at 80% quality to max 80% size)
+        if (isHeic) {
+          setProcessingStatus(
+            files.length > 1
+              ? `Converting Apple HEIC photo ${i + 1} of ${files.length} (${formatBytes(file.size)})...`
+              : `Converting Apple HEIC photo (${formatBytes(file.size)})...`
+          );
+        } else {
+          setProcessingStatus(
+            isOver1MB
+              ? files.length > 1
+                ? `Compressing image ${i + 1} of ${files.length} (${formatBytes(file.size)} > 1MB)...`
+                : `Compressing image (${formatBytes(file.size)} > 1MB)...`
+              : files.length > 1
+                ? `Uploading image ${i + 1} of ${files.length} (${formatBytes(file.size)} <= 1MB)...`
+                : `Uploading image (${formatBytes(file.size)} <= 1MB)...`
+          );
+        }
+
+        // 1. Client-side compression / HEIC conversion (images > 1MB compressed at 80% quality to max 80% size)
         const compression = await compressImage(file, {
           maxWidth,
           maxHeight,
@@ -112,7 +123,11 @@ export default function ImageUpload(props: ImageUploadProps) {
         setCompressionStats(compression);
         if (compression.wasCompressed) {
           setProcessingStatus(
-            `Uploading compressed image (${formatBytes(compression.compressedSize)} - ${compression.savingsPercent}% saved)...`
+            `Uploading compressed ${compression.wasHeic ? 'HEIC➔WebP' : 'image'} (${formatBytes(compression.compressedSize)} - ${compression.savingsPercent}% saved)...`
+          );
+        } else if (compression.wasHeic) {
+          setProcessingStatus(
+            `Uploading converted Apple HEIC photo (${formatBytes(compression.compressedSize)})...`
           );
         } else {
           setProcessingStatus(
@@ -276,7 +291,7 @@ export default function ImageUpload(props: ImageUploadProps) {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif,image/heic,image/heif"
         multiple={multiple}
         className="hidden"
         onChange={(e) => {
@@ -322,6 +337,11 @@ export default function ImageUpload(props: ImageUploadProps) {
                   {formatBytes(compressionStats.originalSize)} ➔ {formatBytes(compressionStats.compressedSize)}{' '}
                   <strong className="text-emerald-700">({compressionStats.savingsPercent}% smaller)</strong> •{' '}
                   {compressionStats.width}×{compressionStats.height} WebP (80% quality)
+                  {compressionStats.wasHeic ? ' [Converted from Apple HEIC]' : ''}
+                </span>
+              ) : compressionStats.wasHeic ? (
+                <span>
+                  {formatBytes(compressionStats.originalSize)} ➔ Converted Apple HEIC to standard JPEG ({formatBytes(compressionStats.compressedSize)}) • Under 1MB
                 </span>
               ) : (
                 <span>
@@ -360,7 +380,7 @@ export default function ImageUpload(props: ImageUploadProps) {
                 </span>
                 {compressionStats && (
                   <span className="text-[10px] font-mono text-neutral-500">
-                    {formatBytes(compressionStats.compressedSize)} ({compressionStats.wasCompressed ? 'WebP 80%' : 'Original'})
+                    {formatBytes(compressionStats.compressedSize)} ({compressionStats.wasCompressed ? (compressionStats.wasHeic ? 'HEIC➔WebP 80%' : 'WebP 80%') : compressionStats.wasHeic ? 'HEIC➔JPEG' : 'Original'})
                   </span>
                 )}
               </div>
@@ -507,13 +527,13 @@ export default function ImageUpload(props: ImageUploadProps) {
                 Click to browse from device or drag photos here
               </p>
               <p className="text-[11px] text-neutral-500 font-light mt-0.5">
-                Camera roll, high-res photos, or screenshots (JPEG, PNG, WebP)
+                Camera roll, iPhone HEIC, high-res photos, or screenshots (Apple HEIC, JPEG, PNG, WebP)
               </p>
             </div>
 
-            <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-neutral-200 rounded-xs text-[10px] uppercase font-mono text-neutral-500 shadow-2xs">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-neutral-200 rounded-xs text-[10px] uppercase font-mono text-neutral-500 shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 text-[#FF55D2]" />
-              <span>Smart WebP compression (images &gt; 1MB compressed to 80% size)</span>
+              <span>Apple HEIC + Smart WebP (images &gt; 1MB compressed to 80% size)</span>
             </div>
           </div>
         </div>

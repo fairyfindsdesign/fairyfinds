@@ -2,7 +2,7 @@
  * Client-Side Image Compression Utility
  * 
  * Automatically scales down high-resolution device photos (often 5MB - 20MB from cameras)
- * to web-optimized dimensions, converts to modern WebP (or high-efficiency JPEG),
+ * to web-optimized dimensions, converts Apple HEIC/HEIF and other formats to modern WebP,
  * and compresses file sizes by up to 90-97% before network transmission.
  */
 
@@ -26,6 +26,7 @@ export interface CompressionResult {
   height: number;
   format: string;
   wasCompressed: boolean;
+  wasHeic?: boolean;
 }
 
 /**
@@ -41,10 +42,52 @@ export function formatBytes(bytes: number, decimals = 1): string {
 }
 
 /**
- * Compresses an image file in the browser using HTML5 Canvas.
+ * Detects whether a file is an Apple HEIC or HEIF format.
+ * Checks both MIME types and file extensions (case-insensitive) because desktop browsers
+ * (e.g. Windows Chrome, Edge) often report an empty string for file.type on .heic files.
+ */
+export function isHeicFile(file: File): boolean {
+  if (!file) return false;
+  const name = file.name || '';
+  const type = (file.type || '').toLowerCase();
+  const isMime = type.includes('heic') || type.includes('heif');
+  const isExt = /\.hei[cf]$/i.test(name);
+  return isMime || isExt;
+}
+
+/**
+ * Converts an Apple HEIC/HEIF file into a standard web-compatible JPEG File
+ * using client-side WebAssembly / libheif in the browser.
+ */
+export async function convertHeicToJpeg(file: File, quality = 0.92): Promise<File> {
+  if (typeof window === 'undefined') {
+    throw new Error('HEIC conversion can only be performed in browser environment.');
+  }
+
+  const { default: heic2any } = await import('heic2any');
+  const result = await heic2any({
+    blob: file,
+    toType: 'image/jpeg',
+    quality,
+  });
+
+  const blob = Array.isArray(result) ? result[0] : result;
+  const baseName = file.name.replace(/\.hei[cf]$/i, '') || 'photo';
+  const newFilename = `${baseName}.jpg`;
+
+  return new File([blob], newFilename, {
+    type: 'image/jpeg',
+    lastModified: Date.now(),
+  });
+}
+
+/**
+ * Compresses an image file in the browser using HTML5 Canvas with full HEIC/HEIF support.
  * 
  * Criteria:
- * 1. Only compresses if the file size is > 1MB (1,048,576 bytes). Files <= 1MB are left untouched.
+ * 1. Only compresses if the file size is > 1MB (1,048,576 bytes). Files <= 1MB are kept uncompressed.
+ *    - For standard web images (JPEG, PNG, WebP) <= 1MB, the original file is preserved untouched.
+ *    - For Apple HEIC files <= 1MB, it is safely converted to clean JPEG so web browsers can render it.
  * 2. Compresses image at 80% quality and ensures the final file size is at most 80% of the original size.
  */
 export async function compressImage(
@@ -60,173 +103,211 @@ export async function compressImage(
     targetMaxRatio = 0.80, // Max 80% of original size
   } = options;
 
-  return new Promise((resolve, reject) => {
-    // If not an image, reject
-    if (!file.type.startsWith('image/')) {
-      return reject(new Error('Selected file is not an image.'));
-    }
+  const isHeic = isHeicFile(file);
 
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('Failed to read image file.'));
-    reader.onload = () => {
+  // Validate format
+  if (!file.type.startsWith('image/') && !isHeic) {
+    throw new Error('Selected file is not a supported image format.');
+  }
+
+  const originalSize = file.size;
+
+  // If it's a HEIC file, convert it to a standard JPEG working file first
+  let workingFile: File = file;
+  if (isHeic) {
+    workingFile = await convertHeicToJpeg(file, 0.92);
+  }
+
+  // CRITERIA 1: If original image size is 1MB or less, DO NOT COMPRESS.
+  if (originalSize <= minSizeToCompress) {
+    const finalFile = workingFile;
+    const previewUrl = URL.createObjectURL(finalFile);
+
+    return new Promise((resolve) => {
       const img = new Image();
-      img.onerror = () => reject(new Error('Failed to load image in browser.'));
       img.onload = () => {
-        const { width: originalWidth, height: originalHeight } = img;
-
-        // CRITERIA 1: If image size is 1MB or less, DO NOT COMPRESS.
-        // Keep original file intact and return as-is.
-        if (file.size <= minSizeToCompress) {
-          const previewUrl = URL.createObjectURL(file);
-          return resolve({
-            file,
-            blob: file,
-            previewUrl,
-            originalSize: file.size,
-            compressedSize: file.size,
-            savingsPercent: 0,
-            width: originalWidth,
-            height: originalHeight,
-            format: file.type || 'image/jpeg',
-            wasCompressed: false,
-          });
-        }
-
-        // CRITERIA 2: Image is > 1MB -> Compress with 70% quality to max 70% of size
-        let width = originalWidth;
-        let height = originalHeight;
-
-        // Calculate scaling preserving aspect ratio
-        if (width > maxWidth || height > maxHeight) {
-          const widthRatio = maxWidth / width;
-          const heightRatio = maxHeight / height;
-          const scale = Math.min(widthRatio, heightRatio);
-
-          width = Math.round(width * scale);
-          height = Math.round(height * scale);
-        }
-
-        // Draw onto HTML5 canvas
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          return reject(new Error('Failed to get 2D canvas context.'));
-        }
-
-        // Apply smooth interpolation
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-
-        // Draw image
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Check WebP support fallback
-        let targetFormat = outputFormat;
-        const testCanvas = document.createElement('canvas');
-        testCanvas.width = 1;
-        testCanvas.height = 1;
-        if (!testCanvas.toDataURL('image/webp').startsWith('data:image/webp')) {
-          targetFormat = 'image/jpeg';
-        }
-
-        const maxAllowedSize = Math.floor(file.size * targetMaxRatio);
-
-        const getBlob = (q: number): Promise<Blob | null> => {
-          return new Promise((res) => {
-            canvas.toBlob((b) => res(b), targetFormat, q);
-          });
-        };
-
-        (async () => {
-          try {
-            let currentQuality = quality; // 0.80 (80% quality)
-            let blob = await getBlob(currentQuality);
-
-            if (!blob) {
-              return reject(new Error('Canvas compression returned empty blob.'));
-            }
-
-            // If the blob exceeds 80% of original size, adjust quality / dimensions
-            if (blob.size > maxAllowedSize) {
-              const qualitySteps = [0.70, 0.60, 0.50];
-              for (const qStep of qualitySteps) {
-                if (blob.size <= maxAllowedSize) break;
-                const nextBlob = await getBlob(qStep);
-                if (nextBlob && nextBlob.size < blob.size) {
-                  blob = nextBlob;
-                  currentQuality = qStep;
-                }
-              }
-
-              // If still over 80% of original size, downscale dimensions
-              if (blob.size > maxAllowedSize && width > 400) {
-                let scaleDown = 0.85;
-                while (blob.size > maxAllowedSize && scaleDown >= 0.5) {
-                  const downCanvas = document.createElement('canvas');
-                  downCanvas.width = Math.round(width * scaleDown);
-                  downCanvas.height = Math.round(height * scaleDown);
-                  const downCtx = downCanvas.getContext('2d');
-                  if (downCtx) {
-                    downCtx.imageSmoothingEnabled = true;
-                    downCtx.imageSmoothingQuality = 'high';
-                    downCtx.drawImage(canvas, 0, 0, downCanvas.width, downCanvas.height);
-                    const scaledBlob: Blob | null = await new Promise((res) => {
-                      downCanvas.toBlob((b) => res(b), targetFormat, currentQuality);
-                    });
-                    if (scaledBlob && scaledBlob.size < blob.size) {
-                      blob = scaledBlob;
-                      width = downCanvas.width;
-                      height = downCanvas.height;
-                    }
-                  }
-                  scaleDown -= 0.15;
-                }
-              }
-            }
-
-            // Derive new filename with appropriate extension
-            const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-            const ext = targetFormat === 'image/webp' ? 'webp' : 'jpg';
-            const compressedFilename = `${baseName}.${ext}`;
-
-            const compressedFile = new File([blob], compressedFilename, {
-              type: targetFormat,
-              lastModified: Date.now(),
-            });
-
-            const originalSize = file.size;
-            const compressedSize = blob.size;
-            const savingsPercent = Math.max(
-              0,
-              Math.round(((originalSize - compressedSize) / originalSize) * 100)
-            );
-
-            const previewUrl = URL.createObjectURL(blob);
-
-            resolve({
-              file: compressedFile,
-              blob,
-              previewUrl,
-              originalSize,
-              compressedSize,
-              savingsPercent,
-              width,
-              height,
-              format: targetFormat,
-              wasCompressed: true,
-            });
-          } catch (err) {
-            reject(err);
-          }
-        })();
+        resolve({
+          file: finalFile,
+          blob: finalFile,
+          previewUrl,
+          originalSize,
+          compressedSize: finalFile.size,
+          savingsPercent: isHeic && finalFile.size < originalSize
+            ? Math.round(((originalSize - finalFile.size) / originalSize) * 100)
+            : 0,
+          width: img.naturalWidth || img.width,
+          height: img.naturalHeight || img.height,
+          format: finalFile.type || 'image/jpeg',
+          wasCompressed: false,
+          wasHeic: isHeic,
+        });
       };
+      img.onerror = () => {
+        resolve({
+          file: finalFile,
+          blob: finalFile,
+          previewUrl,
+          originalSize,
+          compressedSize: finalFile.size,
+          savingsPercent: 0,
+          width: 0,
+          height: 0,
+          format: finalFile.type || 'image/jpeg',
+          wasCompressed: false,
+          wasHeic: isHeic,
+        });
+      };
+      img.src = previewUrl;
+    });
+  }
 
-      img.src = reader.result as string;
+  // CRITERIA 2: Original image is > 1MB -> Compress with 80% quality to max 80% of size
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(workingFile);
+    const img = new Image();
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Failed to load image in browser for compression.'));
     };
 
-    reader.readAsDataURL(file);
+    img.onload = () => {
+      const originalWidth = img.naturalWidth || img.width;
+      const originalHeight = img.naturalHeight || img.height;
+      URL.revokeObjectURL(objectUrl);
+
+      let width = originalWidth;
+      let height = originalHeight;
+
+      // Calculate scaling preserving aspect ratio
+      if (width > maxWidth || height > maxHeight) {
+        const widthRatio = maxWidth / width;
+        const heightRatio = maxHeight / height;
+        const scale = Math.min(widthRatio, heightRatio);
+
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+
+      // Draw onto HTML5 canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return reject(new Error('Failed to get 2D canvas context.'));
+      }
+
+      // Apply smooth interpolation
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      // Draw image
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Check WebP support fallback
+      let targetFormat = outputFormat;
+      const testCanvas = document.createElement('canvas');
+      testCanvas.width = 1;
+      testCanvas.height = 1;
+      if (!testCanvas.toDataURL('image/webp').startsWith('data:image/webp')) {
+        targetFormat = 'image/jpeg';
+      }
+
+      const maxAllowedSize = Math.floor(originalSize * targetMaxRatio);
+
+      const getBlob = (q: number): Promise<Blob | null> => {
+        return new Promise((res) => {
+          canvas.toBlob((b) => res(b), targetFormat, q);
+        });
+      };
+
+      (async () => {
+        try {
+          let currentQuality = quality; // 0.80 (80% quality)
+          let blob = await getBlob(currentQuality);
+
+          if (!blob) {
+            return reject(new Error('Canvas compression returned empty blob.'));
+          }
+
+          // If the blob exceeds 80% of original size, adjust quality / dimensions
+          if (blob.size > maxAllowedSize) {
+            const qualitySteps = [0.70, 0.60, 0.50];
+            for (const qStep of qualitySteps) {
+              if (blob.size <= maxAllowedSize) break;
+              const nextBlob = await getBlob(qStep);
+              if (nextBlob && nextBlob.size < blob.size) {
+                blob = nextBlob;
+                currentQuality = qStep;
+              }
+            }
+
+            // If still over 80% of original size, downscale dimensions
+            if (blob.size > maxAllowedSize && width > 400) {
+              let scaleDown = 0.85;
+              while (blob.size > maxAllowedSize && scaleDown >= 0.5) {
+                const downCanvas = document.createElement('canvas');
+                downCanvas.width = Math.round(width * scaleDown);
+                downCanvas.height = Math.round(height * scaleDown);
+                const downCtx = downCanvas.getContext('2d');
+                if (downCtx) {
+                  downCtx.imageSmoothingEnabled = true;
+                  downCtx.imageSmoothingQuality = 'high';
+                  downCtx.drawImage(canvas, 0, 0, downCanvas.width, downCanvas.height);
+                  const scaledBlob: Blob | null = await new Promise((res) => {
+                    downCanvas.toBlob((b) => res(b), targetFormat, currentQuality);
+                  });
+                  if (scaledBlob && scaledBlob.size < blob.size) {
+                    blob = scaledBlob;
+                    width = downCanvas.width;
+                    height = downCanvas.height;
+                  }
+                }
+                scaleDown -= 0.15;
+              }
+            }
+          }
+
+          // Derive new filename with appropriate extension
+          const baseName = file.name.replace(/\.[^/.]+$/, '') || 'photo';
+          const ext = targetFormat === 'image/webp' ? 'webp' : 'jpg';
+          const compressedFilename = `${baseName}.${ext}`;
+
+          const compressedFile = new File([blob], compressedFilename, {
+            type: targetFormat,
+            lastModified: Date.now(),
+          });
+
+          const compressedSize = blob.size;
+          const savingsPercent = Math.max(
+            0,
+            Math.round(((originalSize - compressedSize) / originalSize) * 100)
+          );
+
+          const previewUrl = URL.createObjectURL(blob);
+
+          resolve({
+            file: compressedFile,
+            blob,
+            previewUrl,
+            originalSize,
+            compressedSize,
+            savingsPercent,
+            width,
+            height,
+            format: targetFormat,
+            wasCompressed: true,
+            wasHeic: isHeic,
+          });
+        } catch (err) {
+          reject(err);
+        }
+      })();
+    };
+
+    img.src = objectUrl;
   });
 }
+

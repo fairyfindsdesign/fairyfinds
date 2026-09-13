@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { logoutAdmin } from '@/app/actions/auth';
 import {
   Package,
   Layers,
@@ -26,11 +27,23 @@ interface AdminNavClientProps {
 export default function AdminNavClient({ children }: AdminNavClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   // Close mobile drawer on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
+
+  // If on admin login page, bypass the admin navigation layout
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
+  const handleSignOut = async () => {
+    await logoutAdmin();
+    router.push('/admin/login');
+    router.refresh();
+  };
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: Store },
@@ -94,13 +107,15 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
             <span className="hidden xs:inline sm:inline">Live Store</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </Link>
-          <Link
-            href="/"
-            className="w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-red-400 transition-colors rounded-xs active:scale-90"
-            title="Exit Admin"
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-red-400 transition-colors rounded-xs active:scale-90 cursor-pointer"
+            title="Sign Out of Admin"
+            aria-label="Sign Out of Admin"
           >
             <LogOut className="w-4 h-4" />
-          </Link>
+          </button>
         </div>
       </header>
 
@@ -195,6 +210,14 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
                 <span>View Live Store</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </Link>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="w-full py-2.5 px-3 bg-red-50 hover:bg-red-100 text-red-600 text-xs uppercase tracking-wider font-semibold rounded-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out of Admin</span>
+              </button>
             </div>
           </div>
         </div>

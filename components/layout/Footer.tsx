@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { MessageCircle, Heart } from 'lucide-react';
+import { MessageCircle, Heart, Lock } from 'lucide-react';
 import { InstagramIcon } from '@/components/ui/Icons';
 
 import { StoreSettings, Collection } from '@/lib/types';
@@ -148,8 +148,12 @@ export default function Footer({ settings, collections }: FooterProps) {
                 </Link>
               </li>
               <li>
-                <Link href="/admin" className="hover:text-[#FF55D2] transition-colors">
-                  Store Management
+                <Link
+                  href="/admin/login"
+                  className="hover:text-[#FF55D2] transition-colors flex items-center gap-1.5"
+                >
+                  <Lock className="w-3.5 h-3.5 text-neutral-400" />
+                  <span>Admin Login</span>
                 </Link>
               </li>
             </ul>
@@ -177,9 +181,19 @@ export default function Footer({ settings, collections }: FooterProps) {
           </div>
         </div>
 
-        {/* Bottom copyright */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500">
-          <p>© {new Date().getFullYear()} Fairy Finds Boutique. All rights reserved.</p>
+        {/* Bottom copyright & Admin Access */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <p>© {new Date().getFullYear()} Fairy Finds Boutique. All rights reserved.</p>
+            <span className="hidden sm:inline text-neutral-700">|</span>
+            <Link
+              href="/admin/login"
+              className="text-neutral-500 hover:text-neutral-300 transition-colors inline-flex items-center gap-1 text-[11px]"
+            >
+              <Lock className="w-3 h-3" />
+              <span>Admin Login</span>
+            </Link>
+          </div>
           <p className="mt-2 sm:mt-0 flex items-center gap-1">
             Crafted with <Heart className="w-3 h-3 text-[#FF55D2] fill-[#FF55D2]" /> for fashion connoisseurs
           </p>

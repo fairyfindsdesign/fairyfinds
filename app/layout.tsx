@@ -38,17 +38,26 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/logo-dark.png', type: 'image/png' },
+      {
+        url: '/favicon-light.png',
+        media: '(prefers-color-scheme: light)',
+        type: 'image/png',
+      },
+      {
+        url: '/favicon-dark.png',
+        media: '(prefers-color-scheme: dark)',
+        type: 'image/png',
+      },
     ],
     apple: [
-      { url: '/logo-dark.png' },
+      { url: '/logo.png' },
     ],
   },
 };
 
 import BackToTop from '@/components/ui/BackToTop';
 import ScrollReset from '@/components/ui/ScrollReset';
+import DynamicFavicon from '@/components/ui/DynamicFavicon';
 import GSAPProvider from '@/components/animation/GSAPProvider';
 import { getNavigation, getSettings, getCollections } from '@/lib/data/store';
 
@@ -69,6 +78,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${manrope.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#FFFFFF] text-[#1A1A1A] font-sans selection:bg-[#FF55D2] selection:text-white">
+        <DynamicFavicon />
         <CartProvider>
           <ScrollReset />
           <AnnouncementBar message={settings.announcement_bar} />

@@ -86,46 +86,47 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
   };
 
   return (
-    <section
-      className="relative w-full min-h-[85vh] lg:min-h-[90vh] -mt-16 sm:-mt-20 flex items-center justify-center overflow-hidden bg-[#1A1A1A] select-none"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      aria-label="Homepage Featured Carousel"
-    >
-      {/* Background Slides */}
-      {slides.map((slide, idx) => {
-        const isActive = idx === activeIndex;
+    <div className="w-full bg-[#1A1A1A] overflow-hidden -mt-16 sm:-mt-20">
+      <section
+        className="relative w-full max-w-[1920px] mx-auto min-h-[600px] sm:min-h-[720px] lg:h-[1080px] lg:min-h-[1080px] flex items-center justify-center overflow-hidden bg-[#1A1A1A] select-none"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        aria-label="Homepage Featured Carousel"
+      >
+        {/* Background Slides */}
+        {slides.map((slide, idx) => {
+          const isActive = idx === activeIndex;
 
-        return (
-          <div
-            key={slide.id || idx}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
-            }`}
-            aria-hidden={!isActive}
-          >
-            {/* Background Image */}
-            <div className="absolute inset-0 overflow-hidden">
-              <Image
-                src={slide.image_url}
-                alt={slide.heading}
-                fill
-                priority={idx === 0}
-                sizes="100vw"
-                className={`object-cover object-center filter brightness-[0.93] transition-transform duration-[8000ms] ease-out ${
-                  isActive ? 'scale-105' : 'scale-100'
-                }`}
-              />
-            </div>
+          return (
+            <div
+              key={slide.id || idx}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
+              }`}
+              aria-hidden={!isActive}
+            >
+              {/* Background Image */}
+              <div className="absolute inset-0 overflow-hidden">
+                <Image
+                  src={slide.image_url}
+                  alt={slide.heading}
+                  fill
+                  priority={idx === 0}
+                  sizes="(max-width: 1920px) 100vw, 1920px"
+                  className={`object-cover object-center filter brightness-[0.93] transition-transform duration-[8000ms] ease-out ${
+                    isActive ? 'scale-105' : 'scale-100'
+                  }`}
+                />
+              </div>
 
-            {/* Dark Editorial Vignette Overlays (Soft top, contrast-rich bottom for text) */}
-            <div className="absolute inset-0 bg-black/20" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 via-35% to-black/30" />
+              {/* Dark Editorial Vignette Overlays (Soft top, contrast-rich bottom for text) */}
+              <div className="absolute inset-0 bg-black/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 via-35% to-black/30" />
 
-            {/* Slide Content Container - Positioned at Bottom */}
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[85vh] lg:min-h-[90vh] flex items-end justify-center z-20 text-center pt-24 sm:pt-28 pb-20 sm:pb-24 lg:pb-28">
+              {/* Slide Content Container - Positioned at Bottom */}
+              <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full h-full min-h-[600px] sm:min-h-[720px] lg:min-h-[1080px] flex items-end justify-center z-20 text-center pt-24 sm:pt-28 pb-20 sm:pb-24 lg:pb-28">
               <div className="max-w-2xl flex flex-col items-center text-center space-y-3.5 sm:space-y-4">
                 {/* Eyebrow Badge */}
                 {slide.badge && (
@@ -234,5 +235,6 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
         </div>
       )}
     </section>
+    </div>
   );
 }

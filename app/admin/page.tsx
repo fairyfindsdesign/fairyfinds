@@ -1,17 +1,18 @@
 import React from 'react';
 import Link from 'next/link';
-import { getProducts, getCollections, getSettings, getHomepageSections } from '@/lib/data/store';
-import { Package, Layers, LayoutTemplate, Phone, AlertCircle, ArrowRight, Plus } from 'lucide-react';
+import { getProducts, getCollections, getSettings, getHomepageSections, getCategories } from '@/lib/data/store';
+import { Package, Layers, LayoutTemplate, Phone, AlertCircle, ArrowRight, Plus, Tag } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AdminDashboardPage() {
-  const [products, collections, settings, sections] = await Promise.all([
+  const [products, collections, settings, sections, categories] = await Promise.all([
     getProducts(),
     getCollections(),
     getSettings(),
     getHomepageSections(),
+    getCategories(),
   ]);
 
   // Inventory stats
@@ -105,34 +106,56 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Quick Access Tiles */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Link
           href="/admin/products"
-          className="p-6 bg-white border border-neutral-200 hover:border-[#FF55D2] transition-colors group shadow-xs"
+          className="p-6 bg-white border border-neutral-200 hover:border-[#FF55D2] transition-colors group shadow-xs flex flex-col justify-between"
         >
-          <Package className="w-6 h-6 text-[#1A1A1A] group-hover:text-[#FF55D2] transition-colors mb-3" />
-          <h3 className="font-serif text-lg font-medium text-[#1A1A1A] mb-1">
-            Manage Catalog & Stock
-          </h3>
-          <p className="text-xs text-neutral-500 font-light mb-4">
-            Update pricing, descriptions, images, and standard size quantities (S, M, L, XL).
-          </p>
+          <div>
+            <Package className="w-6 h-6 text-[#1A1A1A] group-hover:text-[#FF55D2] transition-colors mb-3" />
+            <h3 className="font-serif text-lg font-medium text-[#1A1A1A] mb-1">
+              Manage Catalog & Stock
+            </h3>
+            <p className="text-xs text-neutral-500 font-light mb-4">
+              Update pricing, descriptions, images, and standard size quantities (S, M, L, XL).
+            </p>
+          </div>
           <span className="text-xs font-semibold text-[#FF55D2] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-            View Products <ArrowRight className="w-3.5 h-3.5" />
+            View Products ({products.length}) <ArrowRight className="w-3.5 h-3.5" />
+          </span>
+        </Link>
+
+        <Link
+          href="/admin/categories"
+          className="p-6 bg-white border border-neutral-200 hover:border-[#FF55D2] transition-colors group shadow-xs flex flex-col justify-between"
+        >
+          <div>
+            <Tag className="w-6 h-6 text-[#1A1A1A] group-hover:text-[#FF55D2] transition-colors mb-3" />
+            <h3 className="font-serif text-lg font-medium text-[#1A1A1A] mb-1">
+              Garment Categories
+            </h3>
+            <p className="text-xs text-neutral-500 font-light mb-4">
+              Organize styles, add new product categories, and manage shop filter tabs.
+            </p>
+          </div>
+          <span className="text-xs font-semibold text-[#FF55D2] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+            Manage Categories ({categories.length}) <ArrowRight className="w-3.5 h-3.5" />
           </span>
         </Link>
 
         <Link
           href="/admin/homepage"
-          className="p-6 bg-white border border-neutral-200 hover:border-[#FF55D2] transition-colors group shadow-xs"
+          className="p-6 bg-white border border-neutral-200 hover:border-[#FF55D2] transition-colors group shadow-xs flex flex-col justify-between"
         >
-          <LayoutTemplate className="w-6 h-6 text-[#1A1A1A] group-hover:text-[#FF55D2] transition-colors mb-3" />
-          <h3 className="font-serif text-lg font-medium text-[#1A1A1A] mb-1">
-            Homepage CMS Sections
-          </h3>
-          <p className="text-xs text-neutral-500 font-light mb-4">
-            Reorder homepage sections with Move Up / Move Down buttons, edit text, and toggle visibility.
-          </p>
+          <div>
+            <LayoutTemplate className="w-6 h-6 text-[#1A1A1A] group-hover:text-[#FF55D2] transition-colors mb-3" />
+            <h3 className="font-serif text-lg font-medium text-[#1A1A1A] mb-1">
+              Homepage CMS Sections
+            </h3>
+            <p className="text-xs text-neutral-500 font-light mb-4">
+              Reorder homepage sections with Move Up / Move Down buttons, edit text, and toggle visibility.
+            </p>
+          </div>
           <span className="text-xs font-semibold text-[#FF55D2] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
             Customize Homepage <ArrowRight className="w-3.5 h-3.5" />
           </span>
@@ -140,15 +163,17 @@ export default async function AdminDashboardPage() {
 
         <Link
           href="/admin/settings"
-          className="p-6 bg-white border border-neutral-200 hover:border-[#FF55D2] transition-colors group shadow-xs"
+          className="p-6 bg-white border border-neutral-200 hover:border-[#FF55D2] transition-colors group shadow-xs flex flex-col justify-between"
         >
-          <Phone className="w-6 h-6 text-[#1A1A1A] group-hover:text-[#FF55D2] transition-colors mb-3" />
-          <h3 className="font-serif text-lg font-medium text-[#1A1A1A] mb-1">
-            Store & WhatsApp Settings
-          </h3>
-          <p className="text-xs text-neutral-500 font-light mb-4">
-            Configure boutique WhatsApp order hotline, store address, Instagram profile, and announcements.
-          </p>
+          <div>
+            <Phone className="w-6 h-6 text-[#1A1A1A] group-hover:text-[#FF55D2] transition-colors mb-3" />
+            <h3 className="font-serif text-lg font-medium text-[#1A1A1A] mb-1">
+              Store & WhatsApp Settings
+            </h3>
+            <p className="text-xs text-neutral-500 font-light mb-4">
+              Configure boutique WhatsApp order hotline, store address, Instagram profile, and announcements.
+            </p>
+          </div>
           <span className="text-xs font-semibold text-[#FF55D2] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
             Edit Settings <ArrowRight className="w-3.5 h-3.5" />
           </span>

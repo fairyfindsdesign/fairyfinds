@@ -5,6 +5,8 @@ import {
   updateServerSettings,
   saveServerProduct,
   deleteServerProduct,
+  saveServerCategory,
+  deleteServerCategory,
   saveServerCollection,
   deleteServerCollection,
   reorderServerSections,
@@ -13,7 +15,7 @@ import {
   updateServerNavigation,
   updateServerReviews,
 } from '@/lib/data/server-store';
-import { Collection, CustomerReview, HomepageSection, NavItem, Product, StoreSettings } from '@/lib/types';
+import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, StoreSettings } from '@/lib/types';
 
 /**
  * Purges both layout and individual route caches to ensure
@@ -34,6 +36,7 @@ function purgeStorefrontCache() {
     revalidatePath('/admin', 'layout');
     revalidatePath('/admin/homepage', 'page');
     revalidatePath('/admin/products', 'page');
+    revalidatePath('/admin/categories', 'page');
     revalidatePath('/admin/collections', 'page');
     revalidatePath('/admin/settings', 'page');
     revalidatePath('/admin/navigation', 'page');
@@ -96,6 +99,39 @@ export async function deleteProductAction(id: string) {
   } catch (err: any) {
     console.error('deleteProductAction error:', err);
     return { success: false, error: err?.message || 'Database error deleting product' };
+  }
+}
+
+export async function saveCategoryAction(category: Partial<Category>) {
+  try {
+    const result = await saveServerCategory(category);
+    purgeStorefrontCache();
+    revalidatePath('/admin/categories', 'page');
+    revalidatePath('/admin/products', 'page');
+    revalidatePath('/admin/products/new', 'page');
+    revalidatePath('/admin', 'layout');
+    revalidatePath('/shop', 'page');
+    revalidatePath('/', 'page');
+    return { success: true, category: result };
+  } catch (err: any) {
+    console.error('saveCategoryAction error:', err);
+    return { success: false, error: err?.message || 'Database error saving category' };
+  }
+}
+
+export async function deleteCategoryAction(id: string) {
+  try {
+    const result = await deleteServerCategory(id);
+    purgeStorefrontCache();
+    revalidatePath('/admin/categories', 'page');
+    revalidatePath('/admin/products', 'page');
+    revalidatePath('/admin', 'layout');
+    revalidatePath('/shop', 'page');
+    revalidatePath('/', 'page');
+    return { success: true };
+  } catch (err: any) {
+    console.error('deleteCategoryAction error:', err);
+    return { success: false, error: err?.message || 'Database error deleting category' };
   }
 }
 

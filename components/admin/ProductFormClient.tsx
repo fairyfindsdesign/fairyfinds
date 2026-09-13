@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Product, Category, Collection, ProductVariant } from '@/lib/types';
-import { saveProductAction } from '@/app/actions/store';
-import { ArrowLeft, Save, Plus, Trash2, CheckCircle2, Sparkles, AlertCircle } from 'lucide-react';
+import { saveProductAction, saveCategoryAction } from '@/app/actions/store';
+import { ArrowLeft, Save, Plus, Trash2, CheckCircle2, Sparkles, AlertCircle, Tag, X } from 'lucide-react';
 import ImageUpload from './ImageUpload';
 
 interface ProductFormClientProps {
@@ -26,10 +26,24 @@ export default function ProductFormClient({
   const router = useRouter();
   const isEditing = !!initialProduct;
 
+  const [categoriesList, setCategoriesList] = useState<Category[]>(categories);
   const [name, setName] = useState(initialProduct?.name || '');
   const [categoryId, setCategoryId] = useState(
     initialProduct?.category_id || categories[0]?.id || ''
   );
+
+  useEffect(() => {
+    setCategoriesList(categories);
+  }, [categories]);
+
+  // Quick Add Category Modal State
+  const [isQuickAddCatOpen, setIsQuickAddCatOpen] = useState(false);
+  const [quickCatName, setQuickCatName] = useState('');
+  const [quickCatSlug, setQuickCatSlug] = useState('');
+  const [quickCatDesc, setQuickCatDesc] = useState('');
+  const [isSavingQuickCat, setIsSavingQuickCat] = useState(false);
+  const [quickCatError, setQuickCatError] = useState('');
+
   // Track if admin manually edited the product code
   const [isCustomCodeEdited, setIsCustomCodeEdited] = useState(
     () => isEditing && !!initialProduct?.product_code
@@ -52,7 +66,7 @@ export default function ProductFormClient({
       const autoCode = generateUniqueProductCode({
         productName: newName,
         categoryId,
-        categories,
+        categories: categoriesList,
         existingProducts,
         currentProductId: initialProduct?.id,
       });
@@ -66,7 +80,7 @@ export default function ProductFormClient({
       const autoCode = generateUniqueProductCode({
         productName: name,
         categoryId: newCatId,
-        categories,
+        categories: categoriesList,
         existingProducts,
         currentProductId: initialProduct?.id,
       });
@@ -79,11 +93,65 @@ export default function ProductFormClient({
     const newCode = generateUniqueProductCode({
       productName: name,
       categoryId,
-      categories,
+      categories: categoriesList,
       existingProducts,
       currentProductId: initialProduct?.id,
     });
     setProductCode(newCode);
+  };
+
+  const handleQuickAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickCatName.trim()) return;
+
+    setIsSavingQuickCat(true);
+    setQuickCatError('');
+
+    const cleanSlug =
+      quickCatSlug.trim() ||
+      quickCatName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+    try {
+      const res = await saveCategoryAction({
+        name: quickCatName.trim(),
+        slug: cleanSlug,
+        description: quickCatDesc.trim(),
+        display_order: categoriesList.length + 1,
+      });
+
+      if (res.success && res.category) {
+        const newCat = res.category;
+        const updatedCats = [...categoriesList, newCat];
+        setCategoriesList(updatedCats);
+        setCategoryId(newCat.id);
+
+        // Update product code with newly created category
+        if (!isCustomCodeEdited) {
+          const autoCode = generateUniqueProductCode({
+            productName: name,
+            categoryId: newCat.id,
+            categories: updatedCats,
+            existingProducts,
+            currentProductId: initialProduct?.id,
+          });
+          setProductCode(autoCode);
+        }
+
+        setIsQuickAddCatOpen(false);
+        setQuickCatName('');
+        setQuickCatSlug('');
+        setQuickCatDesc('');
+      } else {
+        setQuickCatError(res.error || 'Failed to create category');
+      }
+    } catch (err: any) {
+      setQuickCatError(err?.message || 'Error creating category');
+    } finally {
+      setIsSavingQuickCat(false);
+    }
   };
   const [price, setPrice] = useState(initialProduct?.price || 15000);
   const [collectionId, setCollectionId] = useState(initialProduct?.collection_id || '');
@@ -337,15 +405,25 @@ export default function ProductFormClient({
 
           {/* Category */}
           <div>
-            <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800 mb-1.5">
-              Category
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800">
+                Category *
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsQuickAddCatOpen(true)}
+                className="text-[11px] text-[#FF55D2] hover:text-[#FD00B9] font-semibold inline-flex items-center gap-1 transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                <span>New Category</span>
+              </button>
+            </div>
             <select
               value={categoryId}
               onChange={(e) => handleCategoryChange(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
             >
-              {categories.map((cat) => (
+              {categoriesList.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
@@ -524,6 +602,103 @@ export default function ProductFormClient({
           )}
         </button>
       </div>
+
+      {/* Quick Add Category Modal */}
+      {isQuickAddCatOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white border border-neutral-200 w-full max-w-md rounded-xs shadow-2xl p-6 space-y-4 animate-fade-in-up">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-200">
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-[#FF55D2]" />
+                <h3 className="font-serif text-lg font-medium text-neutral-900">
+                  Quick Add Category
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsQuickAddCatOpen(false)}
+                className="text-neutral-400 hover:text-neutral-800 p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {quickCatError && (
+              <div className="p-2.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xs">
+                {quickCatError}
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800 mb-1">
+                  Category Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Abayas & Kaftans"
+                  value={quickCatName}
+                  onChange={(e) => {
+                    setQuickCatName(e.target.value);
+                    setQuickCatSlug(
+                      e.target.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/(^-|-$)/g, '')
+                    );
+                  }}
+                  className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800 mb-1">
+                  URL Slug
+                </label>
+                <input
+                  type="text"
+                  value={quickCatSlug}
+                  onChange={(e) => setQuickCatSlug(e.target.value)}
+                  className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 text-xs font-mono text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800 mb-1">
+                  Description (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Brief description of this style..."
+                  value={quickCatDesc}
+                  onChange={(e) => setQuickCatDesc(e.target.value)}
+                  className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-neutral-200">
+              <button
+                type="button"
+                onClick={() => setIsQuickAddCatOpen(false)}
+                disabled={isSavingQuickCat}
+                className="px-3.5 py-1.5 border border-neutral-300 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 rounded-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleQuickAddCategory}
+                disabled={isSavingQuickCat || !quickCatName.trim()}
+                className="px-4 py-1.5 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-wider font-semibold rounded-xs shadow-xs disabled:opacity-50"
+              >
+                {isSavingQuickCat ? 'Saving...' : 'Add & Select'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

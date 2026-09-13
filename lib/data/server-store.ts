@@ -448,6 +448,85 @@ export async function getServerCategories(): Promise<Category[]> {
   return getLocalData().categories;
 }
 
+export async function saveServerCategory(category: Partial<Category>): Promise<Category> {
+  const isNew = !category.id;
+  const id = category.id || crypto.randomUUID();
+  const cleanSlug = category.slug?.trim() || (category.name ? category.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : id);
+
+  const newCat: Category = {
+    id,
+    name: category.name || 'New Category',
+    slug: cleanSlug,
+    description: category.description || '',
+    image_url: category.image_url || '',
+    display_order: category.display_order ?? 1,
+    created_at: category.created_at || new Date().toISOString(),
+  };
+
+  const data = getLocalData();
+  if (isNew) {
+    data.categories.push(newCat);
+  } else {
+    data.categories = data.categories.map((c) => (c.id === id ? newCat : c));
+    data.products = data.products.map((p) => {
+      if (p.category_id === id) {
+        return { ...p, category_name: newCat.name };
+      }
+      return p;
+    });
+  }
+  saveLocalData(data);
+
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('categories').upsert({
+        id: newCat.id,
+        name: newCat.name,
+        slug: newCat.slug,
+        description: newCat.description,
+        image_url: newCat.image_url,
+        display_order: newCat.display_order,
+      });
+      if (error) {
+        console.error('Supabase category upsert error:', error);
+        throw new Error(`Database error saving category: ${error.message || error.details}`);
+      }
+    } catch (err: any) {
+      console.error('Error saving category to Supabase:', err);
+      throw err;
+    }
+  }
+
+  return newCat;
+}
+
+export async function deleteServerCategory(id: string): Promise<boolean> {
+  const data = getLocalData();
+  data.categories = data.categories.filter((c) => c.id !== id);
+  data.products = data.products.map((p) => {
+    if (p.category_id === id) {
+      return { ...p, category_id: undefined, category_name: undefined };
+    }
+    return p;
+  });
+  saveLocalData(data);
+
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('categories').delete().eq('id', id);
+      if (error) {
+        console.error('Supabase category delete error:', error);
+      }
+    } catch (err) {
+      console.error('Error deleting category from Supabase:', err);
+    }
+  }
+
+  return true;
+}
+
 // --- Collections ---
 export async function getServerCollections(): Promise<Collection[]> {
   const supabase = getAdminSupabase();

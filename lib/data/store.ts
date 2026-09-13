@@ -6,6 +6,8 @@ import {
   saveServerProduct,
   deleteServerProduct,
   getServerCategories,
+  saveServerCategory,
+  deleteServerCategory,
   getServerCollections,
   getServerCollectionBySlug,
   saveServerCollection,
@@ -54,6 +56,14 @@ export async function deleteProduct(id: string) {
 
 export async function getCategories() {
   return getServerCategories();
+}
+
+export async function saveCategory(category: any) {
+  return saveServerCategory(category);
+}
+
+export async function deleteCategory(id: string) {
+  return deleteServerCategory(id);
 }
 
 export async function getCollections() {

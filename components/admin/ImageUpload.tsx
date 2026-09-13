@@ -57,7 +57,7 @@ export default function ImageUpload(props: ImageUploadProps) {
     values = [],
     onMultiChange,
     label = 'Upload Photo',
-    helperText = 'Select or drag photos from your device. Images over 1MB are automatically compressed to 70% size (WebP) before uploading.',
+    helperText = 'Select or drag photos from your device. Images over 1MB are automatically compressed to 30% size (WebP) before uploading.',
     aspectRatio = 'aspect-[3/4]',
     isAvatar = false,
     maxWidth = 1600,
@@ -99,13 +99,13 @@ export default function ImageUpload(props: ImageUploadProps) {
               : `Uploading image (${formatBytes(file.size)} <= 1MB)...`
         );
 
-        // 1. Client-side compression (only for files > 1MB, compressed at 70% quality to max 70% size)
+        // 1. Client-side compression (only for files > 1MB, compressed at 30% quality to max 30% size)
         const compression = await compressImage(file, {
           maxWidth,
           maxHeight,
-          quality: 0.70,
+          quality: 0.30,
           minSizeToCompress: 1024 * 1024,
-          targetMaxRatio: 0.70,
+          targetMaxRatio: 0.30,
           outputFormat: 'image/webp',
         });
 
@@ -321,7 +321,7 @@ export default function ImageUpload(props: ImageUploadProps) {
                 <span>
                   {formatBytes(compressionStats.originalSize)} ➔ {formatBytes(compressionStats.compressedSize)}{' '}
                   <strong className="text-emerald-700">({compressionStats.savingsPercent}% smaller)</strong> •{' '}
-                  {compressionStats.width}×{compressionStats.height} WebP (70% quality)
+                  {compressionStats.width}×{compressionStats.height} WebP (30% quality)
                 </span>
               ) : (
                 <span>
@@ -360,7 +360,7 @@ export default function ImageUpload(props: ImageUploadProps) {
                 </span>
                 {compressionStats && (
                   <span className="text-[10px] font-mono text-neutral-500">
-                    {formatBytes(compressionStats.compressedSize)} ({compressionStats.wasCompressed ? 'WebP 70%' : 'Original'})
+                    {formatBytes(compressionStats.compressedSize)} ({compressionStats.wasCompressed ? 'WebP 30%' : 'Original'})
                   </span>
                 )}
               </div>
@@ -513,7 +513,7 @@ export default function ImageUpload(props: ImageUploadProps) {
 
             <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-neutral-200 rounded-xs text-[10px] uppercase font-mono text-neutral-500 shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 text-[#FF55D2]" />
-              <span>Smart WebP compression (images &gt; 1MB compressed to 70% size)</span>
+              <span>Smart WebP compression (images &gt; 1MB compressed to 30% size)</span>
             </div>
           </div>
         </div>

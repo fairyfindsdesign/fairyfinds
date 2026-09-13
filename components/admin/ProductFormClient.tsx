@@ -348,7 +348,7 @@ export default function ProductFormClient({
           values={images}
           onMultiChange={setImages}
           label="Piece Photography & Lookbook Gallery"
-          helperText="Upload photos directly from your phone camera or device. Images over 1MB are automatically compressed to 70% size (WebP) before uploading. The first photo acts as the primary catalog cover."
+          helperText="Upload photos directly from your phone camera or device. Images over 1MB are automatically compressed to 30% size (WebP) before uploading. The first photo acts as the primary catalog cover."
           aspectRatio="aspect-[3/4]"
           maxWidth={1600}
           maxHeight={2000}

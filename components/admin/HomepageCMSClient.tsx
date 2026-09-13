@@ -402,7 +402,7 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                               </span>
                             </div>
                             <p className="text-[11px] text-neutral-500 font-light mt-0.5">
-                              Select multiple photos from your device. Each image is automatically compressed to WebP and appended as a new carousel slide.
+                              Select multiple photos from your device. Images over 1MB are automatically compressed to 70% size (WebP) and appended as new slides.
                             </p>
                           </div>
                         </div>
@@ -648,7 +648,7 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                               value={currentHeroSlide.image_url || ''}
                               onChange={(url) => updateCurrentSlide({ image_url: url })}
                               label="Slide Background Editorial Image"
-                              helperText="Upload an editorial photo directly from your device. Automatically compressed to WebP and scaled to widescreen 16:9."
+                              helperText="Upload an editorial photo directly from your device. Images over 1MB are automatically compressed to 70% size (WebP)."
                               aspectRatio="aspect-[16/9]"
                               maxWidth={1920}
                               maxHeight={1080}
@@ -800,7 +800,7 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                             value={editFields.image_url || ''}
                             onChange={(url) => setEditFields({ ...editFields, image_url: url })}
                             label="Section Feature Imagery"
-                            helperText="Upload feature photograph from your device. Scaled and compressed to WebP automatically."
+                            helperText="Upload feature photograph from your device. Images over 1MB are compressed to 70% size (WebP)."
                             aspectRatio="aspect-[16/9]"
                             maxWidth={1600}
                             maxHeight={1000}

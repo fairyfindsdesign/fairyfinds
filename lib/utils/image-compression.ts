@@ -9,8 +9,10 @@
 export interface CompressionOptions {
   maxWidth?: number;
   maxHeight?: number;
-  quality?: number; // 0.1 to 1.0 (default: 0.82)
+  quality?: number; // 0.1 to 1.0 (default: 0.70 for 70% quality)
   outputFormat?: 'image/webp' | 'image/jpeg' | 'image/png';
+  minSizeToCompress?: number; // Minimum file size in bytes to trigger compression (default: 1MB = 1048576)
+  targetMaxRatio?: number; // Max size ratio vs original (default: 0.70 for 70% of original size)
 }
 
 export interface CompressionResult {
@@ -23,6 +25,7 @@ export interface CompressionResult {
   width: number;
   height: number;
   format: string;
+  wasCompressed: boolean;
 }
 
 /**
@@ -39,6 +42,10 @@ export function formatBytes(bytes: number, decimals = 1): string {
 
 /**
  * Compresses an image file in the browser using HTML5 Canvas.
+ * 
+ * Criteria:
+ * 1. Only compresses if the file size is > 1MB (1,048,576 bytes). Files <= 1MB are left untouched.
+ * 2. Compresses image at 70% quality and ensures the final file size is at most 70% of the original size.
  */
 export async function compressImage(
   file: File,
@@ -47,8 +54,10 @@ export async function compressImage(
   const {
     maxWidth = 1600,
     maxHeight = 1600,
-    quality = 0.82,
+    quality = 0.70, // 70% quality
     outputFormat = 'image/webp',
+    minSizeToCompress = 1024 * 1024, // 1MB threshold (1,048,576 bytes)
+    targetMaxRatio = 0.70, // Max 70% of original size
   } = options;
 
   return new Promise((resolve, reject) => {
@@ -63,7 +72,29 @@ export async function compressImage(
       const img = new Image();
       img.onerror = () => reject(new Error('Failed to load image in browser.'));
       img.onload = () => {
-        let { width, height } = img;
+        const { width: originalWidth, height: originalHeight } = img;
+
+        // CRITERIA 1: If image size is 1MB or less, DO NOT COMPRESS.
+        // Keep original file intact and return as-is.
+        if (file.size <= minSizeToCompress) {
+          const previewUrl = URL.createObjectURL(file);
+          return resolve({
+            file,
+            blob: file,
+            previewUrl,
+            originalSize: file.size,
+            compressedSize: file.size,
+            savingsPercent: 0,
+            width: originalWidth,
+            height: originalHeight,
+            format: file.type || 'image/jpeg',
+            wasCompressed: false,
+          });
+        }
+
+        // CRITERIA 2: Image is > 1MB -> Compress with 70% quality to max 70% of size
+        let width = originalWidth;
+        let height = originalHeight;
 
         // Calculate scaling preserving aspect ratio
         if (width > maxWidth || height > maxHeight) {
@@ -101,10 +132,59 @@ export async function compressImage(
           targetFormat = 'image/jpeg';
         }
 
-        canvas.toBlob(
-          (blob) => {
+        const maxAllowedSize = Math.floor(file.size * targetMaxRatio);
+
+        const getBlob = (q: number): Promise<Blob | null> => {
+          return new Promise((res) => {
+            canvas.toBlob((b) => res(b), targetFormat, q);
+          });
+        };
+
+        (async () => {
+          try {
+            let currentQuality = quality; // 0.70
+            let blob = await getBlob(currentQuality);
+
             if (!blob) {
               return reject(new Error('Canvas compression returned empty blob.'));
+            }
+
+            // If the blob exceeds 70% of original size, adjust quality / dimensions
+            if (blob.size > maxAllowedSize) {
+              const qualitySteps = [0.60, 0.50, 0.40];
+              for (const qStep of qualitySteps) {
+                if (blob.size <= maxAllowedSize) break;
+                const nextBlob = await getBlob(qStep);
+                if (nextBlob && nextBlob.size < blob.size) {
+                  blob = nextBlob;
+                  currentQuality = qStep;
+                }
+              }
+
+              // If still over 70% of original size, downscale dimensions
+              if (blob.size > maxAllowedSize && width > 400) {
+                let scaleDown = 0.85;
+                while (blob.size > maxAllowedSize && scaleDown >= 0.5) {
+                  const downCanvas = document.createElement('canvas');
+                  downCanvas.width = Math.round(width * scaleDown);
+                  downCanvas.height = Math.round(height * scaleDown);
+                  const downCtx = downCanvas.getContext('2d');
+                  if (downCtx) {
+                    downCtx.imageSmoothingEnabled = true;
+                    downCtx.imageSmoothingQuality = 'high';
+                    downCtx.drawImage(canvas, 0, 0, downCanvas.width, downCanvas.height);
+                    const scaledBlob: Blob | null = await new Promise((res) => {
+                      downCanvas.toBlob((b) => res(b), targetFormat, currentQuality);
+                    });
+                    if (scaledBlob && scaledBlob.size < blob.size) {
+                      blob = scaledBlob;
+                      width = downCanvas.width;
+                      height = downCanvas.height;
+                    }
+                  }
+                  scaleDown -= 0.15;
+                }
+              }
             }
 
             // Derive new filename with appropriate extension
@@ -136,11 +216,12 @@ export async function compressImage(
               width,
               height,
               format: targetFormat,
+              wasCompressed: true,
             });
-          },
-          targetFormat,
-          quality
-        );
+          } catch (err) {
+            reject(err);
+          }
+        })();
       };
 
       img.src = reader.result as string;

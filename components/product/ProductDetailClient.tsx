@@ -117,7 +117,10 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
         {product.category_name && (
           <>
             <span>/</span>
-            <Link href={`/shop?category=${product.category_id}`} className="hover:text-black transition-colors">
+            <Link
+              href={product.category_id ? `/category/${product.category_id.replace(/^cat-/, '')}` : '/shop'}
+              className="hover:text-black transition-colors"
+            >
               {product.category_name}
             </Link>
           </>
@@ -143,7 +146,12 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
                       : 'border-neutral-200 opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <Image src={img} alt={`${product.name} preview ${idx + 1}`} fill className="object-cover" />
+                  <Image
+                    src={img}
+                    alt={`${product.name} thumbnail ${idx + 1} - Fairy Finds Boutique`}
+                    fill
+                    className="object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -158,7 +166,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
               <Image
                 key={idx}
                 src={img}
-                alt={`${product.name} view ${idx + 1}`}
+                alt={`${product.name} ${idx === 0 ? 'editorial view' : `detail ${idx + 1}`} - Fairy Finds Boutique`}
                 fill
                 priority={idx === 0}
                 sizes="(max-width: 1024px) 100vw, 600px"

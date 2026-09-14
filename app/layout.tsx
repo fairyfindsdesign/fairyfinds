@@ -20,22 +20,62 @@ const manrope = Manrope({
   display: 'swap',
 });
 
+import BackToTop from '@/components/ui/BackToTop';
+import ScrollReset from '@/components/ui/ScrollReset';
+import DynamicFavicon from '@/components/ui/DynamicFavicon';
+import GSAPProvider from '@/components/animation/GSAPProvider';
+import JsonLd from '@/components/seo/JsonLd';
+import { getNavigation, getSettings, getCollections } from '@/lib/data/store';
+import { SITE_URL, DEFAULT_SEO, BUSINESS_INFO } from '@/lib/seo/constants';
+import { generateBoutiqueSchema, generateWebSiteSchema } from '@/lib/seo/schema';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     template: '%s | Fairy Finds Boutique',
-    default: 'Fairy Finds Boutique | Ready-to-Wear & Custom Haute Couture',
+    default: DEFAULT_SEO.title,
   },
-  description:
-    'A modern, feminine fashion boutique offering curated ready-to-wear clothing alongside bespoke custom-made garments with seamless WhatsApp ordering.',
-  keywords: [
-    'Fairy Finds Boutique',
-    'Sarees',
-    'Lehengas',
-    'Custom Dresses',
-    'Blouses',
-    'Sri Lanka Fashion',
-    'Bespoke Couture',
-  ],
+  description: DEFAULT_SEO.description,
+  keywords: DEFAULT_SEO.keywords,
+  authors: [{ name: BUSINESS_INFO.name, url: SITE_URL }],
+  creator: BUSINESS_INFO.name,
+  publisher: BUSINESS_INFO.name,
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    url: SITE_URL,
+    siteName: BUSINESS_INFO.name,
+    title: DEFAULT_SEO.title,
+    description: DEFAULT_SEO.description,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: DEFAULT_SEO.title,
+    description: DEFAULT_SEO.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
+  },
+  category: 'clothing',
   icons: {
     icon: [
       {
@@ -55,12 +95,6 @@ export const metadata: Metadata = {
   },
 };
 
-import BackToTop from '@/components/ui/BackToTop';
-import ScrollReset from '@/components/ui/ScrollReset';
-import DynamicFavicon from '@/components/ui/DynamicFavicon';
-import GSAPProvider from '@/components/animation/GSAPProvider';
-import { getNavigation, getSettings, getCollections } from '@/lib/data/store';
-
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -77,6 +111,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${cormorant.variable} ${manrope.variable} h-full antialiased`}>
+      <head>
+        <JsonLd data={generateBoutiqueSchema(settings)} id="boutique-jsonld" />
+        <JsonLd data={generateWebSiteSchema()} id="website-jsonld" />
+      </head>
       <body className="min-h-full flex flex-col bg-[#FFFFFF] text-[#1A1A1A] font-sans selection:bg-[#FF55D2] selection:text-white">
         <DynamicFavicon />
         <CartProvider>

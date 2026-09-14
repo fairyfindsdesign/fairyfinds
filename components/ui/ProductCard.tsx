@@ -35,7 +35,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         {/* Primary Image */}
         <Image
           src={primaryImage}
-          alt={product.name}
+          alt={`${product.name} - Fairy Finds Boutique`}
           fill
           priority={priority}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
@@ -48,7 +48,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         {secondaryImage !== primaryImage && (
           <Image
             src={secondaryImage}
-            alt={`${product.name} alternate view`}
+            alt={`${product.name} alternate view - Fairy Finds Boutique`}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
             className={`object-cover object-center absolute inset-0 transition-all duration-700 ease-out group-hover:scale-105 ${

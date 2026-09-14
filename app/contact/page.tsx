@@ -3,10 +3,30 @@ import Link from 'next/link';
 import { getSettings } from '@/lib/data/store';
 import { MessageCircle, Mail, MapPin, Clock, Phone } from 'lucide-react';
 
-export const metadata = {
-  title: 'Contact & Atelier Location',
+import { Metadata } from 'next';
+import JsonLd from '@/components/seo/JsonLd';
+import { generateBreadcrumbSchema } from '@/lib/seo/schema';
+import { SITE_URL, BUSINESS_INFO } from '@/lib/seo/constants';
+
+export const metadata: Metadata = {
+  title: 'Contact & Atelier Location in Kottayam',
   description:
-    'Connect with Fairy Finds Boutique for styling advice, orders, and custom tailoring inquiries.',
+    'Contact Fairy Finds Boutique in Neendoor, Kottayam, Kerala. Connect via WhatsApp or email for ready-to-wear orders, bespoke bridal tailoring, and consultations across India.',
+  alternates: {
+    canonical: `${SITE_URL}/contact`,
+  },
+  openGraph: {
+    title: 'Contact & Atelier Location in Kottayam | Fairy Finds Boutique',
+    description:
+      'Contact Fairy Finds Boutique in Neendoor, Kottayam, Kerala. Direct WhatsApp hotline and email for orders and custom tailoring.',
+    url: `${SITE_URL}/contact`,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Contact Fairy Finds Boutique | Kottayam, Kerala',
+    description:
+      'Direct WhatsApp hotline and email for orders and custom tailoring in Kottayam, Kerala.',
+  },
 };
 
 export const dynamic = 'force-dynamic';
@@ -16,8 +36,36 @@ export default async function ContactPage() {
   const settings = await getSettings();
   const cleanNumber = settings.whatsapp_number.replace(/[^0-9]/g, '');
 
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: 'Contact Us', url: '/contact' },
+  ];
+
+  const contactSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: 'Contact Fairy Finds Boutique',
+    description: 'Contact details and atelier location for Fairy Finds Boutique in Kottayam, Kerala.',
+    url: `${SITE_URL}/contact`,
+    mainEntity: {
+      '@type': 'ClothingStore',
+      name: BUSINESS_INFO.name,
+      telephone: settings.whatsapp_number || BUSINESS_INFO.telephone,
+      email: settings.contact_email || BUSINESS_INFO.email,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Neendoor',
+        addressLocality: 'Kottayam',
+        addressRegion: 'Kerala',
+        addressCountry: 'IN',
+      },
+    },
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <JsonLd data={generateBreadcrumbSchema(breadcrumbs)} id="contact-breadcrumbs-jsonld" />
+      <JsonLd data={contactSchema} id="contact-schema-jsonld" />
       {/* Title */}
       <div className="text-center max-w-2xl mx-auto mb-16">
         <p className="text-xs uppercase tracking-[0.25em] text-[#FF55D2] font-semibold mb-2">

@@ -137,9 +137,15 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                 )}
 
                 {/* Main Headline - Centered, 32px */}
-                <h1 className="font-serif text-[26px] sm:text-[32px] text-white font-normal leading-snug tracking-tight max-w-xl mx-auto gsap-hero-title animate-in fade-in duration-700 drop-shadow-md">
-                  {slide.heading}
-                </h1>
+                {idx === 0 ? (
+                  <h1 className="font-serif text-[26px] sm:text-[32px] text-white font-normal leading-snug tracking-tight max-w-xl mx-auto gsap-hero-title animate-in fade-in duration-700 drop-shadow-md">
+                    {slide.heading}
+                  </h1>
+                ) : (
+                  <h2 className="font-serif text-[26px] sm:text-[32px] text-white font-normal leading-snug tracking-tight max-w-xl mx-auto gsap-hero-title animate-in fade-in duration-700 drop-shadow-md">
+                    {slide.heading}
+                  </h2>
+                )}
 
                 {/* Narrative Description under Headline */}
                 {slide.description && (

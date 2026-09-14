@@ -3,6 +3,12 @@ import AdminNavClient from '@/components/admin/AdminNavClient';
 
 export const metadata = {
   title: 'Owner Portal | Fairy Finds Boutique',
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    nosnippet: true,
+  },
 };
 
 export const dynamic = 'force-dynamic';

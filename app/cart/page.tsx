@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: 'Your Bag & WhatsApp Order',
   description:
     'Review your selected ready-to-wear pieces and complete your boutique order directly via WhatsApp.',
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+  },
 };
 
 export const dynamic = 'force-dynamic';

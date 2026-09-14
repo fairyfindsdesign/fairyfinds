@@ -8,6 +8,24 @@ import ReviewsMarquee from '@/components/storefront/ReviewsMarquee';
 import HeroCarousel from '@/components/home/HeroCarousel';
 import HorizontalScrollSection from '@/components/ui/HorizontalScrollSection';
 
+import { Metadata } from 'next';
+import { SITE_URL, DEFAULT_SEO } from '@/lib/seo/constants';
+
+export const metadata: Metadata = {
+  title: {
+    absolute: DEFAULT_SEO.title,
+  },
+  description: DEFAULT_SEO.description,
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    title: DEFAULT_SEO.title,
+    description: DEFAULT_SEO.description,
+    url: SITE_URL,
+  },
+};
+
 export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Dynamic for CMS updates
 

@@ -2,8 +2,12 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Metadata } from 'next';
 import { getCollectionBySlug, getProducts } from '@/lib/data/store';
 import ProductCard from '@/components/ui/ProductCard';
+import JsonLd from '@/components/seo/JsonLd';
+import { generateBreadcrumbSchema, generateItemListSchema } from '@/lib/seo/schema';
+import { SITE_URL } from '@/lib/seo/constants';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -14,17 +18,43 @@ interface CollectionPageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: CollectionPageProps) {
+export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
   const collection = await getCollectionBySlug(slug);
 
   if (!collection) {
-    return { title: 'Collection Not Found' };
+    return {
+      title: 'Collection Not Found | Fairy Finds Boutique',
+      robots: { index: false, follow: false },
+    };
   }
 
+  const title = `${collection.name} Collection`;
+  const description =
+    collection.description ||
+    `Explore the ${collection.name} collection at Fairy Finds Boutique in Kottayam, Kerala. Curated artisanal women\'s fashion with all-India shipping.`;
+
+  const canonicalUrl = `${SITE_URL}/collections/${collection.slug}`;
+  const ogTitle = `${collection.name} Collection | Fairy Finds Boutique`;
+
   return {
-    title: `${collection.name} Collection | Fairy Finds Boutique`,
-    description: collection.description,
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: ogTitle,
+      description,
+      url: canonicalUrl,
+      images: collection.image_url ? [{ url: collection.image_url, alt: collection.name }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: ogTitle,
+      description,
+      images: collection.image_url ? [collection.image_url] : undefined,
+    },
   };
 }
 
@@ -40,18 +70,40 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
   }
 
   const collectionProducts = allProducts.filter(
-    (p) => p.collection_id === collection.id || p.collection_name?.toLowerCase() === collection.name.toLowerCase()
+    (p) =>
+      p.is_published &&
+      (p.collection_id === collection.id ||
+        p.collection_name?.toLowerCase() === collection.name.toLowerCase())
+  );
+
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: 'Shop', url: '/shop' },
+    { name: `${collection.name} Collection`, url: `/collections/${collection.slug}` },
+  ];
+
+  const itemList = generateItemListSchema(
+    `${collection.name} Collection - Fairy Finds Boutique`,
+    collectionProducts.map((p) => ({
+      name: p.name,
+      slug: p.slug,
+      image: p.images?.[0],
+      price: p.price,
+    }))
   );
 
   return (
     <div>
+      <JsonLd data={generateBreadcrumbSchema(breadcrumbs)} id="collection-breadcrumbs-jsonld" />
+      <JsonLd data={itemList} id="collection-itemlist-jsonld" />
+
       {/* Editorial Collection Hero */}
       <div className="relative py-24 md:py-32 bg-[#1A1A1A] text-white overflow-hidden">
         {collection.image_url && (
           <div className="absolute inset-0 opacity-40">
             <Image
               src={collection.image_url}
-              alt={collection.name}
+              alt={`${collection.name} signature edit - Fairy Finds Boutique`}
               fill
               priority
               className="object-cover object-center"
@@ -59,6 +111,13 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
           </div>
         )}
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-4 z-10">
+          <nav aria-label="Breadcrumb" className="text-xs uppercase tracking-widest text-neutral-300 flex items-center justify-center gap-2 mb-2">
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
+            <span>/</span>
+            <Link href="/shop" className="hover:text-white transition-colors">Shop</Link>
+            <span>/</span>
+            <span className="text-[#FF55D2] font-semibold">{collection.name}</span>
+          </nav>
           <p className="text-xs uppercase tracking-[0.3em] text-[#FF55D2] font-semibold">
             CURATED BOUTIQUE EDIT
           </p>
@@ -88,8 +147,8 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         </div>
 
         {collectionProducts.length === 0 ? (
-          <div className="py-20 text-center bg-neutral-50 p-8 border border-neutral-200">
-            <h3 className="font-serif text-2xl text-[#1A1A1A] mb-2">Collection Arriving Soon</h3>
+          <div className="py-20 text-center bg-[#FAF9F6] p-8 border border-neutral-200">
+            <h2 className="font-serif text-2xl text-[#1A1A1A] mb-2">Collection Arriving Soon</h2>
             <p className="text-xs text-neutral-500 mb-6">
               New couture pieces for this collection are currently being handcrafted in the atelier.
             </p>

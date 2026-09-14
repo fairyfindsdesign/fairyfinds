@@ -3,18 +3,44 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Sparkles, Scissors, Heart, ArrowRight } from 'lucide-react';
 
-export const metadata = {
-  title: 'Our Story & Atelier',
+import { Metadata } from 'next';
+import JsonLd from '@/components/seo/JsonLd';
+import { generateBreadcrumbSchema } from '@/lib/seo/schema';
+import { SITE_URL } from '@/lib/seo/constants';
+
+export const metadata: Metadata = {
+  title: 'Our Story & Atelier Heritage',
   description:
-    'Learn about Fairy Finds Boutique, our commitment to artisanal textile craft, and our bespoke approach to feminine fashion.',
+    'Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Artisanal textile craftsmanship, ready-to-wear grace, and bespoke women\'s fashion shipping across India.',
+  alternates: {
+    canonical: `${SITE_URL}/about`,
+  },
+  openGraph: {
+    title: 'Our Story & Atelier Heritage | Fairy Finds Boutique Kottayam',
+    description:
+      'Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Artisanal textile craftsmanship and bespoke women\'s fashion.',
+    url: `${SITE_URL}/about`,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Our Story & Atelier Heritage | Fairy Finds Boutique Kottayam',
+    description:
+      'Artisanal textile craftsmanship and bespoke women\'s fashion from Kottayam, Kerala.',
+  },
 };
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default function AboutPage() {
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: 'About Us', url: '/about' },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <JsonLd data={generateBreadcrumbSchema(breadcrumbs)} id="about-breadcrumbs-jsonld" />
       {/* Editorial Title */}
       <div className="text-center max-w-3xl mx-auto mb-16">
         <p className="text-xs uppercase tracking-[0.25em] text-[#FF55D2] font-semibold mb-2">

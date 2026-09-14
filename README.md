@@ -16,6 +16,7 @@ A high-performance luxury fashion e-commerce web application built with Next.js 
   - **Direct WhatsApp Checkout**: Itemized cart messages formatted directly to the boutique hotline.
   - **Client Review UGC Marquee**: Editorial portrait cards showing patrons wearing their garments, 5-star ratings, testimonials, and worn garment attribution (touch-scrollable on mobile).
   - **Dark & Light Mode Adaptive Favicon**: Automatically switches between black and white logo icons based on browser/OS theme.
+  - **Production-Ready SEO & Schema.org System**: Dynamic `/sitemap.xml`, `/robots.txt`, dynamic 1200×630 OpenGraph social cards, canonical URLs, and full Schema.org structured data (`ClothingStore`, `Product`, `Offer`, `BreadcrumbList`, `ItemList`).
 
 - **Administrative Portal (`/admin`)**:
   - **Password Protected**: Edge route protection via `proxy.ts` with session cookies.

@@ -52,12 +52,17 @@ Master operational, architectural, and design reference for the **Fairy Finds Bo
 |---|---|---|
 | **`/`** | Dynamic (`ƒ`) | **Section-based CMS Homepage** with 1920×1080 Hero, New Arrivals, Featured Collections, Categories, Bespoke Tailoring, and Customer UGC Reviews. |
 | **`/shop`** | Dynamic (`ƒ`) | **Ready-to-Wear Catalog** with category filter pills, collection filters, size picker, and in-stock toggles. |
+| **`/category/[slug]`** | Dynamic (`ƒ`) | **Dedicated Category Catalog** for permanent, crawlable SEO URLs (e.g., `/category/dresses`, `/category/sarees`). |
+| **`/categories/[slug]`** | Dynamic (`ƒ`) | **Permanent Redirect** route automatically routing plural category queries to `/category/[slug]`. |
 | **`/product/[slug]`** | Dynamic (`ƒ`) | **Product Detail Page** with image thumbnail gallery, size/stock matrix, size guide, and direct WhatsApp inquiry. |
 | **`/collections/[slug]`** | Dynamic (`ƒ`) | **Signature Collection Showcases** (e.g., *Red Saree*, *Green Lehenga*). |
 | **`/custom`** | Static (`○`) | **Custom-Made Atelier** detailing the bespoke process and collecting tailoring inquiry details. |
-| **`/cart`** | Static (`○`) | **Bag Review & WhatsApp Checkout** collecting customer delivery details and launching WhatsApp. |
+| **`/cart`** | Static (`○`) | **Bag Review & WhatsApp Checkout** (`noindex, nofollow` protected). |
 | **`/about`** | Static (`○`) | **Brand Story & Atelier Heritage** explaining craftsmanship values. |
 | **`/contact`** | Static (`○`) | **Atelier Location & Hotline** with direct WhatsApp chat, email, and opening hours. |
+| **`/sitemap.xml`** | Dynamic (`ƒ`) | **Dynamic XML Sitemap** automatically generated from store & database items for search engines. |
+| **`/robots.txt`** | Static (`○`) | **Robots Exclusion Standard** allowing public crawling and blocking private admin/cart routes. |
+| **`/opengraph-image`** | Static (`○`) | **Dynamic OpenGraph Preview** rendering branded 1200×630 share card for WhatsApp, Facebook, X. |
 | **`/admin`** | Dynamic (`ƒ`) | **Protected Owner Dashboard** with inventory metrics, categories count, stock alerts, and quick action cards. |
 | **`/admin/products`** | Dynamic (`ƒ`) | **Product & Stock Manager** with search, per-size stock breakdown, auto-generated product code, and delete actions. |
 | **`/admin/products/new`** | Dynamic (`ƒ`) | **Create Garment Form** with live unique product code auto-sync, inline "+ New Category" modal, and size matrix. |
@@ -357,4 +362,74 @@ The application will be accessible at **http://localhost:3000**.
 npm run build
 npm run start
 ```
-Compiles all 21 routes with 0 TypeScript/ESLint errors into an optimized production bundle.
+Compiles all 26 static and dynamic routes with 0 TypeScript/ESLint errors into an optimized production bundle.
+
+---
+
+## 12. Production SEO, Open Graph & Structured Data Architecture
+
+A complete, production-grade SEO and discoverability system is embedded natively into the Next.js 16 App Router architecture, adhering to Google Search Central standards without modifying any visual design elements.
+
+### 12.1 Architecture & Utilities Layer
+- **Constants ([`lib/seo/constants.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/lib/seo/constants.ts))**: Centralized repository of brand identity, canonical URL (`https://fairyfindsboutique.store`), postal address (Neendoor, Kottayam, Kerala), coordinates, phone, email, opening hours, and regional fashion keywords.
+- **Schema Builders ([`lib/seo/schema.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/lib/seo/schema.ts))**: Strongly typed generator functions outputting Google Rich Results-compliant JSON-LD.
+- **Universal Injector ([`components/seo/JsonLd.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/seo/JsonLd.tsx))**: Server component safely rendering `<script type="application/ld+json">` tags with XSS character escaping.
+
+### 12.2 Dynamic XML Sitemap (`/sitemap.xml`)
+- Route: [`app/sitemap.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/sitemap.ts)
+- Generated dynamically from the live store/database with appropriate update frequencies and priorities:
+  - **Homepage (`/`)**: Daily, Priority 1.0
+  - **Shop Catalog (`/shop`)**: Daily, Priority 0.9
+  - **Dedicated Categories (`/category/[slug]`)**: Weekly, Priority 0.85
+  - **Signature Collections (`/collections/[slug]`)**: Weekly, Priority 0.85
+  - **Individual Products (`/product/[slug]`)**: Weekly, Priority 0.8, with accurate `lastModified` timestamp from `updated_at`/`created_at`.
+  - **Atelier Pages (`/custom`, `/contact`, `/about`)**: Monthly, Priority 0.6–0.8.
+- Excludes private admin portals, authentication endpoints, and internal cart flows.
+
+### 12.3 Robots Exclusion Standard (`/robots.txt`)
+- Route: [`app/robots.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/robots.ts)
+- Allows search engine crawlers on all legitimate storefront and catalog routes (`Allow: /`).
+- Explicitly blocks private and administrative sections:
+  - `Disallow: /admin`
+  - `Disallow: /admin/`
+  - `Disallow: /api/`
+  - `Disallow: /cart`
+- References the live sitemap: `Sitemap: https://fairyfindsboutique.store/sitemap.xml`.
+
+### 12.4 Schema.org JSON-LD Structured Data
+1. **`ClothingStore` & `LocalBusiness`**:
+   - Location: Neendoor, Kottayam, Kerala, India (PIN: 686601).
+   - Area Served: Kerala and India.
+   - Contact: Official WhatsApp hotline (`+91 62826 29144`), email, store hours (Mon–Sat 10:00–19:00), price range (`₹₹`), accepted payment methods, and Instagram profile.
+2. **`Product` & `Offer`**:
+   - Dynamic per product: name, description, SKU / unique product code, brand (`Fairy Finds Boutique`), fabric/material, and high-res imagery.
+   - Real price in `INR`, `NewCondition`, and real-time inventory status (`InStock` vs `OutOfStock` derived from variant matrix).
+   - Only attaches `AggregateRating` when genuine customer reviews exist in the CMS. No fabricated reviews or ratings.
+3. **`BreadcrumbList`**:
+   - Structured hierarchy on all catalog, product, category, collection, and static pages (e.g. `Home` → `Shop` → `Dresses` → `Product Name`).
+4. **`ItemList`**:
+   - Structured catalog listings on `/shop`, `/category/[slug]`, and `/collections/[slug]` for rich carousel/grid display in Google Search.
+
+### 12.5 Dynamic Social Sharing & OpenGraph Card
+- Route: [`app/opengraph-image.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/opengraph-image.tsx)
+- Automatically compiles a high-resolution 1200×630 image with the brand palette, luxury serif typography, and category tags when the site is shared on WhatsApp, Facebook, iMessage, and X/Twitter.
+
+### 12.6 Canonical URLs & Duplicate Prevention
+- Root layout enforces `metadataBase: new URL('https://fairyfindsboutique.store')`.
+- All pages emit an explicit `<link rel="canonical" href="...">`.
+- Safe ID-to-slug redirect: Accessing `/product/prod-01` automatically 308-redirects to the canonical `/product/crimson-heritage-kanjivaram-saree`.
+- Plural category redirect: Navigating to `/categories/[slug]` permanently redirects to `/category/[slug]`.
+
+### 12.7 Google Search Console Verification Setup
+- The root layout metadata includes a verification hook:
+  ```ts
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
+  }
+  ```
+- To verify the website in Google Search Console, simply add your verification token to `.env.local` or your hosting environment variables:
+  ```env
+  NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION="your_token_here"
+  ```
+- The verification tag renders automatically into `<head>` with zero code edits.
+

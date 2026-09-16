@@ -18,6 +18,7 @@ export default async function AdminSeoPage() {
     <SeoManagerClient
       initialConfig={seoConfig}
       isMissingDbColumn={dbStatus.isSupabaseConnected && !dbStatus.hasSeoColumn}
+      isNotConnected={!dbStatus.isSupabaseConnected}
       dbError={dbStatus.error}
     />
   );

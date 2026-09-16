@@ -33,12 +33,14 @@ import { initialSeoConfig } from '@/lib/data/initial-data';
 interface SeoManagerClientProps {
   initialConfig: SeoConfig;
   isMissingDbColumn?: boolean;
+  isNotConnected?: boolean;
   dbError?: string;
 }
 
 export default function SeoManagerClient({
   initialConfig,
   isMissingDbColumn = false,
+  isNotConnected = false,
   dbError,
 }: SeoManagerClientProps) {
   const router = useRouter();
@@ -340,6 +342,24 @@ export default function SeoManagerClient({
           </button>
         </div>
       </div>
+
+      {/* Database Not Connected Warning Banner */}
+      {isNotConnected && (
+        <div className="bg-amber-50 border-2 border-amber-300 p-4 sm:p-5 rounded-xs shadow-xs space-y-3">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-900">
+                Notice: Database Not Connected (Vercel Read-Only Mode)
+              </h3>
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Your store is running on Vercel without a database connection (Supabase). Because Vercel has a read-only filesystem, edits made in this admin panel cannot be saved permanently to disk.
+                To enable live dashboard saving, add your <strong>Supabase environment variables</strong> in Vercel Project Settings. Alternatively, you can edit titles directly in the project codebase.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Supabase Missing Column Migration Warning Banner */}
       {isMissingDbColumn && (

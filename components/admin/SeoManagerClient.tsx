@@ -823,6 +823,14 @@ export default function SeoManagerClient({
               </span>
             </h2>
 
+            {/* Google Crawl Delay Tip */}
+            <div className="mt-3 p-3 bg-blue-50/70 border border-blue-200 rounded-xs flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+              <div className="text-xs text-blue-900 leading-relaxed">
+                <span className="font-semibold">Why didn't Google Search update right away?</span> Google saves a cached copy of your pages. When you update titles or meta descriptions, the changes are live on your website instantly, but Google only updates search results when its crawler revisits your page. To speed this up, paste your URL into <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" className="underline font-bold text-blue-700 hover:text-blue-900">Google Search Console</a> and click <strong>Request Indexing</strong>.
+              </div>
+            </div>
+
             {/* Sub-tabs for pages */}
             <div className="flex items-center gap-2 overflow-x-auto py-3 border-b border-neutral-100 scrollbar-none">
               {[
@@ -1197,6 +1205,22 @@ export default function SeoManagerClient({
                 </span>
               </div>
 
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 mb-1">
+                  Bing Webmaster Tools Verification Token (Bing, Yahoo, DuckDuckGo, Copilot)
+                </label>
+                <input
+                  type="text"
+                  value={config.verification.bing_verification || ''}
+                  onChange={(e) => handleVerificationChange('bing_verification', e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-[#FF55D2] bg-white text-neutral-900 font-mono text-xs"
+                  placeholder="e.g. 1234567890ABCDEF1234567890ABCDEF or verification token"
+                />
+                <span className="text-[11px] text-neutral-400 mt-1 block">
+                  Enables discovery and fast indexing on <strong>Bing, Microsoft Copilot, DuckDuckGo, and Yahoo</strong>. Renders into <code>&lt;meta name=&quot;msvalidate.01&quot;&gt;</code>.
+                </span>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-neutral-700 mb-1">
@@ -1274,8 +1298,8 @@ export default function SeoManagerClient({
               </button>
             </div>
 
-            {/* Sitemap & Robots Links */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            {/* Sitemap, Robots & llms.txt Links */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               <a
                 href="/sitemap.xml"
                 target="_blank"
@@ -1286,7 +1310,7 @@ export default function SeoManagerClient({
                   <FileText className="w-4 h-4 text-neutral-400 group-hover:text-[#FF55D2]" />
                   <div>
                     <div className="text-xs font-semibold text-neutral-800">Dynamic XML Sitemap</div>
-                    <div className="text-[11px] text-neutral-400">/sitemap.xml (Auto-generated)</div>
+                    <div className="text-[11px] text-neutral-400">/sitemap.xml (All engines)</div>
                   </div>
                 </div>
                 <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-[#FF55D2]" />
@@ -1301,12 +1325,60 @@ export default function SeoManagerClient({
                 <div className="flex items-center gap-2">
                   <Info className="w-4 h-4 text-neutral-400 group-hover:text-[#FF55D2]" />
                   <div>
-                    <div className="text-xs font-semibold text-neutral-800">Robots Exclusion Standard</div>
-                    <div className="text-[11px] text-neutral-400">/robots.txt (Crawler directives)</div>
+                    <div className="text-xs font-semibold text-neutral-800">Robots Directives</div>
+                    <div className="text-[11px] text-neutral-400">/robots.txt (AI & search bots)</div>
                   </div>
                 </div>
                 <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-[#FF55D2]" />
               </a>
+
+              <a
+                href="/llms.txt"
+                target="_blank"
+                rel="noreferrer"
+                className="p-3 border border-neutral-200 hover:border-[#FF55D2] rounded-xs flex items-center justify-between group transition-colors bg-white"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#FF55D2]" />
+                  <div>
+                    <div className="text-xs font-semibold text-neutral-800">AI Context Hub</div>
+                    <div className="text-[11px] text-neutral-400">/llms.txt (ChatGPT & Perplexity)</div>
+                  </div>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-[#FF55D2]" />
+              </a>
+            </div>
+
+            {/* AI Search & GEO Card */}
+            <div className="p-4 bg-purple-50/60 border border-purple-200 rounded-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-purple-950 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-600" />
+                  <span>Generative Engine Optimization (GEO) & AI Search Status</span>
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-200 text-purple-900 px-2 py-0.5 rounded-xs">
+                  Active
+                </span>
+              </div>
+              <p className="text-xs text-purple-900 leading-relaxed">
+                Your storefront is configured with dedicated permissions and structured context for <strong>ChatGPT (GPTBot / SearchGPT), Perplexity AI, Claude (ClaudeBot), Microsoft Copilot (Bingbot), and Apple Intelligence</strong>.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                {[
+                  { name: 'ChatGPT / SearchGPT', bot: 'GPTBot / OAI-SearchBot', status: 'Allowed' },
+                  { name: 'Perplexity AI', bot: 'PerplexityBot', status: 'Allowed' },
+                  { name: 'Microsoft Copilot & Bing', bot: 'Bingbot', status: 'Allowed' },
+                  { name: 'Claude & Anthropic', bot: 'ClaudeBot', status: 'Allowed' },
+                ].map((engine) => (
+                  <div key={engine.name} className="bg-white/80 border border-purple-200/80 p-2 rounded-xs">
+                    <div className="text-[11px] font-bold text-neutral-800">{engine.name}</div>
+                    <div className="text-[10px] text-neutral-400 font-mono">{engine.bot}</div>
+                    <div className="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
+                      <Check className="w-3 h-3" /> {engine.status}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

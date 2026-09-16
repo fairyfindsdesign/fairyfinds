@@ -62,7 +62,14 @@ export const DEFAULT_SEO = {
     'Kurithis Kerala',
     'sarees Kottayam',
     'custom made dresses Kerala',
-    'ready to wear outfits Kerala',
-    'bespoke women\'s tailoring Kottayam',
   ],
 };
+
+export function formatMetaTitle(title?: string | null, brandName = 'Fairy Finds Boutique'): string {
+  if (!title || !title.trim()) return brandName;
+  const clean = title.trim();
+  if (clean.toLowerCase().includes('fairy finds')) {
+    return clean;
+  }
+  return `${clean} | ${brandName}`;
+}

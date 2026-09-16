@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { getProducts, getCollections, getSettings, getHomepageSections, getCategories } from '@/lib/data/store';
-import { Package, Layers, LayoutTemplate, Phone, AlertCircle, ArrowRight, Plus, Tag } from 'lucide-react';
+import { Package, Layers, LayoutTemplate, Phone, AlertCircle, ArrowRight, Plus, Tag, BookOpen } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -30,7 +30,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Title & Quick Add */}
+      {/* Title & Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="font-serif text-2xl sm:text-3xl text-[#1A1A1A] font-light">
@@ -40,13 +40,25 @@ export default async function AdminDashboardPage() {
             Welcome to the Fairy Finds Boutique management portal.
           </p>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-wider font-semibold shadow-xs transition-colors rounded-xs active:scale-95"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Product</span>
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href="/docs/Fairy_Finds_Admin_Portal_Guide.pdf"
+            target="_blank"
+            download="Fairy_Finds_Admin_Portal_Guide.pdf"
+            className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-neutral-50 text-neutral-800 text-xs uppercase tracking-wider font-semibold border border-neutral-300 shadow-xs transition-colors rounded-xs active:scale-95"
+            title="Download Step-by-Step PDF Guide"
+          >
+            <BookOpen className="w-4 h-4 text-[#FF55D2]" />
+            <span>Store Guide (PDF)</span>
+          </a>
+          <Link
+            href="/admin/products/new"
+            className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-wider font-semibold shadow-xs transition-colors rounded-xs active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Product</span>
+          </Link>
+        </div>
       </div>
 
       {/* Metrics Cards - 2 columns on mobile */}

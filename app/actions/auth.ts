@@ -9,11 +9,17 @@ const COOKIE_NAME = 'admin_session';
  * Validates the admin password and sets an HTTP-only session cookie.
  */
 export async function loginAdmin(password: string) {
-  if (!password) {
+  if (!password || !password.trim()) {
     return { success: false, error: 'Password is required.' };
   }
 
-  if (password === ADMIN_PASSWORD) {
+  // Artificial delay to prevent automated high-speed brute-force attacks
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
+  const cleanInput = password.trim();
+  const cleanExpected = (process.env.ADMIN_PASSWORD || 'fairyfinds@123').trim();
+
+  if (cleanInput === cleanExpected) {
     const cookieStore = await cookies();
     cookieStore.set(COOKIE_NAME, 'authenticated', {
       httpOnly: true,

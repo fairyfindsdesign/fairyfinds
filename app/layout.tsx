@@ -40,6 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const canonicalBase = seo?.global?.canonical_base || SITE_URL;
   const isIndexed = seo?.crawl?.is_indexed ?? true;
   const googleVerification = seo?.verification?.google_site_verification || process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '';
+  const bingVerification = seo?.verification?.bing_verification || process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || '';
 
   const ogTitle = seo?.social?.og_title || siteTitle;
   const ogDescription = seo?.social?.og_description || metaDescription;
@@ -101,6 +102,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     verification: {
       google: googleVerification,
+      other: {
+        ...(bingVerification ? { 'msvalidate.01': bingVerification } : {}),
+      },
     },
     category: 'clothing',
     icons: {

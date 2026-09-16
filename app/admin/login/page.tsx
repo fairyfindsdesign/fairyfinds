@@ -26,8 +26,7 @@ function AdminLoginForm() {
     try {
       const res = await loginAdmin(password);
       if (res.success) {
-        router.push(from);
-        router.refresh();
+        window.location.href = from || '/admin';
       } else {
         setError(res.error || 'Incorrect password. Please try again.');
         setIsLoading(false);

@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fairy Finds Boutique - Owner & Admin Portal Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Manrope:wght@300;400;500;600;700;800&display=swap');
+
+  @page {
+    size: A4;
+    margin: 12mm 12mm 14mm 12mm;
+    @bottom-right {
+      content: counter(page);
+      font-family: 'Manrope', sans-serif;
+      font-size: 9pt;
+      color: #888;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #262626;
+    background-color: #FFFFFF;
+    line-height: 1.55;
+    font-size: 10pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    page-break-after: always;
+    break-after: page;
+    padding: 6mm 4mm 8mm 4mm;
+    position: relative;
+    min-height: 260mm;
+  }
+
+  .page:last-child {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* Typography */
+  h1, h2, h3, .font-serif {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  h1 {
+    font-size: 28pt;
+    font-weight: 700;
+    color: #1A1A1A;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+  }
+
+  h2 {
+    font-size: 18pt;
+    font-weight: 700;
+    color: #1A1A1A;
+    margin-bottom: 6px;
+    border-bottom: 1.5px solid #F0D5E5;
+    padding-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  h3 {
+    font-size: 13pt;
+    font-weight: 600;
+    color: #333333;
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+
+  p {
+    margin-bottom: 8px;
+    font-size: 9.5pt;
+    color: #444444;
+  }
+
+  /* Color Accents */
+  .text-brand { color: #D44498; }
+  .bg-brand-soft { background-color: #FDF2F8; border-color: #FBCFE8; }
+  .bg-champagne { background-color: #FAF6F0; border-color: #EFE6D8; }
+
+  /* Header & Footer */
+  .doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #E5E5E5;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888888;
+  }
+
+  .doc-footer {
+    position: absolute;
+    bottom: 4mm;
+    left: 4mm;
+    right: 4mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #EAEAEA;
+    padding-top: 6px;
+    font-size: 8pt;
+    color: #999999;
+  }
+
+  /* Cover Page */
+  .cover-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 250mm;
+    padding: 10mm 6mm;
+    background: radial-gradient(circle at top right, #FFF1F8 0%, #FFFFFF 65%);
+    border: 1px solid #F0E6ED;
+    border-radius: 8px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    border-radius: 3px;
+  }
+
+  .badge-pink {
+    background-color: #FDF2F8;
+    color: #BE185D;
+    border: 1px solid #FBCFE8;
+  }
+
+  .badge-dark {
+    background-color: #1A1A1A;
+    color: #FFFFFF;
+  }
+
+  /* Visual Cards & Callouts */
+  .card {
+    background-color: #FFFFFF;
+    border: 1px solid #E8E8E8;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+
+  .card-highlight {
+    background-color: #FCF9F7;
+    border: 1px solid #EFE6DD;
+  }
+
+  .card-tip {
+    background-color: #F0FDF4;
+    border-left: 3.5px solid #22C55E;
+    padding: 8px 12px;
+    border-radius: 0 4px 4px 0;
+    margin: 8px 0;
+    font-size: 9pt;
+  }
+
+  .card-note {
+    background-color: #EFF6FF;
+    border-left: 3.5px solid #3B82F6;
+    padding: 8px 12px;
+    border-radius: 0 4px 4px 0;
+    margin: 8px 0;
+    font-size: 9pt;
+  }
+
+  .card-alert {
+    background-color: #FFFBEB;
+    border-left: 3.5px solid #F59E0B;
+    padding: 8px 12px;
+    border-radius: 0 4px 4px 0;
+    margin: 8px 0;
+    font-size: 9pt;
+  }
+
+  /* Grid Layouts */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  /* Step Badges */
+  .step-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    background-color: #FAFAFA;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #EEEEEE;
+  }
+
+  .step-num {
+    background-color: #1A1A1A;
+    color: #FFFFFF;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8.5pt;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-title {
+    font-weight: 700;
+    font-size: 9.5pt;
+    color: #1A1A1A;
+    margin-bottom: 2px;
+  }
+
+  .step-desc {
+    font-size: 8.5pt;
+    color: #555555;
+    margin-bottom: 0;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin: 8px 0;
+  }
+
+  th {
+    background-color: #F8F9FA;
+    border: 1px solid #E5E7EB;
+    padding: 6px 8px;
+    text-align: left;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    font-size: 7.5pt;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    border: 1px solid #E5E7EB;
+    padding: 6px 8px;
+    color: #4B5563;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #FCFDFD;
+  }
+
+  /* Diagram SVG Containers */
+  .diagram-box {
+    background-color: #FAFAFC;
+    border: 1px solid #E2E4E9;
+    border-radius: 6px;
+    padding: 10px;
+    margin: 10px 0;
+    text-align: center;
+  }
+
+  .diagram-title {
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    color: #64748B;
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== PAGE 1: COVER PAGE ==================== -->
+<div class="page">
+  <div class="cover-container">
+    <div>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px;">
+        <span class="badge badge-pink">Official Store Handbook</span>
+        <span style="font-size: 8pt; color: #888; text-transform: uppercase; letter-spacing: 1px;">Atelier Edition 2026</span>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <h3 style="font-size: 14pt; letter-spacing: 2px; text-transform: uppercase; color: #D44498; margin-bottom: 8px;">Fairy Finds Boutique</h3>
+        <h1>Store Owner & Admin Portal Guide</h1>
+        <p style="font-size: 12pt; color: #666; margin-top: 10px; max-width: 500px; line-height: 1.4;">
+          A simple, visual step-by-step handbook for boutique managers and staff to manage products, stock levels, homepage showcases, customer reviews, and search visibility with ease.
+        </p>
+      </div>
+
+      <div style="margin-top: 30px; display: flex; gap: 8px;">
+        <span class="badge badge-dark">No Coding Required</span>
+        <span class="badge badge-pink">Instant WhatsApp Ordering</span>
+        <span class="badge badge-dark">Mobile & Desktop Friendly</span>
+      </div>
+    </div>
+
+    <!-- Table of Contents on Cover -->
+    <div style="background-color: #FFFFFF; border: 1px solid #F0D5E5; border-radius: 8px; padding: 14px 18px; margin-top: 20px;">
+      <h3 style="font-size: 11pt; text-transform: uppercase; letter-spacing: 1.5px; color: #1A1A1A; margin-bottom: 10px; border-bottom: 1px solid #F5E6F0; padding-bottom: 4px;">
+        What You Will Learn In This Guide
+      </h3>
+      <div class="grid-2" style="font-size: 8.5pt; gap: 6px 16px;">
+        <div><strong>1. How the Storefront Works</strong> (WhatsApp orders & stock)</div>
+        <div><strong>6. Customer Testimonials</strong> (Adding glowing reviews)</div>
+        <div><strong>2. Logging In & Dashboard</strong> (Navigating the portal)</div>
+        <div><strong>7. Store Details & Settings</strong> (WhatsApp, Instagram, Address)</div>
+        <div><strong>3. Adding & Managing Products</strong> (Prices, Sizes & Inventory)</div>
+        <div><strong>8. Search & AI Discovery</strong> (Google, Bing, ChatGPT, Perplexity)</div>
+        <div><strong>4. Categories & Collections</strong> (Grouping sarees & dresses)</div>
+        <div><strong>9. Boutique Photo Guidelines</strong> (Angles & lighting tips)</div>
+        <div><strong>5. Homepage CMS Builder</strong> (Banners & section ordering)</div>
+        <div><strong>10. Common Questions & Troubleshooting</strong> (Quick answers)</div>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #ECECEC; padding-top: 12px; font-size: 8pt; color: #888;">
+      <div>
+        <strong>Atelier Location:</strong> Neendoor, Kottayam, Kerala<br>
+        <strong>Admin URL:</strong> <code style="color: #D44498;">https://fairyfindsboutique.store/admin</code>
+      </div>
+      <div style="text-align: right;">
+        Prepared with care for Fairy Finds Boutique<br>
+        Version 2.0 • Confidential Internal Use
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE 2: SYSTEM WORKFLOW & LOGGING IN ==================== -->
+<div class="page">
+  <div class="doc-header">
+    <span>Fairy Finds Boutique • Store Owner Handbook</span>
+    <span>Section 1 & 2: Overview & Login</span>
+  </div>
+
+  <h2>1. How Your Boutique Storefront Works</h2>
+  <p>
+    Fairy Finds Boutique combines the beauty of an online designer catalog with the speed and personal touch of direct WhatsApp ordering. There is no complicated checkout cart for Indian customers—clients select their piece and connect directly with you on WhatsApp!
+  </p>
+
+  <!-- DIAGRAM 1: STORE ECOSYSTEM -->
+  <div class="diagram-box">
+    <div class="diagram-title">Visual Diagram: The Fairy Finds Customer Order Flow</div>
+    <svg viewBox="0 0 740 140" style="width: 100%; max-height: 140px;" xmlns="http://www.w3.org/2000/svg">
+      <!-- Step 1 -->
+      <rect x="10" y="20" width="160" height="90" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+      <text x="90" y="45" font-family="Manrope" font-size="11" font-weight="bold" fill="#0F172A" text-anchor="middle">1. Client Browses</text>
+      <text x="90" y="65" font-family="Manrope" font-size="8.5" fill="#64748B" text-anchor="middle">Discovers dresses & sarees</text>
+      <text x="90" y="80" font-family="Manrope" font-size="8.5" fill="#64748B" text-anchor="middle">on Phone or Laptop</text>
+      <text x="90" y="98" font-family="Manrope" font-size="8" font-weight="bold" fill="#D44498" text-anchor="middle">Views Real-time Stock</text>
+
+      <!-- Arrow 1 -->
+      <path d="M 170 65 L 200 65" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)" fill="none" />
+      <polygon points="200,65 194,61 194,69" fill="#94A3B8" />
+
+      <!-- Step 2 -->
+      <rect x="205" y="20" width="160" height="90" rx="6" fill="#FDF2F8" stroke="#F472B6" stroke-width="1.5" />
+      <text x="285" y="45" font-family="Manrope" font-size="11" font-weight="bold" fill="#831843" text-anchor="middle">2. Clicks WhatsApp</text>
+      <text x="285" y="65" font-family="Manrope" font-size="8.5" fill="#9D174D" text-anchor="middle">Product details & SKU</text>
+      <text x="285" y="80" font-family="Manrope" font-size="8.5" fill="#9D174D" text-anchor="middle">auto-sent to your phone</text>
+      <text x="285" y="98" font-family="Manrope" font-size="8" font-weight="bold" fill="#BE185D" text-anchor="middle">Zero Friction</text>
+
+      <!-- Arrow 2 -->
+      <path d="M 365 65 L 395 65" stroke="#94A3B8" stroke-width="2" fill="none" />
+      <polygon points="395,65 389,61 389,69" fill="#94A3B8" />
+
+      <!-- Step 3 -->
+      <rect x="400" y="20" width="160" height="90" rx="6" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5" />
+      <text x="480" y="45" font-family="Manrope" font-size="11" font-weight="bold" fill="#14532D" text-anchor="middle">3. Atelier Chat</text>
+      <text x="480" y="65" font-family="Manrope" font-size="8.5" fill="#166534" text-anchor="middle">Custom sizing, blouse fitting,</text>
+      <text x="480" y="80" font-family="Manrope" font-size="8.5" fill="#166534" text-anchor="middle">or instant UPI payment</text>
+      <text x="480" y="98" font-family="Manrope" font-size="8" font-weight="bold" fill="#15803D" text-anchor="middle">Warm Personal Care</text>
+
+      <!-- Arrow 3 -->
+      <path d="M 560 65 L 590 65" stroke="#94A3B8" stroke-width="2" fill="none" />
+      <polygon points="590,65 584,61 584,69" fill="#94A3B8" />
+
+      <!-- Step 4 -->
+      <rect x="595" y="20" width="135" height="90" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+      <text x="662" y="45" font-family="Manrope" font-size="11" font-weight="bold" fill="#0F172A" text-anchor="middle">4. Delivery</text>
+      <text x="662" y="65" font-family="Manrope" font-size="8.5" fill="#64748B" text-anchor="middle">Dispatched across India</text>
+      <text x="662" y="80" font-family="Manrope" font-size="8.5" fill="#64748B" text-anchor="middle">or picked up at Neendoor</text>
+      <text x="662" y="98" font-family="Manrope" font-size="8" font-weight="bold" fill="#475569" text-anchor="middle">Order Complete</text>
+    </svg>
+  </div>
+
+  <h2>2. Logging In & The Admin Dashboard</h2>
+  <div class="grid-2">
+    <div>
+      <h3>Accessing the Portal</h3>
+      <div class="card card-highlight">
+        <p><strong>Admin URL:</strong> <code style="color: #D44498;">https://fairyfindsboutique.store/admin</code></p>
+        <p><strong>Boutique Passkey:</strong> <code style="color: #BE185D;">fairyfinds@123</code> (or your custom password)</p>
+        <p style="font-size: 8.5pt; color: #555;">
+          You can open this link on your phone (iPhone or Android) or your desktop computer. Enter your passkey to access your stock and boutique settings.
+        </p>
+        <div class="card-tip" style="margin-top: 6px;">
+          <strong>Pro-Tip:</strong> On Safari (iPhone) or Chrome (Android), tap <em>"Add to Home Screen"</em> to create an app icon directly on your phone!
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>Dashboard Overview</h3>
+      <div class="card">
+        <p style="font-size: 8.5pt; color: #555;">
+          Once logged in, you will see your master overview showing:
+        </p>
+        <ul style="font-size: 8.5pt; padding-left: 16px; color: #444; margin-bottom: 6px;">
+          <li><strong>Total Products:</strong> Count of all dresses in the catalog.</li>
+          <li><strong>In-Stock Health:</strong> Instant alert on items low in stock.</li>
+          <li><strong>Quick Buttons:</strong> "+ Add Product", "Homepage CMS", and "Live Website".</li>
+        </ul>
+        <div class="card-note">
+          Click <strong>"View Live Storefront"</strong> at any time in the top right to verify how your store looks to the public.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left: 3.5px solid #D44498;">
+    <h3 style="margin-top: 0; color: #D44498;">The Admin Sidebar Menu</h3>
+    <div class="grid-3" style="font-size: 8pt; margin-top: 6px;">
+      <div><strong>🛍️ Products & Stock:</strong> Add, edit, price, or hide garments.</div>
+      <div><strong>🏷️ Categories:</strong> Garment types (Sarees, Kurithis, Blouses).</div>
+      <div><strong>✨ Collections:</strong> Curated edits (Festive, Bridal, Velvet).</div>
+      <div><strong>🎨 Homepage CMS:</strong> Edit banners, hero text & layout order.</div>
+      <div><strong>⭐ Customer Reviews:</strong> Add client reviews & star ratings.</div>
+      <div><strong>🌐 SEO & Discovery:</strong> Google search titles & keywords.</div>
+      <div><strong>⚙️ Store Settings:</strong> WhatsApp number, email & address.</div>
+      <div><strong>🧭 Navigation Menu:</strong> Top header & footer links.</div>
+      <div><strong>🔒 Sign Out:</strong> Securely log out when finished.</div>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <span>Fairy Finds Boutique • Neendoor, Kottayam</span>
+    <span>Page 2</span>
+  </div>
+</div>
+
+<!-- ==================== PAGE 3: ADDING & MANAGING PRODUCTS ==================== -->
+<div class="page">
+  <div class="doc-header">
+    <span>Fairy Finds Boutique • Store Owner Handbook</span>
+    <span>Section 3: Products & Inventory</span>
+  </div>
+
+  <h2>3. Adding & Managing Products (Your Main Day-to-Day Task)</h2>
+  <p>
+    Whether you receive a fresh batch of Banarasi silk sarees, finish a custom velvet lehenga, or create ready-to-wear kurtis, adding them to your website takes less than 2 minutes.
+  </p>
+
+  <!-- DIAGRAM 2: PRODUCT PUBLISHING WORKFLOW -->
+  <div class="diagram-box">
+    <div class="diagram-title">Visual Diagram: Step-by-Step Product Creation Flow</div>
+    <svg viewBox="0 0 740 110" style="width: 100%; max-height: 110px;" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="15" width="130" height="75" rx="5" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5" />
+      <text x="75" y="42" font-family="Manrope" font-size="10" font-weight="bold" fill="#0F172A" text-anchor="middle">1. Basic Details</text>
+      <text x="75" y="58" font-family="Manrope" font-size="8" fill="#64748B" text-anchor="middle">Name, Price, SKU</text>
+      <text x="75" y="72" font-family="Manrope" font-size="8" fill="#64748B" text-anchor="middle">& Category selection</text>
+
+      <path d="M 140 52 L 165 52" stroke="#94A3B8" stroke-width="2" fill="none" />
+      <polygon points="165,52 159,48 159,56" fill="#94A3B8" />
+
+      <rect x="170" y="15" width="130" height="75" rx="5" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5" />
+      <text x="235" y="42" font-family="Manrope" font-size="10" font-weight="bold" fill="#0F172A" text-anchor="middle">2. Story & Fabric</text>
+      <text x="235" y="58" font-family="Manrope" font-size="8" fill="#64748B" text-anchor="middle">Mulberry silk, velvet,</text>
+      <text x="235" y="72" font-family="Manrope" font-size="8" fill="#64748B" text-anchor="middle">dry clean care guide</text>
+
+      <path d="M 300 52 L 325 52" stroke="#94A3B8" stroke-width="2" fill="none" />
+      <polygon points="325,52 319,48 319,56" fill="#94A3B8" />
+
+      <rect x="330" y="15" width="130" height="75" rx="5" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5" />
+      <text x="395" y="42" font-family="Manrope" font-size="10" font-weight="bold" fill="#92400E" text-anchor="middle">3. Sizes & Stock</text>
+      <text x="395" y="58" font-family="Manrope" font-size="8" fill="#B45309" text-anchor="middle">S, M, L, XL or Free Size</text>
+      <text x="395" y="72" font-family="Manrope" font-size="8" font-weight="bold" fill="#92400E" text-anchor="middle">Set Inventory Count</text>
+
+      <path d="M 460 52 L 485 52" stroke="#94A3B8" stroke-width="2" fill="none" />
+      <polygon points="485,52 479,48 479,56" fill="#94A3B8" />
+
+      <rect x="490" y="15" width="115" height="75" rx="5" fill="#FDF2F8" stroke="#EC4899" stroke-width="1.5" />
+      <text x="547" y="42" font-family="Manrope" font-size="10" font-weight="bold" fill="#831843" text-anchor="middle">4. Photos</text>
+      <text x="547" y="58" font-family="Manrope" font-size="8" fill="#9D174D" text-anchor="middle">Upload high-res</text>
+      <text x="547" y="72" font-family="Manrope" font-size="8" fill="#9D174D" text-anchor="middle">front, drape & back</text>
+
+      <path d="M 605 52 L 625 52" stroke="#94A3B8" stroke-width="2" fill="none" />
+      <polygon points="625,52 619,48 619,56" fill="#94A3B8" />
+
+      <rect x="630" y="15" width="100" height="75" rx="5" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+      <text x="680" y="42" font-family="Manrope" font-size="10" font-weight="bold" fill="#14532D" text-anchor="middle">5. Publish!</text>
+      <text x="680" y="58" font-family="Manrope" font-size="8" fill="#166534" text-anchor="middle">Instant Live</text>
+      <text x="680" y="72" font-family="Manrope" font-size="8" fill="#166534" text-anchor="middle">in Store Catalog</text>
+    </svg>
+  </div>
+
+  <div class="step-row">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <div class="step-title">Navigate to Products & Stock</div>
+      <div class="step-desc">
+        Click <strong>"Products & Stock"</strong> in the sidebar. Click the bright pink <strong>"+ Add New Product"</strong> button at the top right.
+      </div>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <div class="step-title">Fill in Garment Essentials</div>
+      <div class="step-desc">
+        <strong>Product Name:</strong> Use an attractive title (e.g. <em>"Crimson Banarasi Katan Silk Saree"</em>).<br>
+        <strong>Product Code (SKU):</strong> Unique code for the atelier (e.g. <code>FF-RS-005</code>). Auto-generated for you!<br>
+        <strong>Price (₹):</strong> The retail price in Rupees (e.g. <code>18500</code>). No commas or symbols needed.<br>
+        <strong>Category & Collection:</strong> Select where this dress belongs (e.g. Category: <em>Sarees</em>; Collection: <em>Festive Edit</em>).
+      </div>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <div class="step-title">Fabric Composition & Care Guide (Important for Boutique Clients)</div>
+      <div class="step-desc">
+        Shoppers love details! Specify the fabric (e.g. <em>"100% Pure Mulberry Silk with Antique Gold Zari"</em>) and care instructions (e.g. <em>"Dry clean only. Store wrapped in pure muslin cloth."</em>). This builds trust and prestige.
+      </div>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <div class="step-title">Setting Size Variants & Stock Count</div>
+      <div class="step-desc">
+        You can add multiple sizes (e.g., <strong>S</strong>: 2 in stock, <strong>M</strong>: 3 in stock, <strong>L</strong>: 0 in stock) or simply choose <strong>"Free Size (Saree)"</strong>.<br>
+        <span style="color: #BE185D; font-weight: 600;">How Automatic "Sold Out" works:</span> When the stock reaches <code>0</code>, the website automatically shows an elegant <em>"Sold Out / Inquire on WhatsApp"</em> badge so you never disappoint a customer!
+      </div>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <div class="step-num">5</div>
+    <div class="step-content">
+      <div class="step-title">Uploading Photos & Featured Switch</div>
+      <div class="step-desc">
+        Click or drag up to 6 high-res photos into the upload area. The first photo is your master display image.<br>
+        Toggle <strong>"Feature on Homepage"</strong> to <code style="color: #15803D;">YES</code> if you want this garment showcased on the main front page!
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <span>Fairy Finds Boutique • Neendoor, Kottayam</span>
+    <span>Page 3</span>
+  </div>
+</div>
+
+<!-- ==================== PAGE 4: CATEGORIES, COLLECTIONS & HOMEPAGE CMS ==================== -->
+<div class="page">
+  <div class="doc-header">
+    <span>Fairy Finds Boutique • Store Owner Handbook</span>
+    <span>Section 4 & 5: Categories & Homepage CMS</span>
+  </div>
+
+  <h2>4. Categories vs. Curated Collections</h2>
+  <p>To keep your boutique organized like a luxury Parisian or Milanese fashion house, garments are organized in two ways:</p>
+
+  <div class="grid-2">
+    <div class="card card-highlight">
+      <h3 style="color: #D44498; margin-top: 0;">🏷️ Categories (Garment Types)</h3>
+      <p style="font-size: 8.5pt;">Permanent garment classifications that help shoppers filter your shop catalog:</p>
+      <ul style="font-size: 8.5pt; padding-left: 16px; color: #555;">
+        <li><strong>Sarees:</strong> Silk, Organza, Banarasi, Linen.</li>
+        <li><strong>Kurithis & Kurtas:</strong> Casual, Festive, Designer.</li>
+        <li><strong>Blouses & Tops:</strong> Hand-embroidered bridal tops.</li>
+        <li><strong>Dresses & Gowns:</strong> Western & fusion party wear.</li>
+      </ul>
+      <div class="card-tip">
+        <strong>Tip:</strong> You rarely need to change categories once set up.
+      </div>
+    </div>
+
+    <div class="card card-highlight">
+      <h3 style="color: #D44498; margin-top: 0;">✨ Collections (Curated Themes)</h3>
+      <p style="font-size: 8.5pt;">Seasonal or artistic themes that change throughout the year:</p>
+      <ul style="font-size: 8.5pt; padding-left: 16px; color: #555;">
+        <li><strong>Onam Festive Heritage Edit:</strong> Kasavu & gold zari.</li>
+        <li><strong>Emerald Velvet Bridal Story:</strong> Micro-velvet lehengas.</li>
+        <li><strong>Pastel Symphony:</strong> Soft lavender & peach georgette.</li>
+        <li><strong>Christian Wedding Atelier:</strong> Ivory & silver bespoke gowns.</li>
+      </ul>
+      <div class="card-tip">
+        <strong>Tip:</strong> Create new collections for festivals, seasons, or special drops!
+      </div>
+    </div>
+  </div>
+
+  <h2>5. Customizing the Homepage CMS (Without Coding)</h2>
+  <p>
+    The front page of your website is modular. You can change announcements, update banners, and rearrange sections in seconds from <strong>"Homepage CMS"</strong>.
+  </p>
+
+  <!-- DIAGRAM 3: HOMEPAGE MODULAR SECTIONS -->
+  <div class="diagram-box">
+    <div class="diagram-title">Visual Diagram: Modular Homepage Layout Sections</div>
+    <svg viewBox="0 0 740 100" style="width: 100%; max-height: 100px;" xmlns="http://www.w3.org/2000/svg">
+      <!-- Announcement Bar -->
+      <rect x="10" y="5" width="720" height="18" rx="3" fill="#D44498" />
+      <text x="370" y="17" font-family="Manrope" font-size="8" font-weight="bold" fill="#FFFFFF" text-anchor="middle">ANNOUNCEMENT BAR: "Bespoke Bridal Tailoring & Ready-to-Wear Delivery Across India"</text>
+
+      <!-- Hero Banner -->
+      <rect x="10" y="27" width="230" height="68" rx="4" fill="#1A1A1A" />
+      <text x="125" y="55" font-family="Cormorant Garamond" font-size="13" font-weight="bold" fill="#FFFFFF" text-anchor="middle">HERO BANNER</text>
+      <text x="125" y="72" font-family="Manrope" font-size="7.5" fill="#D44498" text-anchor="middle">Editorial Image & Main Headline</text>
+
+      <!-- Categories Showcase -->
+      <rect x="250" y="27" width="150" height="68" rx="4" fill="#F8FAFC" stroke="#CBD5E1" />
+      <text x="325" y="55" font-family="Manrope" font-size="10" font-weight="bold" fill="#0F172A" text-anchor="middle">CATEGORY GRID</text>
+      <text x="325" y="72" font-family="Manrope" font-size="7.5" fill="#64748B" text-anchor="middle">Sarees • Kurithis • Blouses</text>
+
+      <!-- Featured Couture -->
+      <rect x="410" y="27" width="160" height="68" rx="4" fill="#FDF2F8" stroke="#F472B6" />
+      <text x="490" y="55" font-family="Manrope" font-size="10" font-weight="bold" fill="#831843" text-anchor="middle">FEATURED COUTURE</text>
+      <text x="490" y="72" font-family="Manrope" font-size="7.5" fill="#BE185D" text-anchor="middle">Curated Bestsellers Grid</text>
+
+      <!-- Reviews -->
+      <rect x="580" y="27" width="150" height="68" rx="4" fill="#F0FDF4" stroke="#86EFAC" />
+      <text x="655" y="55" font-family="Manrope" font-size="10" font-weight="bold" fill="#14532D" text-anchor="middle">CLIENT REVIEWS</text>
+      <text x="655" y="72" font-family="Manrope" font-size="7.5" fill="#15803D" text-anchor="middle">5-Star Testimonials Slider</text>
+    </svg>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="margin-top: 0;">How to Reorder Sections</h3>
+      <p style="font-size: 8.5pt;">
+        Want customer reviews higher on the page? Or want to put Featured Products above Collections?
+      </p>
+      <ol style="font-size: 8.5pt; padding-left: 16px; color: #555;">
+        <li>Go to <strong>Homepage CMS</strong>.</li>
+        <li>Use the <strong>↑ Up</strong> and <strong>↓ Down</strong> arrow buttons next to any section.</li>
+        <li>Click <strong>"Save Layout"</strong>. Your live website updates immediately!</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top: 0;">How to Hide / Show Sections</h3>
+      <p style="font-size: 8.5pt;">
+        Don't have new reviews ready yet? Or want to temporarily hide the festival banner after Onam?
+      </p>
+      <ul style="font-size: 8.5pt; padding-left: 16px; color: #555;">
+        <li>Toggle the green <strong>"Visible"</strong> switch to <span style="color: #DC2626; font-weight: bold;">Hidden</span>.</li>
+        <li>The section instantly disappears from the public website without deleting your data.</li>
+        <li>Switch it back on whenever you are ready!</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <span>Fairy Finds Boutique • Neendoor, Kottayam</span>
+    <span>Page 4</span>
+  </div>
+</div>
+
+<!-- ==================== PAGE 5: REVIEWS, SETTINGS & WHATSAPP ==================== -->
+<div class="page">
+  <div class="doc-header">
+    <span>Fairy Finds Boutique • Store Owner Handbook</span>
+    <span>Section 6 & 7: Reviews & Store Details</span>
+  </div>
+
+  <h2>6. Customer Reviews & Client Testimonials</h2>
+  <p>
+    Nothing converts hesitant online brides faster than seeing real, glowing reviews from previous customers in Kottayam, Kochi, Bangalore, Dubai, and the US!
+  </p>
+
+  <div class="grid-2">
+    <div>
+      <div class="card card-highlight">
+        <h3 style="margin-top: 0;">Adding a New Client Review</h3>
+        <ol style="font-size: 8.5pt; padding-left: 16px; color: #555; line-height: 1.6;">
+          <li>Click <strong>"Customer Reviews"</strong> in the sidebar.</li>
+          <li>Click <strong>"+ Add Review"</strong>.</li>
+          <li>Enter the <strong>Client Name</strong> (e.g. <em>"Dr. Meera N."</em>).</li>
+          <li>Enter their <strong>Location</strong> (e.g. <em>"Kottayam, Kerala"</em> or <em>"Dubai, UAE"</em>).</li>
+          <li>Set the <strong>Star Rating</strong> (typically 5 Stars).</li>
+          <li>Paste their <strong>Feedback Quote</strong> (from WhatsApp or Instagram).</li>
+          <li>Optional: Upload a photo of the client wearing the outfit!</li>
+          <li>Click <strong>"Save Review"</strong>.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div>
+      <div class="card card-tip">
+        <strong>Best Practices for Reviews:</strong>
+        <ul style="font-size: 8.5pt; padding-left: 14px; margin-top: 4px; line-height: 1.5;">
+          <li>Highlight custom fit ("The blouse fit like a glove on the first try!").</li>
+          <li>Mention speedy delivery ("Delivered to Bangalore in 2 days").</li>
+          <li>Include NRI experiences ("Ordered from the UK for my sister's engagement, flawless stitching!").</li>
+        </ul>
+      </div>
+      <div class="card-note">
+        <strong>Did You Know?</strong> These reviews also generate Google Schema data automatically, helping your boutique display gold stars in search results!
+      </div>
+    </div>
+  </div>
+
+  <h2>7. Store Settings & WhatsApp Ordering Details</h2>
+  <p>
+    All your fundamental boutique information lives in <strong>"Store Settings"</strong>. If your WhatsApp phone number, shop timings, or address change, you can update them in seconds.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Setting Field</th>
+        <th style="width: 35%;">What it Controls</th>
+        <th style="width: 40%;">Example & Best Practice</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>WhatsApp Number</strong></td>
+        <td>The phone that receives all direct customer order chats and custom requests.</td>
+        <td><code>+91 62826 29144</code><br><span style="font-size: 7.5pt; color: #BE185D;">Always include country code (+91)</span></td>
+      </tr>
+      <tr>
+        <td><strong>Store Name</strong></td>
+        <td>Displays in browser tabs, receipts, and website header.</td>
+        <td><code>Fairy Finds Boutique</code></td>
+      </tr>
+      <tr>
+        <td><strong>Announcement Bar</strong></td>
+        <td>The highlight marquee strip running across the very top of the website.</td>
+        <td><code>"Bespoke Bridal Tailoring & Ready-to-Wear Delivery Across India • WhatsApp +91 62826 29144"</code></td>
+      </tr>
+      <tr>
+        <td><strong>Contact Email</strong></td>
+        <td>Public inquiries and business correspondence.</td>
+        <td><code>hello@fairyfindsboutique.com</code></td>
+      </tr>
+      <tr>
+        <td><strong>Instagram URL</strong></td>
+        <td>Links visitors directly to your Instagram profile.</td>
+        <td><code>https://instagram.com/fairyfinds.boutique</code></td>
+      </tr>
+      <tr>
+        <td><strong>Atelier Address</strong></td>
+        <td>Physical location shown on Contact page and Google Maps schema.</td>
+        <td><code>Neendoor, Kottayam, Kerala - 686601</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card-alert" style="margin-top: 10px;">
+    <strong>Crucial Check:</strong> If you change your WhatsApp number in Store Settings, test it immediately by opening your live website on your phone, clicking a product's "Order on WhatsApp" button, and confirming your WhatsApp opens with the pre-filled message!
+  </div>
+
+  <div class="doc-footer">
+    <span>Fairy Finds Boutique • Neendoor, Kottayam</span>
+    <span>Page 5</span>
+  </div>
+</div>
+
+<!-- ==================== PAGE 6: SEARCH ENGINES & AI DISCOVERY ==================== -->
+<div class="page">
+  <div class="doc-header">
+    <span>Fairy Finds Boutique • Store Owner Handbook</span>
+    <span>Section 8: Google & AI Discovery</span>
+  </div>
+
+  <h2>8. Search Engines (Google, Bing) & AI Discovery (ChatGPT, Perplexity)</h2>
+  <p>
+    Your website has an advanced, built-in <strong>SEO & Discovery Control Panel</strong> specifically tuned for women's fashion in Kerala, NRI bridal shopping, and AI answer engines.
+  </p>
+
+  <!-- DIAGRAM 4: SEARCH & AI DISCOVERY PIPELINE -->
+  <div class="diagram-box">
+    <div class="diagram-title">Visual Diagram: How Search Engines & AI Discover Your Boutique</div>
+    <svg viewBox="0 0 740 115" style="width: 100%; max-height: 115px;" xmlns="http://www.w3.org/2000/svg">
+      <!-- Step 1: Admin Save -->
+      <rect x="10" y="15" width="150" height="85" rx="5" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5" />
+      <text x="85" y="40" font-family="Manrope" font-size="10" font-weight="bold" fill="#0F172A" text-anchor="middle">1. You Save in Admin</text>
+      <text x="85" y="58" font-family="Manrope" font-size="8" fill="#64748B" text-anchor="middle">Set Title & Description</text>
+      <text x="85" y="72" font-family="Manrope" font-size="8" fill="#64748B" text-anchor="middle">Pick Keywords</text>
+      <text x="85" y="88" font-family="Manrope" font-size="8" font-weight="bold" fill="#D44498" text-anchor="middle">Instant on Website</text>
+
+      <path d="M 160 55 L 190 55" stroke="#94A3B8" stroke-width="2" fill="none" />
+      <polygon points="190,55 184,51 184,59" fill="#94A3B8" />
+
+      <!-- Step 2: Website Engine -->
+      <rect x="195" y="15" width="165" height="85" rx="5" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5" />
+      <text x="277" y="38" font-family="Manrope" font-size="10" font-weight="bold" fill="#92400E" text-anchor="middle">2. Automated Feeds</text>
+      <text x="277" y="54" font-family="Manrope" font-size="8" fill="#B45309" text-anchor="middle">/sitemap.xml (All engines)</text>
+      <text x="277" y="68" font-family="Manrope" font-size="8" fill="#B45309" text-anchor="middle">/llms.txt (ChatGPT & AI)</text>
+      <text x="277" y="84" font-family="Manrope" font-size="8" font-weight="bold" fill="#B45309" text-anchor="middle">ClothingStore Schema</text>
+
+      <path d="M 360 55 L 390 55" stroke="#94A3B8" stroke-width="2" fill="none" />
+      <polygon points="390,55 384,51 384,59" fill="#94A3B8" />
+
+      <!-- Step 3: Search & AI Crawlers -->
+      <rect x="395" y="15" width="165" height="85" rx="5" fill="#FDF2F8" stroke="#EC4899" stroke-width="1.5" />
+      <text x="477" y="38" font-family="Manrope" font-size="10" font-weight="bold" fill="#831843" text-anchor="middle">3. Crawlers Visit</text>
+      <text x="477" y="54" font-family="Manrope" font-size="8" fill="#9D174D" text-anchor="middle">Googlebot • Bingbot</text>
+      <text x="477" y="68" font-family="Manrope" font-size="8" fill="#9D174D" text-anchor="middle">GPTBot • PerplexityBot</text>
+      <text x="477" y="84" font-family="Manrope" font-size="8" font-weight="bold" fill="#BE185D" text-anchor="middle">Indexes Location & Stock</text>
+
+      <path d="M 560 55 L 590 55" stroke="#94A3B8" stroke-width="2" fill="none" />
+      <polygon points="590,55 584,51 584,59" fill="#94A3B8" />
+
+      <!-- Step 4: Customer Results -->
+      <rect x="595" y="15" width="135" height="85" rx="5" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" />
+      <text x="662" y="38" font-family="Manrope" font-size="10" font-weight="bold" fill="#14532D" text-anchor="middle">4. Customer Search</text>
+      <text x="662" y="54" font-family="Manrope" font-size="8" fill="#166534" text-anchor="middle">"Best boutique in Kottayam"</text>
+      <text x="662" y="68" font-family="Manrope" font-size="8" fill="#166534" text-anchor="middle">"Christian bridal saree"</text>
+      <text x="662" y="84" font-family="Manrope" font-size="8" font-weight="bold" fill="#15803D" text-anchor="middle">Fairy Finds Ranked #1</text>
+    </svg>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <h3>Why Google Doesn't Update Instantly</h3>
+      <div class="card card-alert">
+        <p style="font-size: 8.5pt; color: #78350F; margin-bottom: 4px;">
+          <strong>Important Fact:</strong> When you update a title or description in your admin panel, it is <strong>instantly live on your website</strong>. However, Google Search only updates when its crawler (Googlebot) revisits your URL.
+        </p>
+        <p style="font-size: 8pt; color: #92400E; margin-bottom: 0;">
+          Google saves a <em>cached copy</em> of your site. It can take anywhere from 24 hours to a few days for Google to refresh its search snippet.
+        </p>
+      </div>
+
+      <div class="card-tip">
+        <strong>How to Fast-Track Google (24–48 Hours):</strong><br>
+        1. Open <a href="https://search.google.com/search-console" style="color: #15803D; font-weight: bold;">Google Search Console</a>.<br>
+        2. Paste your page URL in the top search bar.<br>
+        3. Click <strong>"Request Indexing"</strong>. Google puts you at the front of the queue!
+      </div>
+    </div>
+
+    <div>
+      <h3>AI Search (ChatGPT, Perplexity & Copilot)</h3>
+      <div class="card card-highlight">
+        <p style="font-size: 8.5pt; color: #444;">
+          Today, thousands of shoppers ask AI: <em>"Where can I find a custom bridal blouse tailor in Kottayam?"</em>
+        </p>
+        <p style="font-size: 8.5pt; color: #555;">
+          Your website is equipped with <strong><code>/llms.txt</code></strong>—an international AI standard that provides structured knowledge directly to ChatGPT, SearchGPT, Perplexity AI, Claude, and Apple Intelligence.
+        </p>
+        <div class="card-note" style="margin-top: 6px;">
+          <strong>Bing & Copilot:</strong> Enter your <em>Bing Webmaster Token</em> in the Technical tab to ensure instant inclusion in Microsoft Copilot, Bing, and Yahoo!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <span>Fairy Finds Boutique • Neendoor, Kottayam</span>
+    <span>Page 6</span>
+  </div>
+</div>
+
+<!-- ==================== PAGE 7: PHOTO TIPS & FAQ ==================== -->
+<div class="page">
+  <div class="doc-header">
+    <span>Fairy Finds Boutique • Store Owner Handbook</span>
+    <span>Section 9 & 10: Photography & Troubleshooting</span>
+  </div>
+
+  <h2>9. Boutique Photography Guidelines (Maximize Sales)</h2>
+  <p>
+    You do not need an expensive photography studio! An iPhone or modern smartphone in good lighting will produce gorgeous luxury photos. Follow these 4 rules:
+  </p>
+
+  <div class="grid-4">
+    <div class="card" style="text-align: center; border-top: 3px solid #D44498;">
+      <div style="font-size: 18pt; margin-bottom: 4px;">☀️</div>
+      <div style="font-weight: 700; font-size: 8.5pt; color: #1A1A1A;">Natural Daylight</div>
+      <p style="font-size: 7.5pt; color: #666; margin-top: 4px;">
+        Shoot near large windows or an open doorway between 10 AM and 3 PM. Avoid yellow room bulbs.
+      </p>
+    </div>
+
+    <div class="card" style="text-align: center; border-top: 3px solid #D44498;">
+      <div style="font-size: 18pt; margin-bottom: 4px;">🏛️</div>
+      <div style="font-weight: 700; font-size: 8.5pt; color: #1A1A1A;">Clean Background</div>
+      <p style="font-size: 7.5pt; color: #666; margin-top: 4px;">
+        Use a neutral off-white, beige, or pale pastel wall. Keep the floor clean and uncluttered.
+      </p>
+    </div>
+
+    <div class="card" style="text-align: center; border-top: 3px solid #D44498;">
+      <div style="font-size: 18pt; margin-bottom: 4px;">📱</div>
+      <div style="font-weight: 700; font-size: 8.5pt; color: #1A1A1A;">Portrait (3:4 Ratio)</div>
+      <p style="font-size: 7.5pt; color: #666; margin-top: 4px;">
+        Always hold your phone vertically! Fashion garments look best in tall portrait orientation.
+      </p>
+    </div>
+
+    <div class="card" style="text-align: center; border-top: 3px solid #D44498;">
+      <div style="font-size: 18pt; margin-bottom: 4px;">🔍</div>
+      <div style="font-weight: 700; font-size: 8.5pt; color: #1A1A1A;">Detail Close-Up</div>
+      <p style="font-size: 7.5pt; color: #666; margin-top: 4px;">
+        Always include 1 close-up photo of the embroidery, zari weave, or neckline craftsmanship.
+      </p>
+    </div>
+  </div>
+
+  <h2>10. Frequently Asked Questions & Troubleshooting</h2>
+
+  <div class="card card-highlight">
+    <div style="font-weight: 700; color: #1A1A1A; font-size: 9pt;">Q1: A customer bought a saree in our Neendoor shop. How do I update the website?</div>
+    <div style="font-size: 8.5pt; color: #555; margin-top: 2px;">
+      <strong>Answer:</strong> Go to <strong>Products & Stock</strong>, click on the saree, reduce the stock count to <code>0</code> (or delete the item if it will never be restocked), and click <strong>"Update Product"</strong>. The website will immediately update!
+    </div>
+  </div>
+
+  <div class="card card-highlight">
+    <div style="font-weight: 700; color: #1A1A1A; font-size: 9pt;">Q2: How do I offer a temporary holiday sale or discount announcement?</div>
+    <div style="font-size: 8.5pt; color: #555; margin-top: 2px;">
+      <strong>Answer:</strong> Go to <strong>Store Settings</strong>, change the <strong>Announcement Bar</strong> text to: <em>"✨ Festive Season Special: Enjoy Complimentary Shipping on Orders Across Kerala!"</em>, and click Save. It appears across all pages instantly.
+    </div>
+  </div>
+
+  <div class="card card-highlight">
+    <div style="font-weight: 700; color: #1A1A1A; font-size: 9pt;">Q3: Can I manage the website while traveling using only my mobile phone?</div>
+    <div style="font-size: 8.5pt; color: #555; margin-top: 2px;">
+      <strong>Answer:</strong> Yes! The admin portal is 100% mobile-friendly. You can upload photos directly from your phone camera, adjust prices, edit stock, and toggle visibility from anywhere.
+    </div>
+  </div>
+
+  <div class="card card-highlight">
+    <div style="font-weight: 700; color: #1A1A1A; font-size: 9pt;">Q4: What should I do if a product photo appears sideways or blurry?</div>
+    <div style="font-size: 8.5pt; color: #555; margin-top: 2px;">
+      <strong>Answer:</strong> Make sure the photo was saved in standard orientation on your phone before uploading. For best results, use JPG or PNG images under 5MB each.
+    </div>
+  </div>
+
+  <!-- Support Footer Box -->
+  <div style="background-color: #1A1A1A; color: #FFFFFF; border-radius: 6px; padding: 10px 14px; margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <div style="font-size: 9.5pt; font-weight: 700; color: #FBCFE8;">Need Technical Assistance or Custom Features?</div>
+      <div style="font-size: 8pt; color: #CCCCCC;">Your website engineering team is always here to assist with new features, seasonal overhauls, or database backups.</div>
+    </div>
+    <div style="text-align: right; font-size: 8.5pt; font-weight: 700; color: #FFFFFF; flex-shrink: 0;">
+      Fairy Finds Web Team
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <span>Fairy Finds Boutique • Neendoor, Kottayam</span>
+    <span>Page 7 • End of Guide</span>
+  </div>
+</div>
+
+</body>
+</html>

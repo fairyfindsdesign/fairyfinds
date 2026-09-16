@@ -4,7 +4,7 @@ import { getProducts, getCategories, getCollections, getSettings } from '@/lib/d
 import ShopClient from '@/components/shop/ShopClient';
 import JsonLd from '@/components/seo/JsonLd';
 import { generateBreadcrumbSchema, generateItemListSchema } from '@/lib/seo/schema';
-import { SITE_URL } from '@/lib/seo/constants';
+import { SITE_URL, formatMetaTitle } from '@/lib/seo/constants';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -68,22 +68,24 @@ export async function generateMetadata({ searchParams }: ShopPageProps): Promise
   }
 
   const canonicalUrl = `${SITE_URL}/shop`;
-  const ogTitle = `${title} | Fairy Finds Boutique`;
+  const pageTitle = formatMetaTitle(title);
 
   return {
-    title,
+    title: {
+      absolute: pageTitle,
+    },
     description,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: ogTitle,
+      title: pageTitle,
       description,
       url: canonicalUrl,
     },
     twitter: {
       card: 'summary_large_image',
-      title: ogTitle,
+      title: pageTitle,
       description,
     },
   };

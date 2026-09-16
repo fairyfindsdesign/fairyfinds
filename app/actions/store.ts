@@ -17,6 +17,14 @@ import {
   updateServerSeoConfig,
 } from '@/lib/data/server-store';
 import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, SeoConfig, StoreSettings } from '@/lib/types';
+import { checkAdminSession } from './auth';
+
+async function assertAdmin() {
+  const isAuthed = await checkAdminSession();
+  if (!isAuthed) {
+    throw new Error('Unauthorized: Valid admin authentication required to perform this action.');
+  }
+}
 
 /**
  * Purges both layout and individual route caches to ensure
@@ -52,6 +60,7 @@ function purgeStorefrontCache() {
 
 export async function saveSettingsAction(settings: Partial<StoreSettings>) {
   try {
+    await assertAdmin();
     const result = await updateServerSettings(settings);
     purgeStorefrontCache();
     revalidatePath('/admin/settings', 'page');
@@ -65,6 +74,7 @@ export async function saveSettingsAction(settings: Partial<StoreSettings>) {
 
 export async function saveSeoConfigAction(seoConfig: Partial<SeoConfig>) {
   try {
+    await assertAdmin();
     const result = await updateServerSeoConfig(seoConfig);
     purgeStorefrontCache();
     revalidatePath('/admin/seo', 'page');
@@ -78,6 +88,7 @@ export async function saveSeoConfigAction(seoConfig: Partial<SeoConfig>) {
 
 export async function saveNavigationAction(navigation: NavItem[]) {
   try {
+    await assertAdmin();
     const result = await updateServerNavigation(navigation);
     purgeStorefrontCache();
     revalidatePath('/admin/navigation', 'page');
@@ -91,6 +102,7 @@ export async function saveNavigationAction(navigation: NavItem[]) {
 
 export async function saveProductAction(product: Partial<Product>) {
   try {
+    await assertAdmin();
     const result = await saveServerProduct(product);
     purgeStorefrontCache();
     const slug = result?.slug || product.slug;
@@ -108,6 +120,7 @@ export async function saveProductAction(product: Partial<Product>) {
 
 export async function deleteProductAction(id: string) {
   try {
+    await assertAdmin();
     const result = await deleteServerProduct(id);
     purgeStorefrontCache();
     revalidatePath('/admin/products', 'page');
@@ -121,6 +134,7 @@ export async function deleteProductAction(id: string) {
 
 export async function saveCategoryAction(category: Partial<Category>) {
   try {
+    await assertAdmin();
     const result = await saveServerCategory(category);
     purgeStorefrontCache();
     revalidatePath('/admin/categories', 'page');
@@ -138,6 +152,7 @@ export async function saveCategoryAction(category: Partial<Category>) {
 
 export async function deleteCategoryAction(id: string) {
   try {
+    await assertAdmin();
     const result = await deleteServerCategory(id);
     purgeStorefrontCache();
     revalidatePath('/admin/categories', 'page');
@@ -154,6 +169,7 @@ export async function deleteCategoryAction(id: string) {
 
 export async function saveCollectionAction(collection: Partial<Collection>) {
   try {
+    await assertAdmin();
     const result = await saveServerCollection(collection);
     purgeStorefrontCache();
     const slug = result?.slug || collection.slug;
@@ -171,6 +187,7 @@ export async function saveCollectionAction(collection: Partial<Collection>) {
 
 export async function deleteCollectionAction(id: string) {
   try {
+    await assertAdmin();
     const result = await deleteServerCollection(id);
     purgeStorefrontCache();
     revalidatePath('/admin/collections', 'page');
@@ -184,6 +201,7 @@ export async function deleteCollectionAction(id: string) {
 
 export async function reorderSectionsAction(orderedIds: string[]) {
   try {
+    await assertAdmin();
     const result = await reorderServerSections(orderedIds);
     purgeStorefrontCache();
     revalidatePath('/admin/homepage', 'page');
@@ -197,6 +215,7 @@ export async function reorderSectionsAction(orderedIds: string[]) {
 
 export async function toggleSectionVisibilityAction(id: string, isVisible: boolean) {
   try {
+    await assertAdmin();
     const result = await toggleServerSectionVisibility(id, isVisible);
     purgeStorefrontCache();
     revalidatePath('/admin/homepage', 'page');
@@ -210,6 +229,7 @@ export async function toggleSectionVisibilityAction(id: string, isVisible: boole
 
 export async function updateSectionContentAction(id: string, content: any) {
   try {
+    await assertAdmin();
     const result = await updateServerSectionContent(id, content);
     purgeStorefrontCache();
     revalidatePath('/admin/homepage', 'page');
@@ -223,6 +243,7 @@ export async function updateSectionContentAction(id: string, content: any) {
 
 export async function saveReviewsAction(reviews: CustomerReview[]) {
   try {
+    await assertAdmin();
     const result = await updateServerReviews(reviews);
     purgeStorefrontCache();
     revalidatePath('/admin/reviews', 'page');

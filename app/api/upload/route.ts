@@ -7,6 +7,15 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    // Require valid admin authentication to upload files
+    const session = request.cookies.get('admin_session');
+    if (session?.value !== 'authenticated') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Admin authentication required to upload files.' },
+        { status: 401 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
 

@@ -25,7 +25,20 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   return {
     rules: [
       {
-        userAgent: '*',
+        userAgent: [
+          '*',
+          'Googlebot',
+          'Bingbot',
+          'Slurp',
+          'DuckDuckBot',
+          'GPTBot',
+          'ChatGPT-User',
+          'OAI-SearchBot',
+          'PerplexityBot',
+          'ClaudeBot',
+          'Applebot',
+          'Applebot-Extended',
+        ],
         allow: '/',
         disallow: [
           '/admin',

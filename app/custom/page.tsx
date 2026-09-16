@@ -4,26 +4,29 @@ import { getSettings } from '@/lib/data/store';
 import CustomOrderFlow from '@/components/custom/CustomOrderFlow';
 import JsonLd from '@/components/seo/JsonLd';
 import { generateBreadcrumbSchema } from '@/lib/seo/schema';
-import { SITE_URL } from '@/lib/seo/constants';
+import { SITE_URL, formatMetaTitle } from '@/lib/seo/constants';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
   const customSeo = settings.seo_config?.pages?.custom;
   const canonicalBase = settings.seo_config?.global?.canonical_base || SITE_URL;
 
-  const title = customSeo?.title || 'Custom-Made Dresses & Bespoke Tailoring';
+  const rawTitle = customSeo?.title || 'Custom-Made Dresses & Bespoke Tailoring';
+  const title = formatMetaTitle(rawTitle);
   const description =
     customSeo?.description ||
     'Commission custom-made dresses, bridal sarees, lehengas, and bespoke tailored outfits with Fairy Finds Boutique in Kottayam, Kerala. One-on-one WhatsApp design consultations and delivery across India.';
 
   return {
-    title,
+    title: {
+      absolute: title,
+    },
     description,
     alternates: {
       canonical: `${canonicalBase}/custom`,
     },
     openGraph: {
-      title: `${title} | Fairy Finds Boutique`,
+      title,
       description,
       url: `${canonicalBase}/custom`,
     },

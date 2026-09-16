@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles, Scissors, ShieldCheck, Heart } from 'lucide-react';
-import { getHomepageSections, getProducts, getCategories, getReviews, getCollections } from '@/lib/data/store';
+import { getHomepageSections, getProducts, getCategories, getReviews, getCollections, getSettings } from '@/lib/data/store';
 import ProductCard from '@/components/ui/ProductCard';
 import ReviewsMarquee from '@/components/storefront/ReviewsMarquee';
 import HeroCarousel from '@/components/home/HeroCarousel';
@@ -11,20 +11,52 @@ import HorizontalScrollSection from '@/components/ui/HorizontalScrollSection';
 import { Metadata } from 'next';
 import { SITE_URL, DEFAULT_SEO } from '@/lib/seo/constants';
 
-export const metadata: Metadata = {
-  title: {
-    absolute: DEFAULT_SEO.title,
-  },
-  description: DEFAULT_SEO.description,
-  alternates: {
-    canonical: SITE_URL,
-  },
-  openGraph: {
-    title: DEFAULT_SEO.title,
-    description: DEFAULT_SEO.description,
-    url: SITE_URL,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  const seo = settings.seo_config;
+  const homeSeo = seo?.pages?.home;
+  const canonicalBase = seo?.global?.canonical_base || SITE_URL;
+
+  const title = homeSeo?.title || seo?.global?.site_title || DEFAULT_SEO.title;
+  const description = homeSeo?.description || seo?.global?.meta_description || DEFAULT_SEO.description;
+  const keywords = homeSeo?.keywords?.length ? homeSeo.keywords : (seo?.global?.keywords || DEFAULT_SEO.keywords);
+
+  const ogTitle = seo?.social?.og_title || title;
+  const ogDescription = seo?.social?.og_description || description;
+  const ogImage = seo?.social?.og_image
+    ? (seo.social.og_image.startsWith('http') ? seo.social.og_image : `${canonicalBase}${seo.social.og_image.startsWith('/') ? '' : '/'}${seo.social.og_image}`)
+    : `${canonicalBase}/og-image.jpg`;
+
+  return {
+    title: {
+      absolute: title,
+    },
+    description,
+    keywords,
+    alternates: {
+      canonical: canonicalBase,
+    },
+    openGraph: {
+      title: ogTitle,
+      description: ogDescription,
+      url: canonicalBase,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: (seo?.social?.twitter_card as any) || 'summary_large_image',
+      title: ogTitle,
+      description: ogDescription,
+      images: [ogImage],
+    },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Dynamic for CMS updates

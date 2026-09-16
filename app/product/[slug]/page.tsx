@@ -18,7 +18,10 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const [product, settings] = await Promise.all([
+    getProductBySlug(slug),
+    getSettings().catch(() => null),
+  ]);
 
   if (!product) {
     return {
@@ -27,6 +30,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     };
   }
 
+  const canonicalBase = settings?.seo_config?.global?.canonical_base || SITE_URL;
   const title = product.name;
 
   // Construct a rich, unique meta description using actual garment details
@@ -41,13 +45,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
   const metaDescription = `${product.name}${detailsText}: ${cleanDescription.slice(0, 140)}... Available with personal WhatsApp ordering and all-India shipping from Fairy Finds Boutique.`;
 
-  const canonicalUrl = `${SITE_URL}/product/${product.slug}`;
+  const canonicalUrl = `${canonicalBase}/product/${product.slug}`;
 
   const primaryImage = product.images?.[0]
     ? product.images[0].startsWith('http')
       ? product.images[0]
-      : `${SITE_URL}${product.images[0].startsWith('/') ? product.images[0] : `/${product.images[0]}`}`
-    : `${SITE_URL}/logo.png`;
+      : `${canonicalBase}${product.images[0].startsWith('/') ? product.images[0] : `/${product.images[0]}`}`
+    : `${canonicalBase}/logo.png`;
 
   const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock_quantity || 0), 0) ?? 0;
   const inStock = totalStock > 0;

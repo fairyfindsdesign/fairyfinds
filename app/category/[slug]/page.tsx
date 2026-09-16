@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { getCategories, getProducts } from '@/lib/data/store';
+import { getCategories, getProducts, getSettings } from '@/lib/data/store';
 import ProductCard from '@/components/ui/ProductCard';
 import JsonLd from '@/components/seo/JsonLd';
 import { generateBreadcrumbSchema, generateItemListSchema } from '@/lib/seo/schema';
@@ -20,12 +20,17 @@ interface CategoryPageProps {
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const categories = await getCategories();
+  const [categories, settings] = await Promise.all([
+    getCategories(),
+    getSettings().catch(() => null),
+  ]);
   const category = categories.find((c) => c.slug.toLowerCase() === slug.toLowerCase());
 
   if (!category) {
     return { title: 'Category Not Found' };
   }
+
+  const canonicalBase = settings?.seo_config?.global?.canonical_base || SITE_URL;
 
   // Curated natural titles & descriptions based on search intent
   let title = category.name;
@@ -52,7 +57,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
       'Intricately tailored blouses and structured tops designed to elevate any ensemble. Fairy Finds Boutique, Kottayam, Kerala.';
   }
 
-  const canonicalUrl = `${SITE_URL}/category/${category.slug}`;
+  const canonicalUrl = `${canonicalBase}/category/${category.slug}`;
   const ogTitle = `${title} | Fairy Finds Boutique`;
 
   return {

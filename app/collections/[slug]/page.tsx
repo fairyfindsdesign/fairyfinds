@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { getCollectionBySlug, getProducts } from '@/lib/data/store';
+import { getCollectionBySlug, getProducts, getSettings } from '@/lib/data/store';
 import ProductCard from '@/components/ui/ProductCard';
 import JsonLd from '@/components/seo/JsonLd';
 import { generateBreadcrumbSchema, generateItemListSchema } from '@/lib/seo/schema';
@@ -20,7 +20,10 @@ interface CollectionPageProps {
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const collection = await getCollectionBySlug(slug);
+  const [collection, settings] = await Promise.all([
+    getCollectionBySlug(slug),
+    getSettings().catch(() => null),
+  ]);
 
   if (!collection) {
     return {
@@ -29,12 +32,14 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
     };
   }
 
+  const canonicalBase = settings?.seo_config?.global?.canonical_base || SITE_URL;
+
   const title = `${collection.name} Collection`;
   const description =
     collection.description ||
     `Explore the ${collection.name} collection at Fairy Finds Boutique in Kottayam, Kerala. Curated artisanal women\'s fashion with all-India shipping.`;
 
-  const canonicalUrl = `${SITE_URL}/collections/${collection.slug}`;
+  const canonicalUrl = `${canonicalBase}/collections/${collection.slug}`;
   const ogTitle = `${collection.name} Collection | Fairy Finds Boutique`;
 
   return {

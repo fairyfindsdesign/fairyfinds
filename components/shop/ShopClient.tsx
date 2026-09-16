@@ -104,13 +104,13 @@ export default function ShopClient({
       {/* Header Banner */}
       <div className="border-b border-neutral-200 pb-8 mb-10">
         <p className="text-xs uppercase tracking-[0.25em] text-[#FF55D2] font-semibold mb-2">
-          READY-TO-WEAR ATELIER
+          READY-TO-WEAR BOUTIQUE
         </p>
         <h1 className="font-serif text-4xl sm:text-5xl text-[#1A1A1A] font-light">
           The Ready-Made Collection
         </h1>
         <p className="text-sm text-neutral-500 mt-2 font-light max-w-2xl">
-          Carefully designed garments available in standard sizes. Select your size, review your bag, and complete your order seamlessly through WhatsApp.
+          Carefully designed ready-to-wear women's garments from Fairy Finds Boutique in Kottayam. Select your size, review your bag, and complete your order seamlessly through WhatsApp.
         </p>
       </div>
 

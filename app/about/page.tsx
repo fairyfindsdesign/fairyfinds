@@ -5,7 +5,7 @@ import { Sparkles, Scissors, Heart, ArrowRight } from 'lucide-react';
 
 import { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
-import { generateBreadcrumbSchema } from '@/lib/seo/schema';
+import { generateBreadcrumbSchema, generateFaqSchema } from '@/lib/seo/schema';
 import { SITE_URL, formatMetaTitle } from '@/lib/seo/constants';
 import { getSettings } from '@/lib/data/store';
 
@@ -44,6 +44,34 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+const faqs = [
+  {
+    question: 'Where is Fairy Finds Boutique located?',
+    answer:
+      'Fairy Finds Boutique is located in Neendoor, Kottayam, Kerala, India. We serve clients across Kottayam, throughout Kerala, and ship across India and worldwide.',
+  },
+  {
+    question: 'What types of clothing does Fairy Finds offer?',
+    answer:
+      'We offer curated ready-to-wear women\'s fashion—including designer sarees, kurtis, dresses, and festive sets—as well as bespoke custom-tailored outfits and bridal wear.',
+  },
+  {
+    question: 'Do you offer custom stitching and bridal blouse embroidery in Kottayam?',
+    answer:
+      'Yes, we specialize in custom stitching, bespoke bridal trousseaus, hand-embroidered wedding blouses, and made-to-measure tailoring with personalized 1-on-1 consultations via WhatsApp.',
+  },
+  {
+    question: 'How can I place an order?',
+    answer:
+      'You can browse our collections on this website, select your pieces, and complete your order seamlessly with our design team through WhatsApp.',
+  },
+  {
+    question: 'Do you ship across India and internationally?',
+    answer:
+      'Yes, we provide reliable express courier shipping to every state in India, as well as international shipping for overseas clients and NRI wedding shoppers.',
+  },
+];
+
 export default function AboutPage() {
   const breadcrumbs = [
     { name: 'Home', url: '/' },
@@ -53,16 +81,17 @@ export default function AboutPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
       <JsonLd data={generateBreadcrumbSchema(breadcrumbs)} id="about-breadcrumbs-jsonld" />
+      <JsonLd data={generateFaqSchema(faqs)} id="about-faq-jsonld" />
       {/* Editorial Title */}
       <div className="text-center max-w-3xl mx-auto mb-16">
         <p className="text-xs uppercase tracking-[0.25em] text-[#FF55D2] font-semibold mb-2">
-          ABOUT THE ATELIER
+          ABOUT FAIRY FINDS BOUTIQUE
         </p>
         <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-[#1A1A1A] font-light leading-tight">
           Artisanal Craftsmanship Meets Modern Femininity
         </h1>
         <p className="mt-4 text-sm sm:text-base text-neutral-600 font-light leading-relaxed">
-          Fairy Finds Boutique was founded with a singular purpose: to bring graceful, fluid silhouettes and traditional textile artistry into the contemporary wardrobe.
+          Rooted in Neendoor, Kottayam, Fairy Finds Boutique was founded with a singular purpose: to bring graceful, fluid silhouettes, bridal couture, and traditional textile artistry into the contemporary wardrobe.
         </p>
       </div>
 
@@ -87,7 +116,7 @@ export default function AboutPage() {
             Timeless Elegance, Never Mass Produced
           </h2>
           <p className="text-sm text-neutral-600 leading-relaxed font-light">
-            Every garment at Fairy Finds is created in limited runs or crafted as a bespoke commission. We believe true luxury lies in the intention behind each stitch, the drape of pure mulberry silks, and the comfort of garments tailored to celebrate the feminine form.
+            Based in Kottayam, Kerala, every garment at Fairy Finds Boutique is created in limited runs or crafted as an individualized custom bridal order. We believe true luxury lies in the intention behind each stitch, the drape of pure fabrics, and the comfort of garments tailored to celebrate the feminine form.
           </p>
           <p className="text-sm text-neutral-600 leading-relaxed font-light">
             Whether choosing from our curated ready-to-wear edit or commissioning a custom bridal ensemble, our clients receive personalized styling attention through direct one-on-one communication on WhatsApp.
@@ -129,7 +158,7 @@ export default function AboutPage() {
             <Scissors className="w-6 h-6 text-[#FF55D2]" />
             <h3 className="font-serif text-xl font-medium text-[#1A1A1A]">Bespoke Made-to-Measure</h3>
             <p className="text-xs text-neutral-600 leading-relaxed font-light">
-              Collaborative atelier commissions for bridals, special celebrations, and couture wear designed to individual measurements.
+              Collaborative bespoke commissions for bridal wear, wedding sarees, custom blouse embroidery, and festive couture designed to individual measurements.
             </p>
           </div>
 
@@ -140,6 +169,34 @@ export default function AboutPage() {
               No automated bots or impersonal checkouts. You converse directly with our stylists to guarantee delight with every order.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="mt-24 border-t border-neutral-200 pt-16">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <p className="text-xs uppercase tracking-[0.25em] text-[#FF55D2] font-semibold mb-2">
+            FREQUENTLY ASKED QUESTIONS
+          </p>
+          <h2 className="font-serif text-3xl sm:text-4xl text-[#1A1A1A] font-light">
+            Questions & Answers
+          </h2>
+          <p className="mt-2 text-xs sm:text-sm text-neutral-500 font-light">
+            Helpful information regarding our boutique location, custom stitching services, and ordering.
+          </p>
+        </div>
+
+        <div className="max-w-3xl mx-auto divide-y divide-neutral-200 border-y border-neutral-200">
+          {faqs.map((faq, idx) => (
+            <div key={idx} className="py-6 space-y-2">
+              <h3 className="font-serif text-lg sm:text-xl font-normal text-[#1A1A1A]">
+                {faq.question}
+              </h3>
+              <p className="text-xs sm:text-sm text-neutral-600 font-light leading-relaxed">
+                {faq.answer}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
 

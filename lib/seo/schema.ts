@@ -51,19 +51,15 @@ export function generateBoutiqueSchema(settings?: Partial<StoreSettings>) {
       postalCode: local?.postal_code || BUSINESS_INFO.address.postalCode,
       addressCountry: local?.address_country || BUSINESS_INFO.address.addressCountry,
     },
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: local?.latitude || BUSINESS_INFO.geo.latitude,
-      longitude: local?.longitude || BUSINESS_INFO.geo.longitude,
-    },
-    openingHoursSpecification: [
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-        opens: '10:00',
-        closes: '19:00',
-      },
-    ],
+    ...(local?.latitude && local?.longitude
+      ? {
+          geo: {
+            '@type': 'GeoCoordinates',
+            latitude: local.latitude,
+            longitude: local.longitude,
+          },
+        }
+      : {}),
     areaServed: BUSINESS_INFO.areaServed,
     sameAs: [instagram].filter(Boolean),
   };
@@ -249,5 +245,23 @@ export function generateSiteNavigationSchema(siteUrl = SITE_URL) {
         url: `${siteUrl}/contact`,
       },
     ],
+  };
+}
+
+/**
+ * Generates Schema.org FAQPage JSON-LD
+ */
+export function generateFaqSchema(faqs: { question: string; answer: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
   };
 }

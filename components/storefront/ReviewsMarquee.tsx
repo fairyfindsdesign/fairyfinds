@@ -77,7 +77,7 @@ export default function ReviewsMarquee({
 
   // Duplicate the reviews array to create an infinite, seamless loop for desktop marquee
   const marqueeItems = [...visibleReviews, ...visibleReviews];
-  const badgeLabel = badge || subtitle || 'Client Voices & Atelier Love';
+  const badgeLabel = badge || subtitle || 'Client Voices & Boutique Love';
 
   return (
     <section className="py-12 sm:py-16 md:py-28 bg-[#FFFFFF] border-b border-neutral-200 overflow-hidden relative">

@@ -46,7 +46,7 @@ export default async function CustomMadePage() {
 
   const breadcrumbs = [
     { name: 'Home', url: '/' },
-    { name: 'Custom-Made Atelier', url: '/custom' },
+    { name: 'Custom Tailoring', url: '/custom' },
   ];
 
   return (

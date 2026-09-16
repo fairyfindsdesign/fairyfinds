@@ -1,7 +1,7 @@
 {
   "settings": {
     "whatsapp_number": "6282629144",
-    "store_name": "Fairy Finds ",
+    "store_name": "Fairy Finds Boutique",
     "contact_email": "hello@fairyfindsboutique.com",
     "instagram_url": "https://instagram.com/fairyfinds.boutique",
     "address": "Fairy Finds Boutique, Neendoor, Kottayam, Kerala",
@@ -923,7 +923,7 @@
           {
             "id": "slide-2",
             "heading": "Regal Heritage Silk Drapes & Festive Edits",
-            "badge": "Atelier Signature Sarees",
+            "badge": "Signature Designer Sarees",
             "description": "Handwoven pure mulberry silk sarees and bridal lehengas featuring traditional gold zari borders and intricate hand finishes.",
             "button_text": "Explore Saree Edit",
             "button_link": "/collections/red-saree",
@@ -951,7 +951,7 @@
       "id": "sec-featured-collection",
       "section_type": "FEATURED_COLLECTIONS",
       "title": "Featured Collections & Highlights",
-      "subtitle": "FEATURED ATELIER EDITS",
+      "subtitle": "FEATURED BOUTIQUE EDITS",
       "content": {
         "heading": "Featured Collections & Highlights",
         "description": "Hand-curated capsule edits and signature drapes crafted in limited batches for celebratory grace.",
@@ -966,10 +966,10 @@
       "id": "sec-reviews",
       "section_type": "REVIEWS",
       "title": "Client Reviews & Testimonials",
-      "subtitle": "CLIENT VOICES & ATELIER LOVE",
+      "subtitle": "CLIENT VOICES & BOUTIQUE LOVE",
       "content": {
         "heading": "Cherished by Our Muses",
-        "badge": "Client Voices & Atelier Love",
+        "badge": "Client Voices & Boutique Love",
         "description": "Authentic stories from patrons who have celebrated their most treasured moments in our artisanal silks and bespoke garments."
       },
       "display_order": 3,
@@ -978,10 +978,10 @@
     {
       "id": "sec-featured-products",
       "section_type": "FEATURED_PRODUCTS",
-      "title": "Featured Atelier Pieces",
+      "title": "Featured Boutique Pieces",
       "subtitle": "HANDPICKED BY DESIGNER",
       "content": {
-        "heading": "Featured Atelier Pieces",
+        "heading": "Featured Boutique Pieces",
         "description": "Curated ready-to-wear highlights and couture masterpieces hand-selected for the season.",
         "button_text": "View Entire Catalog",
         "button_link": "/shop"
@@ -995,7 +995,7 @@
       "title": "New Arrivals",
       "subtitle": "THE LATEST EDIT",
       "content": {
-        "heading": "Fresh Additions to the Atelier",
+        "heading": "Fresh Additions to the Boutique",
         "description": "Handcrafted garments in limited batches, available for immediate WhatsApp ordering.",
         "product_limit": 4,
         "button_text": "View All Products",
@@ -1050,7 +1050,7 @@
       "customer_name": "Nivanka Rathnayake",
       "avatar_url": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=200",
       "rating": 5,
-      "comment": "Fairy Finds is my go-to atelier now. The Banarasi silk crop top paired effortlessly with both my ethnic skirts and modern tailored trousers. 10/10 craftsmanship.",
+      "comment": "Fairy Finds is my go-to boutique now. The Banarasi silk crop top paired effortlessly with both my ethnic skirts and modern tailored trousers. 10/10 craftsmanship.",
       "location": "Mount Lavinia",
       "tag": "Tops & Blouses Edit",
       "is_visible": true,

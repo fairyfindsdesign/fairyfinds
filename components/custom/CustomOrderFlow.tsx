@@ -40,7 +40,7 @@ export default function CustomOrderFlow({ settings }: CustomOrderFlowProps) {
       <div className="text-center max-w-3xl mx-auto mb-16">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#FAF9F6] border border-neutral-200 text-xs uppercase tracking-widest text-[#FF55D2] font-semibold mb-4">
           <Scissors className="w-3.5 h-3.5" />
-          <span>Bespoke Atelier Consultation</span>
+          <span>Bespoke Tailoring & Design Consultation</span>
         </div>
         <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-[#1A1A1A] font-light leading-tight">
           Custom Made to Your Measurements
@@ -56,7 +56,7 @@ export default function CustomOrderFlow({ settings }: CustomOrderFlowProps) {
           {
             step: '01',
             title: 'Design Consultation',
-            desc: 'Fill out your style preferences below and start a direct WhatsApp chat with our atelier stylist.',
+            desc: 'Fill out your style preferences below and start a direct WhatsApp chat with our boutique designer.',
           },
           {
             step: '02',
@@ -247,14 +247,14 @@ export default function CustomOrderFlow({ settings }: CustomOrderFlowProps) {
         <div className="lg:col-span-5 relative bg-neutral-100 min-h-[400px]">
           <Image
             src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=1000"
-            alt="Atelier Tailoring Work"
+            alt="Bespoke Tailoring and Bridal Embroidery - Fairy Finds Boutique"
             fill
             sizes="(max-width: 1024px) 100vw, 500px"
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 text-white">
             <p className="text-xs uppercase tracking-widest text-[#FF55D2] font-semibold mb-1">
-              Atelier Commitment
+              Boutique Commitment
             </p>
             <h3 className="font-serif text-2xl font-light">
               Every Stitch Tells Your Story

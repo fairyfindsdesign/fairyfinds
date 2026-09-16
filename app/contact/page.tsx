@@ -86,7 +86,7 @@ export default async function ContactPage() {
           We Are Delighted to Assist You
         </h1>
         <p className="mt-3 text-sm text-neutral-500 font-light leading-relaxed">
-          For styling guidance, size verification, or custom commission inquiries, our atelier team is available on WhatsApp and email.
+          For styling guidance, size verification, or custom commission inquiries, our boutique team is available on WhatsApp and email.
         </p>
       </div>
 
@@ -97,7 +97,7 @@ export default async function ContactPage() {
             <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700">
               <MessageCircle className="w-6 h-6" />
             </div>
-            <h3 className="font-serif text-2xl text-[#1A1A1A] font-medium">WhatsApp Atelier</h3>
+            <h3 className="font-serif text-2xl text-[#1A1A1A] font-medium">WhatsApp Boutique Desk</h3>
             <p className="text-xs text-neutral-600 leading-relaxed font-light">
               Immediate replies for order confirmations, custom fittings, and inquiries.
             </p>
@@ -139,13 +139,13 @@ export default async function ContactPage() {
           </a>
         </div>
 
-        {/* Atelier Location Card */}
+        {/* Boutique Location Card */}
         <div className="p-8 bg-[#FAF9F6] border border-neutral-200 flex flex-col justify-between space-y-6">
           <div className="space-y-3">
             <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center text-[#1A1A1A]">
               <MapPin className="w-6 h-6" />
             </div>
-            <h3 className="font-serif text-2xl text-[#1A1A1A] font-medium">Atelier Location</h3>
+            <h3 className="font-serif text-2xl text-[#1A1A1A] font-medium">Boutique Location</h3>
             <p className="text-xs text-neutral-600 leading-relaxed font-light">
               {settings.address}
             </p>

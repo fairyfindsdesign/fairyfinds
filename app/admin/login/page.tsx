@@ -55,7 +55,7 @@ function AdminLoginForm() {
             Fairy Finds
           </span>
           <span className="block text-[10px] tracking-[0.35em] text-neutral-400 uppercase font-sans mt-0.5">
-            Boutique Atelier
+            Boutique
           </span>
         </Link>
         <h2 className="mt-6 font-serif text-2xl text-[#1A1A1A] font-light">

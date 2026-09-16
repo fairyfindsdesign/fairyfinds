@@ -208,7 +208,7 @@ export default function CheckoutClient({ settings }: CheckoutClientProps) {
           <div className="p-4 bg-neutral-50 border border-neutral-200 text-xs text-neutral-600 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
             <span>
-              All pieces are checked and steamed by our atelier team prior to courier dispatch.
+              All pieces are checked and steamed by our boutique team prior to courier dispatch.
             </span>
           </div>
         </div>

@@ -155,7 +155,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
           <div className="py-20 text-center bg-[#FAF9F6] p-8 border border-neutral-200">
             <h2 className="font-serif text-2xl text-[#1A1A1A] mb-2">Collection Arriving Soon</h2>
             <p className="text-xs text-neutral-500 mb-6">
-              New couture pieces for this collection are currently being handcrafted in the atelier.
+              New couture pieces for this collection are currently being handcrafted in the boutique studio.
             </p>
             <Link
               href="/shop"

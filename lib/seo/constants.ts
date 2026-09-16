@@ -18,10 +18,6 @@ export const BUSINESS_INFO = {
     postalCode: '686601',
     addressCountry: 'IN',
   },
-  geo: {
-    latitude: '9.6582',
-    longitude: '76.5445',
-  },
   areaServed: [
     {
       '@type': 'State',
@@ -35,7 +31,6 @@ export const BUSINESS_INFO = {
   priceRange: '₹₹',
   currenciesAccepted: 'INR',
   paymentAccepted: 'Cash, UPI, Credit Card, Net Banking',
-  openingHours: 'Mo-Sa 10:00-19:00',
   instagram: 'https://instagram.com/fairyfinds.boutique',
   sameAs: [
     'https://instagram.com/fairyfinds.boutique',

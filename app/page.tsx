@@ -88,7 +88,7 @@ export default async function HomePage() {
                 key={section.id}
                 id="new-arrivals"
                 eyebrow={section.subtitle || 'THE LATEST EDIT'}
-                title={section.content.heading || 'Fresh Additions to the Atelier'}
+                title={section.content.heading || 'Fresh Additions to the Boutique'}
                 description={
                   section.content.description ||
                   'Handcrafted garments in limited batches, available for immediate WhatsApp ordering.'
@@ -121,7 +121,7 @@ export default async function HomePage() {
                   badge={
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-neutral-200 text-[11px] uppercase tracking-widest text-[#FF55D2] font-semibold">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>{section.subtitle || 'FEATURED ATELIER EDITS'}</span>
+                      <span>{section.subtitle || 'FEATURED BOUTIQUE EDITS'}</span>
                     </div>
                   }
                   title={section.content.heading || 'Featured Collections & Highlights'}
@@ -157,7 +157,7 @@ export default async function HomePage() {
                                 col.image_url ||
                                 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=800'
                               }
-                              alt={col.name}
+                              alt={`${col.name} - Fairy Finds Boutique`}
                               fill
                               sizes="(max-width: 640px) 280px, (max-width: 1024px) 340px, 380px"
                               className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -181,7 +181,7 @@ export default async function HomePage() {
                               )}
                               <div className="mt-4 flex items-center justify-between pt-3 border-t border-white/20 text-xs">
                                 <span className="text-[11px] text-neutral-300 uppercase tracking-wider">
-                                  {count} {count === 1 ? 'Piece' : 'Pieces'} in Atelier
+                                  {count} {count === 1 ? 'Piece' : 'Pieces'} in Boutique
                                 </span>
                                 <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-widest text-[#FF55D2] font-semibold group-hover:translate-x-1 transition-transform">
                                   View Collection <ArrowRight className="w-3.5 h-3.5" />
@@ -206,7 +206,7 @@ export default async function HomePage() {
                       section.content.image_url ||
                       'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1600'
                     }
-                    alt={section.content.heading || 'Collection Banner'}
+                    alt={`${section.content.heading || 'Featured Collection'} - Fairy Finds Boutique`}
                     fill
                     className="object-cover object-center filter grayscale-25"
                   />
@@ -251,7 +251,7 @@ export default async function HomePage() {
                     <span>{section.subtitle || 'HANDPICKED BY DESIGNER'}</span>
                   </div>
                 }
-                title={section.content.heading || 'Featured Atelier Pieces'}
+                title={section.content.heading || 'Featured Boutique Pieces'}
                 description={
                   section.content.description ||
                   'Curated ready-to-wear highlights and couture masterpieces hand-selected for the season.'
@@ -299,7 +299,7 @@ export default async function HomePage() {
                           cat.image_url ||
                           'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=600'
                         }
-                        alt={cat.name}
+                        alt={`${cat.name} Collection - Fairy Finds Boutique`}
                         fill
                         sizes="(max-width: 640px) 220px, (max-width: 1024px) 260px, 290px"
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -329,7 +329,7 @@ export default async function HomePage() {
                     <div className="lg:col-span-7 space-y-6">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-neutral-200 text-[11px] uppercase tracking-widest text-[#FF55D2] font-semibold">
                         <Scissors className="w-3.5 h-3.5" />
-                        <span>Bespoke Tailoring Atelier</span>
+                        <span>Bespoke Tailoring Studio</span>
                       </div>
 
                       <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#1A1A1A] font-light leading-tight">
@@ -385,7 +385,7 @@ export default async function HomePage() {
                           section.content.image_url ||
                           'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=800'
                         }
-                        alt="Bespoke Couture Design"
+                        alt="Bespoke Tailoring and Bridal Couture - Fairy Finds Boutique"
                         fill
                         className="object-cover"
                         sizes="(max-width: 1024px) 100vw, 400px"

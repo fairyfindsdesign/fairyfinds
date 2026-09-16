@@ -44,7 +44,7 @@ export default function Footer({ settings, collections }: FooterProps) {
               <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden shrink-0 border border-neutral-700/80 group-hover:border-[#FF55D2] transition-colors">
                 <Image
                   src="/logo-white.png"
-                  alt="Fairy Finds Logo"
+                  alt="Fairy Finds Boutique Logo"
                   fill
                   sizes="40px"
                   className="object-contain"
@@ -52,15 +52,15 @@ export default function Footer({ settings, collections }: FooterProps) {
               </div>
               <div className="flex flex-col text-left">
                 <span className="font-serif text-xl sm:text-2xl tracking-[0.2em] font-semibold text-white group-hover:text-[#FF55D2] transition-colors uppercase leading-tight">
-                  {settings?.store_name?.trim() || 'Fairy Finds'}
+                  {settings?.store_name?.trim() || 'Fairy Finds Boutique'}
                 </span>
                 <span className="block text-[9px] tracking-[0.35em] text-neutral-400 uppercase font-sans">
-                  Boutique Atelier
+                  Boutique
                 </span>
               </div>
             </Link>
             <p className="text-neutral-400 text-xs leading-relaxed max-w-sm">
-              A modern, feminine fashion boutique offering curated ready-to-wear silhouettes alongside bespoke made-to-measure couture.
+              A modern, feminine fashion boutique based in Neendoor, Kottayam, Kerala, offering curated ready-to-wear silhouettes alongside bespoke made-to-measure couture.
             </p>
             {settings?.address && (
               <p className="text-neutral-500 text-[11px] leading-relaxed max-w-sm pt-1">
@@ -134,7 +134,7 @@ export default function Footer({ settings, collections }: FooterProps) {
               </li>
               <li>
                 <Link href="/about" className="hover:text-[#FF55D2] transition-colors">
-                  Our Story & Atelier
+                  Our Story & Heritage
                 </Link>
               </li>
               <li>

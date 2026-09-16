@@ -110,7 +110,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
               <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <Image
                   src={isHeroTransparent ? '/logo-white.png' : '/logo.png'}
-                  alt="Fairy Finds"
+                  alt="Fairy Finds Boutique Logo"
                   fill
                   sizes="32px"
                   className="object-contain"
@@ -132,7 +132,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                     isHeroTransparent ? 'text-white/80' : 'text-neutral-400'
                   }`}
                 >
-                  Boutique Atelier
+                  Boutique
                 </span>
               </div>
             </Link>
@@ -308,13 +308,13 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                   <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0">
                     <Image
                       src="/logo.png"
-                      alt="Fairy Finds"
+                      alt="Fairy Finds Boutique Logo"
                       fill
                       sizes="24px"
                       className="object-contain"
                     />
                   </div>
-                  <span>Fairy Finds</span>
+                  <span>Fairy Finds Boutique</span>
                 </Link>
                 <button
                   onClick={() => setMobileMenuOpen(false)}

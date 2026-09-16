@@ -214,6 +214,7 @@ async function ensureSupabaseSeeded(supabase: any) {
         currency_symbol: local.settings.currency_symbol || 'Rs.',
         navigation: local.navigation || initialNavigation,
         reviews: local.reviews || initialReviews,
+        seo_config: local.settings.seo_config || initialSeoConfig,
         updated_at: new Date().toISOString(),
       });
     }
@@ -227,6 +228,7 @@ async function ensureSupabaseSeeded(supabase: any) {
 
 // --- Settings ---
 export async function getServerSettings(): Promise<StoreSettings> {
+  const localSettings = getLocalData().settings;
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
@@ -243,14 +245,13 @@ export async function getServerSettings(): Promise<StoreSettings> {
           currency_symbol: data.currency_symbol || 'Rs.',
           navigation: data.navigation || initialNavigation,
           reviews: data.reviews || initialReviews,
-          seo_config: data.seo_config || initialSeoConfig,
+          seo_config: data.seo_config || localSettings.seo_config || initialSeoConfig,
         };
       }
     } catch (err) {
       console.error('Error fetching store_settings from Supabase:', err);
     }
   }
-  const localSettings = getLocalData().settings;
   return {
     ...localSettings,
     seo_config: localSettings.seo_config || initialSeoConfig,

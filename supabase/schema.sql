@@ -89,8 +89,12 @@ CREATE TABLE IF NOT EXISTS store_settings (
   currency_symbol TEXT DEFAULT 'Rs.',
   navigation JSONB DEFAULT '[]'::jsonb,
   reviews JSONB DEFAULT '[]'::jsonb,
+  seo_config JSONB DEFAULT '{}'::jsonb,
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Ensure seo_config column exists on existing store_settings table
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS seo_config JSONB DEFAULT '{}'::jsonb;
 
 -- Safe migration from UUID to TEXT if tables were previously created with UUID
 DO $$ 

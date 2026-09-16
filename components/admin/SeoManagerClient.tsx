@@ -95,13 +95,36 @@ export default function SeoManagerClient({ initialConfig }: SeoManagerClientProp
   ];
 
   const handleGlobalChange = (field: keyof SeoConfig['global'], value: any) => {
-    setConfig((prev) => ({
-      ...prev,
-      global: {
+    setConfig((prev) => {
+      const nextGlobal = {
         ...prev.global,
         [field]: value,
-      },
-    }));
+      };
+      let nextPages = prev.pages;
+      if (field === 'site_title') {
+        nextPages = {
+          ...prev.pages,
+          home: {
+            ...(prev.pages?.home || { title: '', description: '', keywords: [] }),
+            title: value,
+          },
+        };
+      }
+      if (field === 'meta_description') {
+        nextPages = {
+          ...nextPages,
+          home: {
+            ...(nextPages?.home || { title: '', description: '', keywords: [] }),
+            description: value,
+          },
+        };
+      }
+      return {
+        ...prev,
+        global: nextGlobal,
+        pages: nextPages,
+      };
+    });
     setIsDirty(true);
   };
 

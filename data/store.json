@@ -36,8 +36,7 @@
         "legal_name": "Fairy Finds Boutique",
         "alternate_names": [
           "Fairy Finds",
-          "Fairy Finds Boutique Kottayam",
-          "Fairy Finds Atelier"
+          "Fairy Finds Boutique Kottayam"
         ],
         "street_address": "Neendoor",
         "address_locality": "Kottayam",
@@ -79,7 +78,7 @@
           ]
         },
         "custom": {
-          "title": "Custom-Made Dresses & Bespoke Bridal Atelier | Fairy Finds Boutique",
+          "title": "Custom-Made Dresses & Bespoke Bridal Wear | Fairy Finds Boutique",
           "description": "Commission custom-made bridal sarees, lehengas, and bespoke tailored outfits with Fairy Finds Boutique in Kottayam, Kerala. 1-on-1 WhatsApp consultations with worldwide delivery.",
           "keywords": [
             "custom stitching kottayam",
@@ -93,7 +92,7 @@
           "description": "Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Artisanal textile craftsmanship, ready-to-wear grace, and bespoke women's fashion shipping across India.",
           "keywords": [
             "about fairy finds boutique",
-            "kottayam designer atelier",
+            "kottayam designer boutique",
             "kerala boutique heritage"
           ]
         },
@@ -163,7 +162,7 @@
         },
         {
           "id": "feat-custom",
-          "label": "Custom Made Atelier",
+          "label": "Custom Made",
           "href": "/custom",
           "description": "One-of-a-kind bespoke commissions made to your measurements"
         }

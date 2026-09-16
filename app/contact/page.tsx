@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const contactSeo = settings.seo_config?.pages?.contact;
   const canonicalBase = settings.seo_config?.global?.canonical_base || SITE_URL;
 
-  const rawTitle = contactSeo?.title || 'Contact & Atelier Location in Kottayam';
+  const rawTitle = contactSeo?.title || 'Contact & Location in Kottayam';
   const title = formatMetaTitle(rawTitle);
   const description =
     contactSeo?.description ||
@@ -56,7 +56,7 @@ export default async function ContactPage() {
     '@context': 'https://schema.org',
     '@type': 'ContactPage',
     name: 'Contact Fairy Finds Boutique',
-    description: 'Contact details and atelier location for Fairy Finds Boutique in Kottayam, Kerala.',
+    description: 'Contact details and boutique location for Fairy Finds Boutique in Kottayam, Kerala.',
     url: `${SITE_URL}/contact`,
     mainEntity: {
       '@type': 'ClothingStore',

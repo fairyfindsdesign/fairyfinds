@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const aboutSeo = settings.seo_config?.pages?.about;
   const canonicalBase = settings.seo_config?.global?.canonical_base || SITE_URL;
 
-  const rawTitle = aboutSeo?.title || 'Our Story & Atelier Heritage';
+  const rawTitle = aboutSeo?.title || 'Our Story';
   const title = formatMetaTitle(rawTitle);
   const description =
     aboutSeo?.description ||

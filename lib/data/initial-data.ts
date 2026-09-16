@@ -360,7 +360,7 @@ export const initialSeoConfig: SeoConfig = {
   local_business: {
     name: 'Fairy Finds Boutique',
     legal_name: 'Fairy Finds Boutique',
-    alternate_names: ['Fairy Finds', 'Fairy Finds Boutique Kottayam', 'Fairy Finds Atelier'],
+    alternate_names: ['Fairy Finds', 'Fairy Finds Boutique Kottayam'],
     street_address: 'Neendoor',
     address_locality: 'Kottayam',
     address_region: 'Kerala',
@@ -387,19 +387,19 @@ export const initialSeoConfig: SeoConfig = {
       keywords: ['ready to wear sarees kerala', 'dresses kottayam', 'designer kurthis kerala', 'party wear lehenga kottayam'],
     },
     custom: {
-      title: 'Custom-Made Dresses & Bespoke Bridal Atelier | Fairy Finds Boutique',
+      title: 'Custom-Made Dresses & Bespoke Bridal Wear | Fairy Finds Boutique',
       description:
         'Commission custom-made bridal sarees, lehengas, and bespoke tailored outfits with Fairy Finds Boutique in Kottayam, Kerala. 1-on-1 WhatsApp consultations with worldwide delivery.',
       keywords: ['custom stitching kottayam', 'bridal blouse embroidery kottayam', 'bespoke bridal couture kerala', 'custom gowns kottayam'],
     },
     about: {
-      title: 'Our Story & Atelier Heritage | Fairy Finds Boutique Kottayam',
+      title: 'Our Story | Fairy Finds Boutique Kottayam',
       description:
         "Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Artisanal textile craftsmanship, ready-to-wear grace, and bespoke women's fashion shipping across India.",
-      keywords: ['about fairy finds boutique', 'kottayam designer atelier', 'kerala boutique heritage'],
+      keywords: ['about fairy finds boutique', 'kottayam designer boutique', 'kerala boutique heritage'],
     },
     contact: {
-      title: 'Contact & Atelier Location | Fairy Finds Boutique Kottayam',
+      title: 'Contact & Location | Fairy Finds Boutique Kottayam',
       description:
         'Visit Fairy Finds Boutique in Neendoor, Kottayam, Kerala, or connect with our design team directly on WhatsApp for styling consultations and order queries.',
       keywords: ['fairy finds boutique contact', 'boutique location neendoor kottayam', 'kottayam boutique phone number'],

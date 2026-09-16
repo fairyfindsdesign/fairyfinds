@@ -43,8 +43,7 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
 
   const handleSignOut = async () => {
     await logoutAdmin();
-    router.push('/admin/login');
-    router.refresh();
+    window.location.href = '/admin/login';
   };
 
   const navigation = [

@@ -21,6 +21,7 @@ import {
   getServerReviews,
   updateServerReviews,
   updateServerSeoConfig,
+  checkSupabaseSeoStatus,
 } from './server-store';
 
 export async function getNavigation() {
@@ -114,6 +115,10 @@ export async function getSeoConfig() {
 
 export async function updateSeoConfig(seoConfig: any) {
   return updateServerSeoConfig(seoConfig);
+}
+
+export async function checkSeoDbStatus() {
+  return checkSupabaseSeoStatus();
 }
 
 

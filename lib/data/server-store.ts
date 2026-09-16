@@ -291,6 +291,38 @@ export async function updateServerSettings(settings: Partial<StoreSettings>): Pr
   return data.settings;
 }
 
+export async function checkSupabaseSeoStatus(): Promise<{
+  isSupabaseConnected: boolean;
+  hasSeoColumn: boolean;
+  error?: string;
+}> {
+  const supabase = getAdminSupabase();
+  if (!supabase) {
+    return { isSupabaseConnected: false, hasSeoColumn: true };
+  }
+
+  try {
+    const { error } = await supabase.from('store_settings').select('seo_config').limit(1);
+    if (error) {
+      return {
+        isSupabaseConnected: true,
+        hasSeoColumn: false,
+        error: error.message,
+      };
+    }
+    return {
+      isSupabaseConnected: true,
+      hasSeoColumn: true,
+    };
+  } catch (err: any) {
+    return {
+      isSupabaseConnected: true,
+      hasSeoColumn: false,
+      error: err?.message || 'Error checking Supabase column',
+    };
+  }
+}
+
 export async function updateServerSeoConfig(seoConfig: Partial<SeoConfig>): Promise<SeoConfig> {
   const data = getLocalData();
   const currentSeo = data.settings.seo_config || initialSeoConfig;
@@ -312,13 +344,55 @@ export async function updateServerSeoConfig(seoConfig: Partial<SeoConfig>): Prom
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
-      await supabase.from('store_settings').upsert({
-        id: 1,
-        seo_config: merged,
-        updated_at: new Date().toISOString(),
-      });
-    } catch (err) {
-      console.error('Error updating seo_config in Supabase:', err);
+      // First check if row id: 1 exists
+      const { data: existingRow } = await supabase
+        .from('store_settings')
+        .select('id')
+        .eq('id', 1)
+        .maybeSingle();
+
+      let dbError: any = null;
+
+      if (existingRow) {
+        const { error } = await supabase
+          .from('store_settings')
+          .update({
+            seo_config: merged,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', 1);
+        dbError = error;
+      } else {
+        const { error } = await supabase
+          .from('store_settings')
+          .upsert({
+            id: 1,
+            whatsapp_number: data.settings.whatsapp_number || '+916282629144',
+            store_name: data.settings.store_name || 'Fairy Finds Boutique',
+            seo_config: merged,
+            updated_at: new Date().toISOString(),
+          });
+        dbError = error;
+      }
+
+      if (dbError) {
+        console.error('Error updating seo_config in Supabase:', dbError);
+        const errMsg = dbError.message || dbError.details || '';
+        if (
+          dbError.code === '42703' ||
+          dbError.code === 'PGRST204' ||
+          errMsg.toLowerCase().includes('seo_config') ||
+          errMsg.toLowerCase().includes('column')
+        ) {
+          throw new Error(
+            "Supabase database is missing the 'seo_config' column. Please execute this query in your Supabase SQL Editor:\nALTER TABLE store_settings ADD COLUMN IF NOT EXISTS seo_config JSONB DEFAULT '{}'::jsonb;"
+          );
+        }
+        throw new Error(`Database error saving SEO configuration: ${errMsg || 'Unknown database error'}`);
+      }
+    } catch (err: any) {
+      console.error('Error in updateServerSeoConfig:', err);
+      throw err;
     }
   }
 

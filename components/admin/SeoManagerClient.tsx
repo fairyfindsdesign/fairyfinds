@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Globe,
   Search,
@@ -23,6 +24,7 @@ import {
   Key,
   Eye,
   MessageCircle,
+  Copy,
 } from 'lucide-react';
 import { SeoConfig, PageSeoItem } from '@/lib/types';
 import { saveSeoConfigAction } from '@/app/actions/store';
@@ -30,9 +32,16 @@ import { initialSeoConfig } from '@/lib/data/initial-data';
 
 interface SeoManagerClientProps {
   initialConfig: SeoConfig;
+  isMissingDbColumn?: boolean;
+  dbError?: string;
 }
 
-export default function SeoManagerClient({ initialConfig }: SeoManagerClientProps) {
+export default function SeoManagerClient({
+  initialConfig,
+  isMissingDbColumn = false,
+  dbError,
+}: SeoManagerClientProps) {
+  const router = useRouter();
   const [config, setConfig] = useState<SeoConfig>(initialConfig || initialSeoConfig);
   const [activeTab, setActiveTab] = useState<'global' | 'pages' | 'keywords' | 'social' | 'technical'>('global');
   const [activePageKey, setActivePageKey] = useState<string>('home');
@@ -41,6 +50,7 @@ export default function SeoManagerClient({ initialConfig }: SeoManagerClientProp
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [copiedSql, setCopiedSql] = useState(false);
 
   // Suggested Kerala & Kottayam Keyword Clusters
   const keywordSuggestions = [
@@ -140,16 +150,28 @@ export default function SeoManagerClient({ initialConfig }: SeoManagerClientProp
   };
 
   const handlePageChange = (pageKey: string, field: keyof PageSeoItem, value: any) => {
-    setConfig((prev) => ({
-      ...prev,
-      pages: {
+    setConfig((prev) => {
+      const nextPages = {
         ...prev.pages,
         [pageKey]: {
           ...(prev.pages?.[pageKey] || { title: '', description: '', keywords: [] }),
           [field]: value,
         },
-      },
-    }));
+      };
+      let nextGlobal = prev.global;
+      if (pageKey === 'home') {
+        if (field === 'title') {
+          nextGlobal = { ...prev.global, site_title: value };
+        } else if (field === 'description') {
+          nextGlobal = { ...prev.global, meta_description: value };
+        }
+      }
+      return {
+        ...prev,
+        global: nextGlobal,
+        pages: nextPages,
+      };
+    });
     setIsDirty(true);
   };
 
@@ -237,16 +259,26 @@ export default function SeoManagerClient({ initialConfig }: SeoManagerClientProp
     try {
       const res = await saveSeoConfigAction(config);
       if (res.success) {
-        setSaveStatus({ type: 'success', message: 'SEO configuration saved & cache revalidated successfully!' });
+        setSaveStatus({
+          type: 'success',
+          message: 'SEO configuration saved & live storefront cache revalidated successfully!',
+        });
         setIsDirty(false);
+        router.refresh();
+        setTimeout(() => setSaveStatus(null), 5000);
       } else {
-        setSaveStatus({ type: 'error', message: res.error || 'Failed to save SEO settings' });
+        setSaveStatus({
+          type: 'error',
+          message: res.error || 'Failed to save SEO settings',
+        });
       }
     } catch (err: any) {
-      setSaveStatus({ type: 'error', message: err.message || 'Error saving settings' });
+      setSaveStatus({
+        type: 'error',
+        message: err.message || 'Error saving settings',
+      });
     } finally {
       setIsSaving(false);
-      setTimeout(() => setSaveStatus(null), 5000);
     }
   };
 
@@ -309,21 +341,101 @@ export default function SeoManagerClient({ initialConfig }: SeoManagerClientProp
         </div>
       </div>
 
+      {/* Supabase Missing Column Migration Warning Banner */}
+      {isMissingDbColumn && (
+        <div className="bg-amber-50 border-2 border-amber-300 p-4 sm:p-5 rounded-xs shadow-xs space-y-3">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-900">
+                Action Required: Supabase Database Migration Needed
+              </h3>
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Your production Supabase database is missing the <code className="bg-amber-200/70 px-1 py-0.5 rounded font-mono text-amber-950 font-bold">seo_config</code> column on the <code className="bg-amber-200/70 px-1 py-0.5 rounded font-mono text-amber-950 font-bold">store_settings</code> table.
+                Updates saved here will <strong>not persist to your live storefront</strong> until you execute this 1-line SQL query in your <strong>Supabase Project → SQL Editor</strong>:
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1 sm:pl-8">
+            <code className="flex-1 px-3 py-2 bg-white border border-amber-300 rounded-xs font-mono text-xs text-amber-950 select-all overflow-x-auto">
+              ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS seo_config JSONB DEFAULT &apos;{}&apos;::jsonb;
+            </code>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText("ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS seo_config JSONB DEFAULT '{}'::jsonb;");
+                setCopiedSql(true);
+                setTimeout(() => setCopiedSql(false), 3000);
+              }}
+              className="px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold uppercase tracking-wider rounded-xs transition-colors shrink-0 cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              {copiedSql ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy SQL</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Save Status Alert */}
       {saveStatus && (
         <div
-          className={`p-3.5 rounded-xs text-xs font-medium flex items-center gap-2.5 transition-all ${
+          className={`p-4 rounded-xs text-xs font-medium space-y-2 transition-all ${
             saveStatus.type === 'success'
               ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
-              : 'bg-red-50 border border-red-200 text-red-800'
+              : 'bg-red-50 border-2 border-red-300 text-red-900'
           }`}
         >
-          {saveStatus.type === 'success' ? (
-            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+          <div className="flex items-center gap-2.5">
+            {saveStatus.type === 'success' ? (
+              <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            )}
+            <span className="font-semibold">{saveStatus.message}</span>
+          </div>
+
+          {saveStatus.type === 'error' && saveStatus.message.includes('ALTER TABLE') && (
+            <div className="pt-2 sm:pl-6 space-y-2">
+              <p className="text-[11px] text-red-700">
+                Run this command in your Supabase SQL Editor to enable SEO settings storage:
+              </p>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <code className="flex-1 px-3 py-1.5 bg-white border border-red-200 rounded-xs font-mono text-xs text-red-950 select-all overflow-x-auto">
+                  ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS seo_config JSONB DEFAULT &apos;{}&apos;::jsonb;
+                </code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText("ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS seo_config JSONB DEFAULT '{}'::jsonb;");
+                    setCopiedSql(true);
+                    setTimeout(() => setCopiedSql(false), 3000);
+                  }}
+                  className="px-3 py-1.5 bg-red-800 hover:bg-red-900 text-white text-xs font-semibold uppercase tracking-wider rounded-xs transition-colors shrink-0 cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  {copiedSql ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy SQL</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           )}
-          <span>{saveStatus.message}</span>
         </div>
       )}
 

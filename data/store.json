@@ -6,7 +6,123 @@
     "instagram_url": "https://instagram.com/fairyfinds.boutique",
     "address": "Fairy Finds Boutique, Neendoor, Kottayam, Kerala",
     "announcement_bar": "Free Delivery about Rs2000 Order • Order Directly via WhatsApp",
-    "currency_symbol": "Rs."
+    "currency_symbol": "Rs.",
+    "seo_config": {
+      "global": {
+        "site_title": "Fairy Finds Boutique | Luxury Women's Fashion & Bridal Boutique Kottayam, Kerala",
+        "title_template": "%s | Fairy Finds Boutique",
+        "meta_description": "Shop ready-to-wear designer sarees, bridal lehengas, kurtis, and bespoke couture from Fairy Finds Boutique in Neendoor, Kottayam, Kerala. Worldwide & All-India express shipping with direct WhatsApp consultations.",
+        "keywords": [
+          "Fairy Finds Boutique",
+          "Fairy Finds Kottayam",
+          "boutique in kottayam",
+          "designer boutique kottayam",
+          "ladies boutique kottayam",
+          "bridal boutique kottayam",
+          "christian bridal wear kottayam",
+          "wedding sarees kottayam",
+          "custom stitching kottayam",
+          "bridal blouse embroidery kottayam",
+          "designer sarees kerala",
+          "onam kasavu sarees online",
+          "kerala boutique shipping to dubai",
+          "nri kerala wedding shopping online",
+          "ready to wear outfits kerala"
+        ],
+        "canonical_base": "https://fairyfindsboutique.store"
+      },
+      "local_business": {
+        "name": "Fairy Finds Boutique",
+        "legal_name": "Fairy Finds Boutique",
+        "alternate_names": [
+          "Fairy Finds",
+          "Fairy Finds Boutique Kottayam",
+          "Fairy Finds Atelier"
+        ],
+        "street_address": "Neendoor",
+        "address_locality": "Kottayam",
+        "address_region": "Kerala",
+        "postal_code": "686601",
+        "address_country": "IN",
+        "latitude": "9.6582",
+        "longitude": "76.5445",
+        "opening_hours": "Mo-Sa 10:00-19:00",
+        "price_range": "₹₹",
+        "payment_accepted": "Cash, UPI, GPay, PhonePe, Credit Card, Debit Card, Net Banking",
+        "areas_served": [
+          "Kottayam",
+          "Kerala",
+          "India",
+          "UAE / Gulf Diaspora",
+          "Worldwide"
+        ]
+      },
+      "pages": {
+        "home": {
+          "title": "Fairy Finds Boutique | Artisanal Ready-to-Wear & Bespoke Couture Kottayam, Kerala",
+          "description": "Discover artisanal ready-to-wear garments and bespoke bridal commissions crafted for celebratory grace. Located in Kottayam, Kerala, shipping across India and worldwide.",
+          "keywords": [
+            "boutique in kottayam",
+            "designer boutique kottayam",
+            "bridal boutique kottayam",
+            "kerala fashion boutique"
+          ]
+        },
+        "shop": {
+          "title": "Ready-to-Wear Fashion & Designer Outfits | Fairy Finds Boutique",
+          "description": "Browse curated ready-to-wear sarees, lehengas, dresses, and designer blouses from Fairy Finds Boutique in Kottayam, Kerala. Express delivery across India and worldwide.",
+          "keywords": [
+            "ready to wear sarees kerala",
+            "dresses kottayam",
+            "designer kurthis kerala",
+            "party wear lehenga kottayam"
+          ]
+        },
+        "custom": {
+          "title": "Custom-Made Dresses & Bespoke Bridal Atelier | Fairy Finds Boutique",
+          "description": "Commission custom-made bridal sarees, lehengas, and bespoke tailored outfits with Fairy Finds Boutique in Kottayam, Kerala. 1-on-1 WhatsApp consultations with worldwide delivery.",
+          "keywords": [
+            "custom stitching kottayam",
+            "bridal blouse embroidery kottayam",
+            "bespoke bridal couture kerala",
+            "custom gowns kottayam"
+          ]
+        },
+        "about": {
+          "title": "Our Story & Atelier Heritage | Fairy Finds Boutique Kottayam",
+          "description": "Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Artisanal textile craftsmanship, ready-to-wear grace, and bespoke women's fashion shipping across India.",
+          "keywords": [
+            "about fairy finds boutique",
+            "kottayam designer atelier",
+            "kerala boutique heritage"
+          ]
+        },
+        "contact": {
+          "title": "Contact & Atelier Location | Fairy Finds Boutique Kottayam",
+          "description": "Visit Fairy Finds Boutique in Neendoor, Kottayam, Kerala, or connect with our design team directly on WhatsApp for styling consultations and order queries.",
+          "keywords": [
+            "fairy finds boutique contact",
+            "boutique location neendoor kottayam",
+            "kottayam boutique phone number"
+          ]
+        }
+      },
+      "social": {
+        "og_title": "Fairy Finds Boutique | Artisanal Ready-to-Wear & Bespoke Couture",
+        "og_description": "Curated luxury fashion, artisanal ready-to-wear garments, and bespoke couture commissions from Neendoor, Kottayam, Kerala.",
+        "og_image": "/og-image.jpg",
+        "twitter_card": "summary_large_image"
+      },
+      "verification": {
+        "google_site_verification": "",
+        "google_analytics_id": "",
+        "meta_pixel_id": "",
+        "bing_verification": ""
+      },
+      "crawl": {
+        "is_indexed": true
+      }
+    }
   },
   "navigation": [
     {

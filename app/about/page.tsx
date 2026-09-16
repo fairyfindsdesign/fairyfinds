@@ -7,27 +7,36 @@ import { Metadata } from 'next';
 import JsonLd from '@/components/seo/JsonLd';
 import { generateBreadcrumbSchema } from '@/lib/seo/schema';
 import { SITE_URL } from '@/lib/seo/constants';
+import { getSettings } from '@/lib/data/store';
 
-export const metadata: Metadata = {
-  title: 'Our Story & Atelier Heritage',
-  description:
-    'Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Artisanal textile craftsmanship, ready-to-wear grace, and bespoke women\'s fashion shipping across India.',
-  alternates: {
-    canonical: `${SITE_URL}/about`,
-  },
-  openGraph: {
-    title: 'Our Story & Atelier Heritage | Fairy Finds Boutique Kottayam',
-    description:
-      'Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Artisanal textile craftsmanship and bespoke women\'s fashion.',
-    url: `${SITE_URL}/about`,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Our Story & Atelier Heritage | Fairy Finds Boutique Kottayam',
-    description:
-      'Artisanal textile craftsmanship and bespoke women\'s fashion from Kottayam, Kerala.',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  const aboutSeo = settings.seo_config?.pages?.about;
+  const canonicalBase = settings.seo_config?.global?.canonical_base || SITE_URL;
+
+  const title = aboutSeo?.title || 'Our Story & Atelier Heritage';
+  const description =
+    aboutSeo?.description ||
+    'Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Artisanal textile craftsmanship, ready-to-wear grace, and bespoke women\'s fashion shipping across India.';
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${canonicalBase}/about`,
+    },
+    openGraph: {
+      title: `${title} | Fairy Finds Boutique Kottayam`,
+      description,
+      url: `${canonicalBase}/about`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | Fairy Finds Boutique Kottayam`,
+      description,
+    },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

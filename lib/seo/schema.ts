@@ -5,6 +5,10 @@ import { BUSINESS_INFO, SITE_URL } from './constants';
  * Generates Schema.org ClothingStore / LocalBusiness JSON-LD
  */
 export function generateBoutiqueSchema(settings?: Partial<StoreSettings>) {
+  const seo = settings?.seo_config;
+  const local = seo?.local_business;
+  const siteUrl = seo?.global?.canonical_base || SITE_URL;
+
   const phone = settings?.whatsapp_number
     ? settings.whatsapp_number.startsWith('+')
       ? settings.whatsapp_number
@@ -13,39 +17,44 @@ export function generateBoutiqueSchema(settings?: Partial<StoreSettings>) {
 
   const email = settings?.contact_email || BUSINESS_INFO.email;
   const instagram = settings?.instagram_url || BUSINESS_INFO.instagram;
+  const name = local?.name || local?.legal_name || BUSINESS_INFO.name;
+  const alternateName = local?.alternate_names || BUSINESS_INFO.alternateNames;
+  const description = seo?.global?.meta_description || BUSINESS_INFO.description;
 
   return {
     '@context': 'https://schema.org',
     '@type': 'ClothingStore',
-    '@id': `${SITE_URL}/#boutique`,
-    name: BUSINESS_INFO.name,
-    alternateName: BUSINESS_INFO.alternateNames,
-    description: BUSINESS_INFO.description,
-    url: SITE_URL,
+    '@id': `${siteUrl}/#boutique`,
+    name,
+    alternateName,
+    description,
+    url: siteUrl,
     logo: {
       '@type': 'ImageObject',
       url: BUSINESS_INFO.logo,
       width: 512,
       height: 512,
     },
-    image: `${SITE_URL}/og-image.jpg`,
+    image: seo?.social?.og_image
+      ? (seo.social.og_image.startsWith('http') ? seo.social.og_image : `${siteUrl}${seo.social.og_image.startsWith('/') ? '' : '/'}${seo.social.og_image}`)
+      : `${siteUrl}/og-image.jpg`,
     telephone: phone,
     email: email,
-    priceRange: BUSINESS_INFO.priceRange,
+    priceRange: local?.price_range || BUSINESS_INFO.priceRange,
     currenciesAccepted: BUSINESS_INFO.currenciesAccepted,
-    paymentAccepted: BUSINESS_INFO.paymentAccepted,
+    paymentAccepted: local?.payment_accepted || BUSINESS_INFO.paymentAccepted,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: BUSINESS_INFO.address.streetAddress,
-      addressLocality: BUSINESS_INFO.address.addressLocality,
-      addressRegion: BUSINESS_INFO.address.addressRegion,
-      postalCode: BUSINESS_INFO.address.postalCode,
-      addressCountry: BUSINESS_INFO.address.addressCountry,
+      streetAddress: local?.street_address || BUSINESS_INFO.address.streetAddress,
+      addressLocality: local?.address_locality || BUSINESS_INFO.address.addressLocality,
+      addressRegion: local?.address_region || BUSINESS_INFO.address.addressRegion,
+      postalCode: local?.postal_code || BUSINESS_INFO.address.postalCode,
+      addressCountry: local?.address_country || BUSINESS_INFO.address.addressCountry,
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: BUSINESS_INFO.geo.latitude,
-      longitude: BUSINESS_INFO.geo.longitude,
+      latitude: local?.latitude || BUSINESS_INFO.geo.latitude,
+      longitude: local?.longitude || BUSINESS_INFO.geo.longitude,
     },
     openingHoursSpecification: [
       {
@@ -63,17 +72,22 @@ export function generateBoutiqueSchema(settings?: Partial<StoreSettings>) {
 /**
  * Generates Schema.org WebSite JSON-LD
  */
-export function generateWebSiteSchema() {
+export function generateWebSiteSchema(settings?: Partial<StoreSettings>) {
+  const seo = settings?.seo_config;
+  const siteUrl = seo?.global?.canonical_base || SITE_URL;
+  const name = seo?.local_business?.name || BUSINESS_INFO.name;
+  const description = seo?.global?.meta_description || BUSINESS_INFO.description;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    '@id': `${SITE_URL}/#website`,
-    url: SITE_URL,
-    name: BUSINESS_INFO.name,
-    alternateName: BUSINESS_INFO.alternateNames[0],
-    description: BUSINESS_INFO.description,
+    '@id': `${siteUrl}/#website`,
+    url: siteUrl,
+    name: name,
+    alternateName: seo?.local_business?.alternate_names?.[0] || BUSINESS_INFO.alternateNames[0],
+    description: description,
     publisher: {
-      '@id': `${SITE_URL}/#boutique`,
+      '@id': `${siteUrl}/#boutique`,
     },
     inLanguage: 'en-IN',
   };

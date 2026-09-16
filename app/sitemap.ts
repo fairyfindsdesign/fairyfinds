@@ -1,47 +1,49 @@
 import type { MetadataRoute } from 'next';
-import { getProducts, getCategories, getCollections } from '@/lib/data/store';
+import { getProducts, getCategories, getCollections, getSettings } from '@/lib/data/store';
 import { SITE_URL } from '@/lib/seo/constants';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, categories, collections] = await Promise.all([
+  const [products, categories, collections, settings] = await Promise.all([
     getProducts().catch(() => []),
     getCategories().catch(() => []),
     getCollections().catch(() => []),
+    getSettings().catch(() => null),
   ]);
 
+  const baseUrl = settings?.seo_config?.global?.canonical_base || SITE_URL;
   const now = new Date();
 
   // 1. Static Core Public Pages
   const staticPages: MetadataRoute.Sitemap = [
     {
-      url: SITE_URL,
+      url: baseUrl,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 1.0,
     },
     {
-      url: `${SITE_URL}/shop`,
+      url: `${baseUrl}/shop`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: `${SITE_URL}/custom`,
+      url: `${baseUrl}/custom`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${SITE_URL}/about`,
+      url: `${baseUrl}/about`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
-      url: `${SITE_URL}/contact`,
+      url: `${baseUrl}/contact`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
@@ -50,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 2. Category Pages (Clean URLs without query parameters)
   const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
-    url: `${SITE_URL}/category/${cat.slug}`,
+    url: `${baseUrl}/category/${cat.slug}`,
     lastModified: cat.created_at ? new Date(cat.created_at) : now,
     changeFrequency: 'weekly',
     priority: 0.85,
@@ -60,7 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const collectionPages: MetadataRoute.Sitemap = collections
     .filter((col) => col.is_published && col.has_dedicated_page)
     .map((col) => ({
-      url: `${SITE_URL}/collections/${col.slug}`,
+      url: `${baseUrl}/collections/${col.slug}`,
       lastModified: col.created_at ? new Date(col.created_at) : now,
       changeFrequency: 'weekly',
       priority: 0.85,
@@ -78,7 +80,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
 
       return {
-        url: `${SITE_URL}/product/${prod.slug}`,
+        url: `${baseUrl}/product/${prod.slug}`,
         lastModified: lastMod,
         changeFrequency: 'weekly',
         priority: 0.8,

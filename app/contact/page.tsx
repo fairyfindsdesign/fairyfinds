@@ -8,26 +8,34 @@ import JsonLd from '@/components/seo/JsonLd';
 import { generateBreadcrumbSchema } from '@/lib/seo/schema';
 import { SITE_URL, BUSINESS_INFO } from '@/lib/seo/constants';
 
-export const metadata: Metadata = {
-  title: 'Contact & Atelier Location in Kottayam',
-  description:
-    'Contact Fairy Finds Boutique in Neendoor, Kottayam, Kerala. Connect via WhatsApp or email for ready-to-wear orders, bespoke bridal tailoring, and consultations across India.',
-  alternates: {
-    canonical: `${SITE_URL}/contact`,
-  },
-  openGraph: {
-    title: 'Contact & Atelier Location in Kottayam | Fairy Finds Boutique',
-    description:
-      'Contact Fairy Finds Boutique in Neendoor, Kottayam, Kerala. Direct WhatsApp hotline and email for orders and custom tailoring.',
-    url: `${SITE_URL}/contact`,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Contact Fairy Finds Boutique | Kottayam, Kerala',
-    description:
-      'Direct WhatsApp hotline and email for orders and custom tailoring in Kottayam, Kerala.',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  const contactSeo = settings.seo_config?.pages?.contact;
+  const canonicalBase = settings.seo_config?.global?.canonical_base || SITE_URL;
+
+  const title = contactSeo?.title || 'Contact & Atelier Location in Kottayam';
+  const description =
+    contactSeo?.description ||
+    'Contact Fairy Finds Boutique in Neendoor, Kottayam, Kerala. Connect via WhatsApp or email for ready-to-wear orders, bespoke bridal tailoring, and consultations across India.';
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${canonicalBase}/contact`,
+    },
+    openGraph: {
+      title: `${title} | Fairy Finds Boutique`,
+      description,
+      url: `${canonicalBase}/contact`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | Fairy Finds Boutique`,
+      description,
+    },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

@@ -19,6 +19,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Tag,
+  Globe,
 } from 'lucide-react';
 
 interface AdminNavClientProps {
@@ -54,6 +55,7 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
     { name: 'Homepage CMS', href: '/admin/homepage', icon: LayoutTemplate },
     { name: 'Navigation Menu', href: '/admin/navigation', icon: Menu },
     { name: 'Customer Reviews', href: '/admin/reviews', icon: Star },
+    { name: 'SEO & Discovery', href: '/admin/seo', icon: Globe },
     { name: 'Store Settings', href: '/admin/settings', icon: Settings },
   ];
 

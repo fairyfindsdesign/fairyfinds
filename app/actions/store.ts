@@ -14,8 +14,9 @@ import {
   updateServerSectionContent,
   updateServerNavigation,
   updateServerReviews,
+  updateServerSeoConfig,
 } from '@/lib/data/server-store';
-import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, StoreSettings } from '@/lib/types';
+import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, SeoConfig, StoreSettings } from '@/lib/types';
 
 /**
  * Purges both layout and individual route caches to ensure
@@ -41,6 +42,9 @@ function purgeStorefrontCache() {
     revalidatePath('/admin/settings', 'page');
     revalidatePath('/admin/navigation', 'page');
     revalidatePath('/admin/reviews', 'page');
+    revalidatePath('/admin/seo', 'page');
+    revalidatePath('/sitemap.xml');
+    revalidatePath('/robots.txt');
   } catch (err) {
     console.error('Error in purgeStorefrontCache:', err);
   }
@@ -56,6 +60,19 @@ export async function saveSettingsAction(settings: Partial<StoreSettings>) {
   } catch (err: any) {
     console.error('saveSettingsAction error:', err);
     return { success: false, error: err?.message || 'Database error updating settings' };
+  }
+}
+
+export async function saveSeoConfigAction(seoConfig: Partial<SeoConfig>) {
+  try {
+    const result = await updateServerSeoConfig(seoConfig);
+    purgeStorefrontCache();
+    revalidatePath('/admin/seo', 'page');
+    revalidatePath('/admin', 'layout');
+    return { success: true, seoConfig: result };
+  } catch (err: any) {
+    console.error('saveSeoConfigAction error:', err);
+    return { success: false, error: err?.message || 'Database error updating SEO configuration' };
   }
 }
 

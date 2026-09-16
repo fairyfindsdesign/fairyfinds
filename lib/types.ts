@@ -101,6 +101,65 @@ export interface HomepageSection {
   is_visible: boolean;
 }
 
+export interface PageSeoItem {
+  title: string;
+  description: string;
+  keywords?: string[];
+  canonical?: string;
+  is_indexed?: boolean;
+}
+
+export interface SeoConfig {
+  global: {
+    site_title: string;
+    title_template: string;
+    meta_description: string;
+    keywords: string[];
+    canonical_base: string;
+  };
+  local_business: {
+    name: string;
+    legal_name?: string;
+    alternate_names?: string[];
+    street_address: string;
+    address_locality: string;
+    address_region: string;
+    postal_code: string;
+    address_country: string;
+    latitude: string;
+    longitude: string;
+    opening_hours: string;
+    price_range: string;
+    payment_accepted: string;
+    areas_served?: string[];
+  };
+  pages: {
+    home?: PageSeoItem;
+    shop?: PageSeoItem;
+    custom?: PageSeoItem;
+    about?: PageSeoItem;
+    contact?: PageSeoItem;
+    [key: string]: PageSeoItem | undefined;
+  };
+  social: {
+    og_title: string;
+    og_description: string;
+    og_image: string;
+    twitter_card: 'summary' | 'summary_large_image';
+  };
+  verification: {
+    google_site_verification?: string;
+    google_analytics_id?: string;
+    meta_pixel_id?: string;
+    bing_verification?: string;
+  };
+  crawl: {
+    is_indexed: boolean;
+    disallow_paths?: string[];
+  };
+  last_updated?: string;
+}
+
 export interface StoreSettings {
   whatsapp_number: string;
   store_name: string;
@@ -111,6 +170,7 @@ export interface StoreSettings {
   currency_symbol: string;
   navigation?: NavItem[];
   reviews?: CustomerReview[];
+  seo_config?: SeoConfig;
 }
 
 export interface CartItem {

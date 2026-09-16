@@ -20,6 +20,7 @@ import {
   updateServerNavigation,
   getServerReviews,
   updateServerReviews,
+  updateServerSeoConfig,
 } from './server-store';
 
 export async function getNavigation() {
@@ -105,5 +106,15 @@ export async function getReviews() {
 export async function updateReviews(reviews: any) {
   return updateServerReviews(reviews);
 }
+
+export async function getSeoConfig() {
+  const settings = await getServerSettings();
+  return settings.seo_config;
+}
+
+export async function updateSeoConfig(seoConfig: any) {
+  return updateServerSeoConfig(seoConfig);
+}
+
 
 

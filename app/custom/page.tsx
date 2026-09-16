@@ -6,26 +6,34 @@ import JsonLd from '@/components/seo/JsonLd';
 import { generateBreadcrumbSchema } from '@/lib/seo/schema';
 import { SITE_URL } from '@/lib/seo/constants';
 
-export const metadata: Metadata = {
-  title: 'Custom-Made Dresses',
-  description:
-    'Commission custom-made dresses, bridal sarees, lehengas, and bespoke tailored outfits with Fairy Finds Boutique in Kottayam, Kerala. One-on-one WhatsApp design consultations and delivery across India.',
-  alternates: {
-    canonical: `${SITE_URL}/custom`,
-  },
-  openGraph: {
-    title: 'Custom-Made Dresses & Bespoke Tailoring | Fairy Finds Boutique',
-    description:
-      'Commission custom-made dresses, bridal sarees, lehengas, and bespoke tailored outfits with Fairy Finds Boutique in Kottayam, Kerala.',
-    url: `${SITE_URL}/custom`,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Custom-Made Dresses | Fairy Finds Boutique',
-    description:
-      'Commission custom-made dresses, bridal sarees, and bespoke outfits with Fairy Finds Boutique in Kottayam, Kerala.',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings();
+  const customSeo = settings.seo_config?.pages?.custom;
+  const canonicalBase = settings.seo_config?.global?.canonical_base || SITE_URL;
+
+  const title = customSeo?.title || 'Custom-Made Dresses & Bespoke Tailoring';
+  const description =
+    customSeo?.description ||
+    'Commission custom-made dresses, bridal sarees, lehengas, and bespoke tailored outfits with Fairy Finds Boutique in Kottayam, Kerala. One-on-one WhatsApp design consultations and delivery across India.';
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `${canonicalBase}/custom`,
+    },
+    openGraph: {
+      title: `${title} | Fairy Finds Boutique`,
+      description,
+      url: `${canonicalBase}/custom`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  };
+}
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
-import { getProducts, getCategories, getCollections } from '@/lib/data/store';
+import { getProducts, getCategories, getCollections, getSettings } from '@/lib/data/store';
 import ShopClient from '@/components/shop/ShopClient';
 import JsonLd from '@/components/seo/JsonLd';
 import { generateBreadcrumbSchema, generateItemListSchema } from '@/lib/seo/schema';
@@ -18,13 +18,16 @@ interface ShopPageProps {
 
 export async function generateMetadata({ searchParams }: ShopPageProps): Promise<Metadata> {
   const params = await searchParams;
-  const [categories, collections] = await Promise.all([
+  const [categories, collections, settings] = await Promise.all([
     getCategories(),
     getCollections(),
+    getSettings(),
   ]);
 
-  let title = 'Ready-to-Wear Fashion & Designer Outfits';
+  const shopSeo = settings.seo_config?.pages?.shop;
+  let title = shopSeo?.title || 'Ready-to-Wear Fashion & Designer Outfits';
   let description =
+    shopSeo?.description ||
     'Browse curated ready-to-wear women\'s clothing, sarees, dresses, and designer outfits from Fairy Finds Boutique in Kottayam, Kerala. All-India shipping.';
 
   if (params.category) {

@@ -26,6 +26,7 @@ A high-performance luxury fashion e-commerce web application built with Next.js 
   - **Homepage Section CMS**: Move Up / Move Down section reordering, visibility toggles, and live text editor.
   - **Apple HEIC Support & Smart Compression**: Client-side conversion of iPhone HEIC/HEIF photos and 80% compression.
   - **Customer Review CMS**: Manage customer UGC outfit photos and testimonials.
+  - **SEO & Discovery Control Panel**: 5-tab control center with live Google SERP simulator, curated Kerala & Kottayam keyword suggestion bank, page-by-page meta controls, WhatsApp sharing preview, and Search Console/GA4 tags.
   - **Store & WhatsApp Settings**: Hotline number, boutique address, and announcement banner.
 
 ---

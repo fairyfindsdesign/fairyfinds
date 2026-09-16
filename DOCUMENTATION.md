@@ -72,6 +72,7 @@ Master operational, architectural, and design reference for the **Fairy Finds Bo
 | **`/admin/homepage`** | Dynamic (`ƒ`) | **Homepage CMS** with Move Up / Move Down reordering, visibility toggles, and text editor. |
 | **`/admin/navigation`** | Dynamic (`ƒ`) | **Navigation & Dropdown CMS** to manage top-level nav visibility and customize the *Featured* dropdown menu links. |
 | **`/admin/reviews`** | Dynamic (`ƒ`) | **Customer Reviews CMS** to manage customer UGC outfit photos, testimonials, ratings, and worn product references. |
+| **`/admin/seo`** | Dynamic (`ƒ`) | **SEO & Discovery Control Panel** with 5 tabs: Global & Local SEO, Page-by-Page Meta, Kerala Keyword Bank, Social & WhatsApp OG Cards, and Search Console/Analytics. |
 | **`/admin/settings`** | Dynamic (`ƒ`) | **Store Settings** to configure the business WhatsApp phone number, store details, and announcement bar. |
 | **`/admin/login`** | Dynamic (`ƒ`) | **Owner Sign-in Portal** protected by password authentication (`fairyfinds@123`). |
 
@@ -287,6 +288,13 @@ Accessed at [`/admin`](http://localhost:3000/admin).
 - WhatsApp Business Order Hotline (immediately updates all checkout actions).
 - Store name, email, Instagram URL, and atelier address.
 - Announcement bar text and toggles.
+
+### 7.10 SEO & Discovery Control Panel ([`/admin/seo`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/seo/page.tsx))
+- **Tab 1: Global & Local SEO**: Store meta title, title suffix template, global meta description with character count feedback, live Google SERP Simulator (Desktop and Mobile preview modes), and Central Kerala & Kottayam Google Map Pack signals (physical NAP, GPS coordinates, opening hours, accepted payment methods).
+- **Tab 2: Page-Specific Meta**: Customize individual SEO titles and descriptions for Homepage (`/`), Shop Catalog (`/shop`), Custom Atelier (`/custom`), About Story (`/about`), and Contact (`/contact`).
+- **Tab 3: Kerala & India Keyword Bank**: Active keywords tag manager with curated high-intent suggestion clusters for Kottayam local search, bridal & bespoke couture, traditional & festive wear, and NRI diaspora wedding shoppers.
+- **Tab 4: Social & WhatsApp (Open Graph)**: Open Graph share title, description, banner image picker, and interactive WhatsApp chat link preview card mockup.
+- **Tab 5: Search Console, Analytics & Crawl**: Google Search Console verification meta token, Google Analytics 4 (GA4) ID injection, Meta Pixel ID, search engine indexing master toggle (`index, follow` vs `noindex, nofollow`), and XML sitemap / robots.txt quick inspectors.
 
 ---
 

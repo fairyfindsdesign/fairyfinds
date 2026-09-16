@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, StoreSettings } from '../types';
-import { initialCategories, initialCollections, initialNavigation, initialProducts, initialReviews, initialSections, initialSettings } from './initial-data';
+import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, SeoConfig, StoreSettings } from '../types';
+import { initialCategories, initialCollections, initialNavigation, initialProducts, initialReviews, initialSections, initialSeoConfig, initialSettings } from './initial-data';
 import { getAdminSupabase } from '../supabase/admin';
 import { generateUniqueProductCode } from '../utils/product-code';
 
@@ -30,8 +30,13 @@ export function getLocalData(): StoreData {
     if (fs.existsSync(DATA_FILE)) {
       const content = fs.readFileSync(DATA_FILE, 'utf-8');
       const parsed = JSON.parse(content);
+      const parsedSettings = parsed.settings || initialSettings;
       const data: StoreData = {
-        settings: parsed.settings || initialSettings,
+        settings: {
+          ...initialSettings,
+          ...parsedSettings,
+          seo_config: parsedSettings.seo_config || initialSeoConfig,
+        },
         navigation: parsed.navigation || initialNavigation,
         categories: parsed.categories || initialCategories,
         collections: parsed.collections || initialCollections,
@@ -236,18 +241,31 @@ export async function getServerSettings(): Promise<StoreSettings> {
           address: data.address,
           announcement_bar: data.announcement_bar,
           currency_symbol: data.currency_symbol || 'Rs.',
+          navigation: data.navigation || initialNavigation,
+          reviews: data.reviews || initialReviews,
+          seo_config: data.seo_config || initialSeoConfig,
         };
       }
     } catch (err) {
       console.error('Error fetching store_settings from Supabase:', err);
     }
   }
-  return getLocalData().settings;
+  const localSettings = getLocalData().settings;
+  return {
+    ...localSettings,
+    seo_config: localSettings.seo_config || initialSeoConfig,
+  };
 }
 
 export async function updateServerSettings(settings: Partial<StoreSettings>): Promise<StoreSettings> {
   const data = getLocalData();
-  data.settings = { ...data.settings, ...settings };
+  data.settings = {
+    ...data.settings,
+    ...settings,
+    seo_config: settings.seo_config
+      ? { ...(data.settings.seo_config || initialSeoConfig), ...settings.seo_config }
+      : (data.settings.seo_config || initialSeoConfig),
+  };
   saveLocalData(data);
 
   const supabase = getAdminSupabase();
@@ -270,6 +288,40 @@ export async function updateServerSettings(settings: Partial<StoreSettings>): Pr
   }
 
   return data.settings;
+}
+
+export async function updateServerSeoConfig(seoConfig: Partial<SeoConfig>): Promise<SeoConfig> {
+  const data = getLocalData();
+  const currentSeo = data.settings.seo_config || initialSeoConfig;
+  const merged: SeoConfig = {
+    ...currentSeo,
+    ...seoConfig,
+    global: { ...currentSeo.global, ...(seoConfig.global || {}) },
+    local_business: { ...currentSeo.local_business, ...(seoConfig.local_business || {}) },
+    pages: { ...currentSeo.pages, ...(seoConfig.pages || {}) },
+    social: { ...currentSeo.social, ...(seoConfig.social || {}) },
+    verification: { ...currentSeo.verification, ...(seoConfig.verification || {}) },
+    crawl: { ...currentSeo.crawl, ...(seoConfig.crawl || {}) },
+    last_updated: new Date().toISOString(),
+  };
+
+  data.settings.seo_config = merged;
+  saveLocalData(data);
+
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      await supabase.from('store_settings').upsert({
+        id: 1,
+        seo_config: merged,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error('Error updating seo_config in Supabase:', err);
+    }
+  }
+
+  return merged;
 }
 
 // --- Products ---

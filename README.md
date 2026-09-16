@@ -12,21 +12,23 @@ A high-performance luxury fashion e-commerce web application built with Next.js 
   - **1920×1080 Editorial Hero Canvas**: Centered typography, narrative storytelling, and transparent-to-solid overlay navigation.
   - **Ready-to-Wear Catalog**: Filter by category, collection, size, and in-stock availability.
   - **Size & Stock Intelligence**: Real-time stock indicators per size with out-of-stock commission prompts.
-  - **Bespoke Tailoring Atelier**: 4-step consultation flow for custom bridal, lehenga, and saree commissions.
+  - **Bespoke Tailoring Studio**: 4-step consultation flow for custom bridal, lehenga, and saree commissions.
   - **Direct WhatsApp Checkout**: Itemized cart messages formatted directly to the boutique hotline.
   - **Client Review UGC Marquee**: Editorial portrait cards showing patrons wearing their garments, 5-star ratings, testimonials, and worn garment attribution (touch-scrollable on mobile).
   - **Dark & Light Mode Adaptive Favicon**: Automatically switches between black and white logo icons based on browser/OS theme.
-  - **Production-Ready SEO & Schema.org System**: Dynamic `/sitemap.xml`, `/robots.txt`, dynamic 1200×630 OpenGraph social cards, canonical URLs, and full Schema.org structured data (`ClothingStore`, `Product`, `Offer`, `BreadcrumbList`, `ItemList`).
+  - **Production-Ready SEO & Schema.org System**: Dynamic `/sitemap.xml`, `/robots.txt` with AI bot permissions, Google Sitelinks schema (`SiteNavigationElement`), dynamic 1200×630 OpenGraph social cards, canonical URLs, and full Schema.org structured data (`ClothingStore`, `Product`, `Offer`, `BreadcrumbList`, `ItemList`).
+  - **Agentic Browsing & LLM Discovery**: Native `/llms.txt` and `/llms-full.txt` served from Vercel Edge CDN with CORS & UTF-8 headers for AI agent accessibility.
 
 - **Administrative Portal (`/admin`)**:
-  - **Password Protected**: Edge route protection via `proxy.ts` with session cookies.
+  - **Edge-Level Security**: Protected via Next.js 16 Edge proxy (`proxy.ts`), authenticated session cookies, and Server Action mutation guards (`assertAdmin()`).
+  - **Client Onboarding Handbook**: Complete 7-page visual PDF guide with SVG diagrams available at `/docs/Fairy_Finds_Admin_Portal_Guide.pdf`.
   - **Unique Product ID Auto-Generation**: Standardized collision-free SKU generator (`FF-[CAT]-[NAME]-[NUM]`) with live sync and manual override.
   - **Category Management**: Dedicated portal to create, edit, search, and delete categories, plus inline `+ New Category` quick-add inside the product form.
   - **Collections CMS**: Create signature edits, manage banners, and toggle homepage feature status.
   - **Homepage Section CMS**: Move Up / Move Down section reordering, visibility toggles, and live text editor.
   - **Apple HEIC Support & Smart Compression**: Client-side conversion of iPhone HEIC/HEIF photos and 80% compression.
   - **Customer Review CMS**: Manage customer UGC outfit photos and testimonials.
-  - **SEO & Discovery Control Panel**: 5-tab control center with live Google SERP simulator, curated Kerala & Kottayam keyword suggestion bank, page-by-page meta controls, WhatsApp sharing preview, and Search Console/GA4 tags.
+  - **SEO & Discovery Control Panel**: 5-tab control center with live Google SERP simulator, database connection diagnostics, curated Kerala keyword bank, page-by-page meta controls, WhatsApp sharing preview, and Search Console/GA4 tags.
   - **Store & WhatsApp Settings**: Hotline number, boutique address, and announcement banner.
 
 ---

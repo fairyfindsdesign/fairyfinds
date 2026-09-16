@@ -56,13 +56,16 @@ Master operational, architectural, and design reference for the **Fairy Finds Bo
 | **`/categories/[slug]`** | Dynamic (`ƒ`) | **Permanent Redirect** route automatically routing plural category queries to `/category/[slug]`. |
 | **`/product/[slug]`** | Dynamic (`ƒ`) | **Product Detail Page** with image thumbnail gallery, size/stock matrix, size guide, and direct WhatsApp inquiry. |
 | **`/collections/[slug]`** | Dynamic (`ƒ`) | **Signature Collection Showcases** (e.g., *Red Saree*, *Green Lehenga*). |
-| **`/custom`** | Static (`○`) | **Custom-Made Atelier** detailing the bespoke process and collecting tailoring inquiry details. |
+| **`/custom`** | Dynamic (`ƒ`) | **Custom-Made Studio** detailing the bespoke process and collecting tailoring inquiry details. |
 | **`/cart`** | Static (`○`) | **Bag Review & WhatsApp Checkout** (`noindex, nofollow` protected). |
-| **`/about`** | Static (`○`) | **Brand Story & Atelier Heritage** explaining craftsmanship values. |
-| **`/contact`** | Static (`○`) | **Atelier Location & Hotline** with direct WhatsApp chat, email, and opening hours. |
-| **`/sitemap.xml`** | Dynamic (`ƒ`) | **Dynamic XML Sitemap** automatically generated from store & database items for search engines. |
-| **`/robots.txt`** | Static (`○`) | **Robots Exclusion Standard** allowing public crawling and blocking private admin/cart routes. |
+| **`/about`** | Dynamic (`ƒ`) | **Our Story** explaining brand values, heritage, and Kottayam craftsmanship. |
+| **`/contact`** | Dynamic (`ƒ`) | **Contact & Location** with direct WhatsApp chat, email, physical store address in Neendoor, and opening hours. |
+| **`/llms.txt`** | Static (`○`) | **AI Agent Context File** (Edge CDN asset) following the llmstxt.org specification for AI agents and LLM crawlers. |
+| **`/llms-full.txt`** | Static (`○`) | **Full AI Agent Knowledge Base** detailing brand collections, ordering flows, and atelier details for deep agent indexing. |
+| **`/sitemap.xml`** | Dynamic (`ƒ`) | **Dynamic XML Sitemap** automatically generated from store & database items with tuned priorities (Home 1.0, Shop 0.95, Custom 0.90). |
+| **`/robots.txt`** | Dynamic (`ƒ`) | **Robots Exclusion Standard** allowing search engines & AI crawlers (GPTBot, ClaudeBot, PerplexityBot) and blocking private admin/cart routes. |
 | **`/opengraph-image`** | Static (`○`) | **Dynamic OpenGraph Preview** rendering branded 1200×630 share card for WhatsApp, Facebook, X. |
+| **`/docs/Fairy_Finds_Admin_Portal_Guide.pdf`** | Static (`○`) | **Client Owner Handbook** (7-page vector PDF guide with SVG workflow diagrams for daily boutique operations). |
 | **`/admin`** | Dynamic (`ƒ`) | **Protected Owner Dashboard** with inventory metrics, categories count, stock alerts, and quick action cards. |
 | **`/admin/products`** | Dynamic (`ƒ`) | **Product & Stock Manager** with search, per-size stock breakdown, auto-generated product code, and delete actions. |
 | **`/admin/products/new`** | Dynamic (`ƒ`) | **Create Garment Form** with live unique product code auto-sync, inline "+ New Category" modal, and size matrix. |
@@ -72,7 +75,7 @@ Master operational, architectural, and design reference for the **Fairy Finds Bo
 | **`/admin/homepage`** | Dynamic (`ƒ`) | **Homepage CMS** with Move Up / Move Down reordering, visibility toggles, and text editor. |
 | **`/admin/navigation`** | Dynamic (`ƒ`) | **Navigation & Dropdown CMS** to manage top-level nav visibility and customize the *Featured* dropdown menu links. |
 | **`/admin/reviews`** | Dynamic (`ƒ`) | **Customer Reviews CMS** to manage customer UGC outfit photos, testimonials, ratings, and worn product references. |
-| **`/admin/seo`** | Dynamic (`ƒ`) | **SEO & Discovery Control Panel** with 5 tabs: Global & Local SEO, Page-by-Page Meta, Kerala Keyword Bank, Social & WhatsApp OG Cards, and Search Console/Analytics. |
+| **`/admin/seo`** | Dynamic (`ƒ`) | **SEO & Discovery Control Panel** with live database connectivity status, page-by-page meta controls, Kerala Keyword Bank, Social OG Cards, and Search Console/Analytics tags. |
 | **`/admin/settings`** | Dynamic (`ƒ`) | **Store Settings** to configure the business WhatsApp phone number, store details, and announcement bar. |
 | **`/admin/login`** | Dynamic (`ƒ`) | **Owner Sign-in Portal** protected by password authentication (`fairyfinds@123`). |
 
@@ -385,18 +388,23 @@ A complete, production-grade SEO and discoverability system is embedded natively
 
 ### 12.2 Dynamic XML Sitemap (`/sitemap.xml`)
 - Route: [`app/sitemap.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/sitemap.ts)
-- Generated dynamically from the live store/database with appropriate update frequencies and priorities:
-  - **Homepage (`/`)**: Daily, Priority 1.0
-  - **Shop Catalog (`/shop`)**: Daily, Priority 0.9
-  - **Dedicated Categories (`/category/[slug]`)**: Weekly, Priority 0.85
-  - **Signature Collections (`/collections/[slug]`)**: Weekly, Priority 0.85
-  - **Individual Products (`/product/[slug]`)**: Weekly, Priority 0.8, with accurate `lastModified` timestamp from `updated_at`/`created_at`.
-  - **Atelier Pages (`/custom`, `/contact`, `/about`)**: Monthly, Priority 0.6–0.8.
+- Generated dynamically from the live store and cloud database with search-engine tuned update frequencies and priorities:
+  - **Homepage (`/`)**: Daily, Priority `1.0` *(Maximum priority — designated canonical brand entry)*
+  - **Shop Catalog (`/shop`)**: Daily, Priority `0.95` *(Primary ready-to-wear catalog)*
+  - **Custom Commissions (`/custom`)**: Weekly, Priority `0.90` *(Core bespoke bridal service)*
+  - **Dedicated Categories (`/category/[slug]`)**: Weekly, Priority `0.85`
+  - **Signature Collections (`/collections/[slug]`)**: Weekly, Priority `0.85`
+  - **Individual Products (`/product/[slug]`)**: Weekly, Priority `0.80`, with accurate `lastModified` timestamp from `updated_at`/`created_at`.
+  - **About Us (`/about`)**: Monthly, Priority `0.50`
+  - **Contact Page (`/contact`)**: Monthly, Priority `0.40` *(Lowered so Google and search bots rank Home, Shop, and Custom ahead of utility support pages)*
 - Excludes private admin portals, authentication endpoints, and internal cart flows.
 
-### 12.3 Robots Exclusion Standard (`/robots.txt`)
+### 12.3 Robots Exclusion & AI Crawler Directives (`/robots.txt`)
 - Route: [`app/robots.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/robots.ts)
 - Allows search engine crawlers on all legitimate storefront and catalog routes (`Allow: /`).
+- Explicitly authorizes modern AI search and model crawlers alongside traditional search engines:
+  - Traditional: `Googlebot`, `Bingbot`, `Slurp`, `DuckDuckBot`
+  - AI & LLM: `GPTBot`, `ChatGPT-User`, `OAI-SearchBot`, `PerplexityBot`, `ClaudeBot`, `Applebot`, `Applebot-Extended`
 - Explicitly blocks private and administrative sections:
   - `Disallow: /admin`
   - `Disallow: /admin/`
@@ -407,15 +415,23 @@ A complete, production-grade SEO and discoverability system is embedded natively
 ### 12.4 Schema.org JSON-LD Structured Data
 1. **`ClothingStore` & `LocalBusiness`**:
    - Location: Neendoor, Kottayam, Kerala, India (PIN: 686601).
-   - Area Served: Kerala and India.
+   - Area Served: Kerala, India, and NRI diaspora worldwide.
    - Contact: Official WhatsApp hotline (`+91 62826 29144`), email, store hours (Mon–Sat 10:00–19:00), price range (`₹₹`), accepted payment methods, and Instagram profile.
-2. **`Product` & `Offer`**:
+2. **`SiteNavigationElement` (Google Sitelinks Schema)**:
+   - Injects structured navigation graph into `<head>` declaring primary brand hierarchy:
+     1. Home (`/`)
+     2. Shop Ready-to-Wear (`/shop`)
+     3. Custom Made Outfits (`/custom`)
+     4. Our Story (`/about`)
+     5. Contact & Location (`/contact`)
+   - Helps Google display rich sitelinks under the main homepage search snippet.
+3. **`Product` & `Offer`**:
    - Dynamic per product: name, description, SKU / unique product code, brand (`Fairy Finds Boutique`), fabric/material, and high-res imagery.
    - Real price in `INR`, `NewCondition`, and real-time inventory status (`InStock` vs `OutOfStock` derived from variant matrix).
    - Only attaches `AggregateRating` when genuine customer reviews exist in the CMS. No fabricated reviews or ratings.
-3. **`BreadcrumbList`**:
+4. **`BreadcrumbList`**:
    - Structured hierarchy on all catalog, product, category, collection, and static pages (e.g. `Home` → `Shop` → `Dresses` → `Product Name`).
-4. **`ItemList`**:
+5. **`ItemList`**:
    - Structured catalog listings on `/shop`, `/category/[slug]`, and `/collections/[slug]` for rich carousel/grid display in Google Search.
 
 ### 12.5 Dynamic Social Sharing & OpenGraph Card
@@ -428,16 +444,121 @@ A complete, production-grade SEO and discoverability system is embedded natively
 - Safe ID-to-slug redirect: Accessing `/product/prod-01` automatically 308-redirects to the canonical `/product/crimson-heritage-kanjivaram-saree`.
 - Plural category redirect: Navigating to `/categories/[slug]` permanently redirects to `/category/[slug]`.
 
-### 12.7 Google Search Console Verification Setup
-- The root layout metadata includes a verification hook:
+### 12.7 Search Engine Verification Hooks
+- The root layout metadata includes verification hooks for both Google and Microsoft Bing:
   ```ts
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
+    other: {
+      ...(bingVerification ? { 'msvalidate.01': bingVerification } : {}),
+    },
   }
   ```
-- To verify the website in Google Search Console, simply add your verification token to `.env.local` or your hosting environment variables:
-  ```env
-  NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION="your_token_here"
+- Configure either via `.env.local` / Vercel Environment Variables or dynamically through `/admin/seo` → Tab 5:
+  - Google: `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION="your_token"`
+  - Bing: `NEXT_PUBLIC_BING_SITE_VERIFICATION="your_token"`
+
+### 12.8 AI Agent Discovery & Agentic Browsing (`/llms.txt` & `/llms-full.txt`)
+- Routes: [`public/llms.txt`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/public/llms.txt) & [`public/llms-full.txt`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/public/llms-full.txt)
+- Adheres to the official [llmstxt.org](https://llmstxt.org/) specification:
+  - Single `# Fairy Finds Boutique` H1 headline
+  - Blockquote executive summary of the boutique and services
+  - Markdown link lists for core pages, categories, collections, and WhatsApp ordering channels
+- Served directly as **static edge assets** from the Vercel Global Edge CDN with zero lambda cold start (< 15ms response time).
+- Includes edge headers configured in `next.config.ts`:
+  - `Content-Type: text/plain; charset=utf-8`
+  - `Access-Control-Allow-Origin: *` (eliminates CORS blocks for external AI agents)
+- Passes Google Lighthouse 13.3+ "Agentic Browsing" accessibility checks without timing out.
+
+### 12.9 Meta Title Deduplication & Regional SEO
+- **Title Formatter ([`lib/seo/constants.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/lib/seo/constants.ts))**:
+  ```ts
+  export function formatMetaTitle(title?: string | null, brandName = 'Fairy Finds Boutique'): string {
+    if (!title || !title.trim()) return brandName;
+    const clean = title.trim();
+    if (clean.toLowerCase().includes('fairy finds')) return clean;
+    return `${clean} | ${brandName}`;
+  }
   ```
-- The verification tag renders automatically into `<head>` with zero code edits.
+- **Absolute Title Injection**: All page routes (`/`, `/shop`, `/custom`, `/about`, `/contact`) wrap metadata titles in `title: { absolute: title }` to prevent Next.js layout templates from repeating the brand name twice (e.g., prevents `"Title | Fairy Finds Boutique | Fairy Finds Boutique"`).
+- **Regional Brand Dominance**: Home page metadata specifically targets *"Fairy Finds Boutique | Women's Fashion & Bridal Couture in Neendoor, Kottayam"*, ensuring the home page dominates local Google searches for Kottayam and Neendoor.
+
+---
+
+## 13. Administrative Security & Access Control
+
+### 13.1 Edge Proxy Authentication (`proxy.ts`)
+- Implemented as Next.js 16 Edge middleware (`proxy.ts`).
+- Matches `/admin/:path*` routes:
+  - Unauthenticated requests attempting to access any `/admin/*` route (except `/admin/login`) are automatically intercepted and redirected to `/admin/login?from=[pathname]`.
+  - Authenticated requests visiting `/admin/login` are automatically redirected to the dashboard `/admin`.
+- Authentication is verified via an `admin_session` cookie (`admin_session=authenticated; path=/; max-age=604800; SameSite=Lax`).
+
+### 13.2 Owner Login Flow (`/admin/login`)
+- Route: [`app/admin/login/page.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/login/page.tsx)
+- Server Action: [`app/actions/auth.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/actions/auth.ts)
+- Features:
+  - Password input with show/hide eye toggle.
+  - Case and whitespace resilience: automatically trims accidental leading/trailing spaces (`password.trim()`).
+  - Secure verification: Compares against `ADMIN_PASSWORD` environment variable (defaults to `fairyfinds@123`).
+  - Full-page redirect via `window.location.href` to ensure cookie propagation across Edge middleware.
+
+### 13.3 Server Action Mutation Guards
+- All mutation actions in [`app/actions/store.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/actions/store.ts) enforce an internal `assertAdmin()` security check:
+  ```ts
+  async function assertAdmin() {
+    const isAuthed = await checkAdminSession();
+    if (!isAuthed) {
+      throw new Error('Unauthorized: Valid admin authentication required.');
+    }
+  }
+  ```
+- Guards cover: `saveSettingsAction`, `saveSeoConfigAction`, `saveNavigationAction`, `saveProductAction`, `deleteProductAction`, `saveCategoryAction`, `deleteCategoryAction`, `saveCollectionAction`, `deleteCollectionAction`, `reorderSectionsAction`, `toggleSectionAction`, `saveReviewsAction`.
+
+### 13.4 Image Upload Security
+- Endpoint: [`app/api/upload/route.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/api/upload/route.ts)
+- Checks for valid `admin_session` cookie before allowing image file writes to Supabase storage or disk, returning `401 Unauthorized` for unauthenticated requests.
+
+---
+
+## 14. Cloud Database & Vercel Read-Only Mode Architecture
+
+### 14.1 Ephemeral Read-Only Filesystem vs Supabase
+- **Local Environment**: Mutations write directly to `data/store.json` on disk.
+- **Vercel Serverless**: Functions run in a stateless, read-only container (`EROFS`). Changes written to disk only exist in temporary memory and reset on the next container instance.
+- **Production Persistence**: Live production saves require [Supabase](https://supabase.com/) credentials configured in Vercel Project Settings:
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+
+### 14.2 Supabase SEO Settings Migration
+To enable saving SEO settings from the `/admin/seo` dashboard to Supabase, run this single SQL query in the Supabase SQL Editor:
+```sql
+ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS seo_config JSONB DEFAULT '{}'::jsonb;
+```
+
+### 14.3 Visual Connection Status in `/admin/seo`
+The SEO dashboard ([`SeoManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/SeoManagerClient.tsx)) includes real-time database diagnostics:
+- **Notice: Database Not Connected (Vercel Read-Only Mode)**: Appears if Supabase environment variables are missing in Vercel.
+- **Action Required: Database Migration Needed**: Appears if Supabase is connected but the `seo_config` column has not been added yet, providing a one-click copy button for the SQL command.
+
+---
+
+## 15. Client Onboarding & Admin Portal Handbook
+
+### 15.1 Owner Handbook PDF
+- High-resolution, 7-page print-ready handbook created specifically for non-technical boutique owners and staff:
+  - Source HTML & CSS: [`docs/Fairy_Finds_Admin_Portal_Guide.html`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/docs/Fairy_Finds_Admin_Portal_Guide.html)
+  - Compiled Vector PDF: [`docs/Fairy_Finds_Admin_Portal_Guide.pdf`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/docs/Fairy_Finds_Admin_Portal_Guide.pdf)
+  - Public Download Link: `https://fairyfindsboutique.store/docs/Fairy_Finds_Admin_Portal_Guide.pdf`
+
+### 15.2 Handbook Contents
+1. **Welcome & Security**: Login URL, passkey, session security, and dashboard navigation.
+2. **Product Catalog & Stock Management**: Adding new garments, size matrix (XS–XXL), out-of-stock behavior, and SKU format (`FF-[CAT]-[NAME]-[NUM]`).
+3. **Categories & Signature Collections**: Adding categories, uploading category banners, and creating signature edits (e.g. *Red Saree*, *Green Lehenga*).
+4. **Homepage CMS**: Move Up / Move Down section order, visibility eye toggles, and live text edits.
+5. **Customer Reviews & UGC**: Managing client photos, 5-star ratings, testimonials, and tagging worn outfits.
+6. **SEO & WhatsApp Sharing**: Page-by-page meta titles, WhatsApp preview cards, Google Search Console indexing requests, and Kerala fashion keyword bank.
+7. **Troubleshooting & FAQs**: WhatsApp number formatting, image upload best practices, and emergency support hotline.
+
 

@@ -375,10 +375,19 @@ export const initialSeoConfig: SeoConfig = {
   },
   pages: {
     home: {
-      title: "Fairy Finds Boutique | Artisanal Ready-to-Wear & Bespoke Couture Kottayam, Kerala",
+      title: "Fairy Finds Boutique | Women's Fashion & Bridal Couture in Neendoor, Kottayam",
       description:
-        "Discover artisanal ready-to-wear garments and bespoke bridal commissions crafted for celebratory grace. Located in Kottayam, Kerala, shipping across India and worldwide.",
-      keywords: ['boutique in kottayam', 'designer boutique kottayam', 'bridal boutique kottayam', 'kerala fashion boutique'],
+        "Official online storefront for Fairy Finds Boutique located in Neendoor, Kottayam, Kerala. Shop ready-to-wear sarees, dresses, and bespoke bridal tailoring with express shipping.",
+      keywords: [
+        'Fairy Finds',
+        'Fairy Finds Boutique',
+        'Fairy Finds in Neendoor Kottayam',
+        'boutique in neendoor',
+        'boutique in kottayam',
+        'designer boutique kottayam',
+        'bridal boutique kottayam',
+        'kerala fashion boutique',
+      ],
     },
     shop: {
       title: 'Ready-to-Wear Fashion & Designer Outfits | Fairy Finds Boutique',

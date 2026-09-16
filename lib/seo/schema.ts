@@ -209,3 +209,45 @@ export function generateItemListSchema(
     })),
   };
 }
+
+/**
+ * Generates Schema.org SiteNavigationElement JSON-LD
+ * to instruct Google to prioritize Home, Shop, and Custom as primary sitelinks.
+ */
+export function generateSiteNavigationSchema(siteUrl = SITE_URL) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'SiteNavigationElement',
+        name: 'Home',
+        description: 'Fairy Finds Boutique official homepage, new arrivals and festive edits',
+        url: `${siteUrl}/`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: 'Shop Ready-to-Wear',
+        description: 'Explore curated sarees, dresses, and designer outfits ready to ship',
+        url: `${siteUrl}/shop`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: 'Custom Made Outfits',
+        description: 'Bespoke bridal wear, custom stitching and tailored consultations',
+        url: `${siteUrl}/custom`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: 'Our Story',
+        description: 'Boutique heritage, story, and craftsmanship values',
+        url: `${siteUrl}/about`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        name: 'Contact & Location',
+        description: 'Boutique location in Neendoor, Kottayam and WhatsApp direct chat',
+        url: `${siteUrl}/contact`,
+      },
+    ],
+  };
+}

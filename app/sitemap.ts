@@ -16,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = settings?.seo_config?.global?.canonical_base || SITE_URL;
   const now = new Date();
 
-  // 1. Static Core Public Pages
+  // 1. Static Core Public Pages (Home, Shop, and Custom are highest priority)
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -28,25 +28,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/shop`,
       lastModified: now,
       changeFrequency: 'daily',
-      priority: 0.9,
+      priority: 0.95,
     },
     {
       url: `${baseUrl}/custom`,
       lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.8,
+      changeFrequency: 'weekly',
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/about`,
       lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.6,
+      priority: 0.5,
     },
     {
       url: `${baseUrl}/contact`,
       lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.7,
+      priority: 0.4,
     },
   ];
 

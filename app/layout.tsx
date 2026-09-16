@@ -27,7 +27,7 @@ import GSAPProvider from '@/components/animation/GSAPProvider';
 import JsonLd from '@/components/seo/JsonLd';
 import { getNavigation, getSettings, getCollections } from '@/lib/data/store';
 import { SITE_URL, DEFAULT_SEO, BUSINESS_INFO } from '@/lib/seo/constants';
-import { generateBoutiqueSchema, generateWebSiteSchema } from '@/lib/seo/schema';
+import { generateBoutiqueSchema, generateWebSiteSchema, generateSiteNavigationSchema } from '@/lib/seo/schema';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
@@ -146,6 +146,7 @@ export default async function RootLayout({
       <head>
         <JsonLd data={generateBoutiqueSchema(settings)} id="boutique-jsonld" />
         <JsonLd data={generateWebSiteSchema(settings)} id="website-jsonld" />
+        <JsonLd data={generateSiteNavigationSchema(settings?.seo_config?.global?.canonical_base || SITE_URL)} id="navigation-jsonld" />
         {gaId && (
           <>
             <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />

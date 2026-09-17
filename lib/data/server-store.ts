@@ -222,6 +222,39 @@ async function ensureSupabaseSeeded(supabase: any) {
       });
     }
 
+    // 6. Check & Seed Orders if table exists and is empty
+    try {
+      const { count: ordCount, error: ordErr } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true });
+
+      if (!ordErr && ordCount === 0) {
+        console.log('[Supabase] Seeding initial orders...');
+        const ordersToSeed = local.orders && local.orders.length > 0 ? local.orders : initialOrders;
+        for (const ord of ordersToSeed) {
+          await supabase.from('orders').upsert({
+            id: ord.id,
+            order_number: ord.order_number,
+            customer_name: ord.customer_name,
+            customer_phone: ord.customer_phone,
+            delivery_address: ord.delivery_address,
+            notes: ord.notes || null,
+            items: ord.items,
+            subtotal: ord.subtotal,
+            total: ord.total,
+            currency_symbol: ord.currency_symbol,
+            status: ord.status,
+            confirmation_notes: ord.confirmation_notes || null,
+            confirmed_at: ord.confirmed_at || null,
+            created_at: ord.created_at,
+            updated_at: ord.updated_at,
+          });
+        }
+      }
+    } catch (ordCheckErr) {
+      // Graceful fallback if table does not exist yet
+    }
+
     isSeeding = false;
   } catch (err) {
     console.error('Error in ensureSupabaseSeeded:', err);
@@ -322,6 +355,38 @@ export async function checkSupabaseSeoStatus(): Promise<{
       isSupabaseConnected: true,
       hasSeoColumn: false,
       error: err?.message || 'Error checking Supabase column',
+    };
+  }
+}
+
+export async function checkSupabaseOrdersStatus(): Promise<{
+  isSupabaseConnected: boolean;
+  hasOrdersTable: boolean;
+  error?: string;
+}> {
+  const supabase = getAdminSupabase();
+  if (!supabase) {
+    return { isSupabaseConnected: false, hasOrdersTable: false };
+  }
+
+  try {
+    const { error } = await supabase.from('orders').select('id').limit(1);
+    if (error) {
+      return {
+        isSupabaseConnected: true,
+        hasOrdersTable: false,
+        error: error.message,
+      };
+    }
+    return {
+      isSupabaseConnected: true,
+      hasOrdersTable: true,
+    };
+  } catch (err: any) {
+    return {
+      isSupabaseConnected: true,
+      hasOrdersTable: false,
+      error: err?.message || 'Error checking Supabase orders table',
     };
   }
 }
@@ -1018,6 +1083,7 @@ export async function getServerOrders(): Promise<Order[]> {
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
+      await ensureSupabaseSeeded(supabase);
       const { data, error } = await supabase
         .from('orders')
         .select('*')

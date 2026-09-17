@@ -22,6 +22,7 @@ import {
   updateServerReviews,
   updateServerSeoConfig,
   checkSupabaseSeoStatus,
+  checkSupabaseOrdersStatus,
   getServerOrders,
   getServerOrderById,
   createServerOrder,
@@ -126,6 +127,10 @@ export async function updateSeoConfig(seoConfig: any) {
 
 export async function checkSeoDbStatus() {
   return checkSupabaseSeoStatus();
+}
+
+export async function checkOrdersDbStatus() {
+  return checkSupabaseOrdersStatus();
 }
 
 export async function getOrders(): Promise<Order[]> {

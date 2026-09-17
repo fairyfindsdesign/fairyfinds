@@ -17,7 +17,6 @@ import {
   cancelAndDeleteOrderAction,
   createManualOrderAction,
 } from '@/app/actions/store';
-import { cleanPhoneNumber } from '@/lib/whatsapp';
 import {
   CheckCircle2,
   Clock,
@@ -40,32 +39,23 @@ import {
   Calendar,
   MapPin,
   FileText,
-  Copy,
-  Database,
 } from 'lucide-react';
 
 interface OrdersManagerClientProps {
   initialOrders: Order[];
   products: Product[];
   settings: StoreSettings;
-  dbStatus?: {
-    isSupabaseConnected: boolean;
-    hasOrdersTable: boolean;
-    error?: string;
-  };
 }
 
 export default function OrdersManagerClient({
   initialOrders,
   products,
   settings,
-  dbStatus,
 }: OrdersManagerClientProps) {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'ALL' | 'PENDING' | 'CONFIRMED' | 'COMPLETED'>('ALL');
-  const [copiedSql, setCopiedSql] = useState(false);
 
   // Confirmation Modal state
   const [confirmingOrder, setConfirmingOrder] = useState<Order | null>(null);
@@ -263,47 +253,9 @@ export default function OrdersManagerClient({
 
   // WhatsApp reply link to customer
   const getCustomerWhatsAppUrl = (order: Order) => {
-    const cleanPhone = cleanPhoneNumber(order.customer_phone);
+    const cleanPhone = order.customer_phone.replace(/[^0-9]/g, '');
     const message = `Hello ${order.customer_name}, this is Fairy Finds Boutique regarding your order #${order.order_number}.`;
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-  };
-
-  const handleCopyOrdersSql = () => {
-    const sql = `-- Fairy Finds Boutique - Create Orders Table in Supabase
-CREATE TABLE IF NOT EXISTS orders (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  order_number TEXT UNIQUE NOT NULL,
-  customer_name TEXT NOT NULL,
-  customer_phone TEXT NOT NULL,
-  delivery_address TEXT NOT NULL,
-  notes TEXT,
-  items JSONB DEFAULT '[]'::jsonb,
-  subtotal DECIMAL(10, 2) NOT NULL DEFAULT 0,
-  total DECIMAL(10, 2) NOT NULL DEFAULT 0,
-  currency_symbol TEXT DEFAULT 'Rs.',
-  status TEXT NOT NULL DEFAULT 'PENDING',
-  confirmation_notes TEXT,
-  confirmed_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
-CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
-
-ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Public Create Orders" ON orders;
-CREATE POLICY "Public Create Orders" ON orders FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Admin All Orders" ON orders;
-CREATE POLICY "Admin All Orders" ON orders FOR ALL USING (true) WITH CHECK (true);`;
-
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(sql);
-      setCopiedSql(true);
-      setTimeout(() => setCopiedSql(false), 3000);
-    }
   };
 
   return (
@@ -355,59 +307,6 @@ CREATE POLICY "Admin All Orders" ON orders FOR ALL USING (true) WITH CHECK (true
           </button>
         </div>
       </div>
-
-      {/* Database Connection Diagnostic Bar */}
-      {dbStatus && (
-        <>
-          {dbStatus.isSupabaseConnected && dbStatus.hasOrdersTable && (
-            <div className="px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xs flex items-center justify-between text-xs text-emerald-800 shadow-xs">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-                <span className="font-medium">
-                  Live Cloud Database Connected: All orders and confirmation logs persist directly in Supabase.
-                </span>
-              </div>
-              <span className="text-[11px] font-mono uppercase text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-xs">
-                Active Sync
-              </span>
-            </div>
-          )}
-
-          {!dbStatus.isSupabaseConnected && (
-            <div className="p-4 bg-amber-50 border border-amber-300 rounded-xs text-xs space-y-2 text-amber-900 shadow-xs">
-              <div className="flex items-center gap-2 font-semibold">
-                <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
-                <span>Notice: Cloud Database Not Connected (Vercel Read-Only Mode)</span>
-              </div>
-              <p className="text-amber-800 leading-relaxed font-light">
-                Your store is currently running without Supabase credentials. On Vercel, the filesystem is stateless and read-only, so orders exist in temporary serverless memory. To enable <strong>permanent cloud database saving</strong>, add your <strong>Supabase credentials</strong> (<code>NEXT_PUBLIC_SUPABASE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>) in your Vercel Project Settings.
-              </p>
-            </div>
-          )}
-
-          {dbStatus.isSupabaseConnected && !dbStatus.hasOrdersTable && (
-            <div className="p-4 bg-blue-50 border border-blue-300 rounded-xs text-xs space-y-3 text-blue-950 shadow-xs">
-              <div className="flex items-center gap-2 font-semibold text-blue-900">
-                <Database className="w-4 h-4 text-blue-600 shrink-0" />
-                <span>Action Required: &apos;orders&apos; table not created in Supabase yet</span>
-              </div>
-              <p className="text-blue-800 leading-relaxed font-light">
-                Supabase is connected, but the <code>orders</code> table needs to be created in your database. Click below to copy the SQL setup script, then paste and run it in your <strong>Supabase SQL Editor</strong> to enable permanent order saving.
-              </p>
-              <div>
-                <button
-                  type="button"
-                  onClick={handleCopyOrdersSql}
-                  className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xs inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>{copiedSql ? 'SQL Copied to Clipboard!' : 'Copy Supabase Orders SQL'}</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </>
-      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">

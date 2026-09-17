@@ -2,17 +2,7 @@ import { CartItem, CustomerOrderDetails, CustomInquiryDetails } from './types';
 
 export function cleanPhoneNumber(phone: string): string {
   // Strip spaces, dashes, parentheses, leading plus for wa.me
-  let digits = (phone || '').replace(/[^0-9]/g, '');
-  if (!digits) return '';
-  // If 10 digits starting with 6, 7, 8, 9 (standard Indian mobile format without +91), prepend India country code 91
-  if (digits.length === 10 && /^[6-9]/.test(digits)) {
-    return `91${digits}`;
-  }
-  // If 11 digits starting with 0 followed by 6-9, convert leading 0 to 91
-  if (digits.length === 11 && digits.startsWith('0') && /^[6-9]/.test(digits.slice(1))) {
-    return `91${digits.slice(1)}`;
-  }
-  return digits;
+  return phone.replace(/[^0-9]/g, '');
 }
 
 export function generateOrderWhatsAppUrl(

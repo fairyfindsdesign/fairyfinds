@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Tag,
   Globe,
+  ClipboardList,
 } from 'lucide-react';
 
 interface AdminNavClientProps {
@@ -48,6 +49,7 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: Store },
+    { name: 'Orders', href: '/admin/orders', icon: ClipboardList },
     { name: 'Products & Stock', href: '/admin/products', icon: Package },
     { name: 'Categories', href: '/admin/categories', icon: Tag },
     { name: 'Collections', href: '/admin/collections', icon: Layers },

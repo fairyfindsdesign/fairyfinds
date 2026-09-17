@@ -303,3 +303,38 @@ VALUES
 )
 ON CONFLICT (id) DO NOTHING;
 
+-- 12. Orders Table
+CREATE TABLE IF NOT EXISTS orders (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  order_number TEXT UNIQUE NOT NULL,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  delivery_address TEXT NOT NULL,
+  notes TEXT,
+  items JSONB DEFAULT '[]'::jsonb,
+  subtotal DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  total DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  currency_symbol TEXT DEFAULT 'Rs.',
+  status TEXT NOT NULL DEFAULT 'PENDING',
+  confirmation_notes TEXT,
+  confirmed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
+
+-- Enable RLS
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+-- Public checkout can create orders
+DROP POLICY IF EXISTS "Public Create Orders" ON orders;
+CREATE POLICY "Public Create Orders" ON orders FOR INSERT WITH CHECK (true);
+
+-- Admin full control
+DROP POLICY IF EXISTS "Admin All Orders" ON orders;
+CREATE POLICY "Admin All Orders" ON orders FOR ALL USING (true) WITH CHECK (true);
+
+

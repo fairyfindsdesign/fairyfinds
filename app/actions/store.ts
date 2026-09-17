@@ -15,8 +15,12 @@ import {
   updateServerNavigation,
   updateServerReviews,
   updateServerSeoConfig,
+  createServerOrder,
+  confirmServerOrder,
+  updateServerOrderStatus,
+  deleteServerOrder,
 } from '@/lib/data/server-store';
-import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, SeoConfig, StoreSettings } from '@/lib/types';
+import { Category, Collection, CustomerReview, HomepageSection, NavItem, Order, OrderStatus, Product, SeoConfig, StoreSettings } from '@/lib/types';
 import { checkAdminSession } from './auth';
 
 async function assertAdmin() {
@@ -50,6 +54,7 @@ function purgeStorefrontCache() {
     revalidatePath('/admin/settings', 'page');
     revalidatePath('/admin/navigation', 'page');
     revalidatePath('/admin/reviews', 'page');
+    revalidatePath('/admin/orders', 'page');
     revalidatePath('/admin/seo', 'page');
     revalidatePath('/sitemap.xml');
     revalidatePath('/robots.txt');
@@ -252,6 +257,105 @@ export async function saveReviewsAction(reviews: CustomerReview[]) {
   } catch (err: any) {
     console.error('saveReviewsAction error:', err);
     return { success: false, error: err?.message || 'Database error saving reviews' };
+  }
+}
+
+// --- Orders Management Actions ---
+
+/**
+ * Public action invoked when customer submits order on the checkout bag page.
+ * Creates an order record with status 'PENDING' and returns the generated order reference.
+ */
+export async function placeOrderAction(orderData: Partial<Order>) {
+  try {
+    const order = await createServerOrder(orderData);
+    purgeStorefrontCache();
+    revalidatePath('/admin/orders', 'page');
+    revalidatePath('/admin', 'layout');
+    return { success: true, order };
+  } catch (err: any) {
+    console.error('placeOrderAction error:', err);
+    return { success: false, error: err?.message || 'Failed to place order.' };
+  }
+}
+
+/**
+ * Admin action to manually confirm an order, making it a verified Valid Order.
+ * Optionally decrements variant inventory to prevent overselling.
+ */
+export async function confirmOrderAction(
+  orderId: string,
+  notes?: string,
+  deductStock: boolean = true
+) {
+  try {
+    await assertAdmin();
+    const order = await confirmServerOrder(orderId, notes, deductStock);
+    purgeStorefrontCache();
+    revalidatePath('/admin/orders', 'page');
+    revalidatePath('/admin/products', 'page');
+    revalidatePath('/admin', 'layout');
+    return { success: true, order };
+  } catch (err: any) {
+    console.error('confirmOrderAction error:', err);
+    return { success: false, error: err?.message || 'Database error confirming order' };
+  }
+}
+
+/**
+ * Admin action to update order status (e.g. COMPLETED or back to PENDING).
+ */
+export async function updateOrderStatusAction(
+  orderId: string,
+  status: OrderStatus,
+  notes?: string
+) {
+  try {
+    await assertAdmin();
+    const order = await updateServerOrderStatus(orderId, status, notes);
+    purgeStorefrontCache();
+    revalidatePath('/admin/orders', 'page');
+    revalidatePath('/admin', 'layout');
+    return { success: true, order };
+  } catch (err: any) {
+    console.error('updateOrderStatusAction error:', err);
+    return { success: false, error: err?.message || 'Database error updating order status' };
+  }
+}
+
+/**
+ * Admin action to cancel or delete an order.
+ * Per user request: when an order is cancelled/deleted, it is removed from the database log.
+ */
+export async function cancelAndDeleteOrderAction(orderId: string, restoreStock: boolean = true) {
+  try {
+    await assertAdmin();
+    const deleted = await deleteServerOrder(orderId, restoreStock);
+    purgeStorefrontCache();
+    revalidatePath('/admin/orders', 'page');
+    revalidatePath('/admin/products', 'page');
+    revalidatePath('/admin', 'layout');
+    return { success: true, deleted };
+  } catch (err: any) {
+    console.error('cancelAndDeleteOrderAction error:', err);
+    return { success: false, error: err?.message || 'Database error removing order' };
+  }
+}
+
+/**
+ * Admin action to manually log an order received offline, in-person, or via direct phone/WhatsApp.
+ */
+export async function createManualOrderAction(orderData: Partial<Order>) {
+  try {
+    await assertAdmin();
+    const order = await createServerOrder(orderData);
+    purgeStorefrontCache();
+    revalidatePath('/admin/orders', 'page');
+    revalidatePath('/admin', 'layout');
+    return { success: true, order };
+  } catch (err: any) {
+    console.error('createManualOrderAction error:', err);
+    return { success: false, error: err?.message || 'Database error creating manual order' };
   }
 }
 

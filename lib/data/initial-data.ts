@@ -1,4 +1,4 @@
-import { Category, Collection, CustomerReview, HomepageSection, NavItem, Order, Product, SeoConfig, StoreSettings } from '../types';
+import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, SeoConfig, StoreSettings } from '../types';
 
 export const initialCategories: Category[] = [
   {
@@ -568,67 +568,5 @@ export const initialReviews: CustomerReview[] = [
     created_at: '2026-09-03T11:45:00Z',
   },
 ];
-
-export const initialOrders: Order[] = [
-  {
-    id: 'ord-1002',
-    order_number: 'FF-1002',
-    customer_name: 'Ananya Nair',
-    customer_phone: '+94 77 987 6543',
-    delivery_address: '42 Lotus Grove, Cinnamon Gardens, Colombo 03',
-    notes: 'Please double steam before dispatch, needed for Saturday wedding.',
-    items: [
-      {
-        id: 'item-1',
-        product_id: 'prod-crimson-saree',
-        product_name: 'Crimson Heritage Kanjivaram Silk Saree',
-        product_code: 'FF-SAR-001',
-        image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=600',
-        size: 'Standard',
-        quantity: 1,
-        unit_price: 48500,
-        subtotal: 48500,
-        sku: 'SAR-RED-STD',
-      },
-    ],
-    subtotal: 48500,
-    total: 48500,
-    currency_symbol: 'Rs.',
-    status: 'PENDING',
-    created_at: '2026-09-17T09:15:00Z',
-    updated_at: '2026-09-17T09:15:00Z',
-  },
-  {
-    id: 'ord-1001',
-    order_number: 'FF-1001',
-    customer_name: 'Meera Jacob',
-    customer_phone: '+94 71 234 5678',
-    delivery_address: '12 Palm Beach Road, Mount Lavinia',
-    notes: 'Fragile gift wrapping requested.',
-    items: [
-      {
-        id: 'item-2',
-        product_id: 'prod-scarlet-organza',
-        product_name: 'Scarlet Bloom Embroidered Organza Saree',
-        product_code: 'FF-SAR-002',
-        image_url: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=600',
-        size: 'Standard',
-        quantity: 1,
-        unit_price: 36000,
-        subtotal: 36000,
-        sku: 'SAR-ORG-RED',
-      },
-    ],
-    subtotal: 36000,
-    total: 36000,
-    currency_symbol: 'Rs.',
-    status: 'CONFIRMED',
-    confirmation_notes: 'Payment advance confirmed via bank transfer. Courier package prepared.',
-    confirmed_at: '2026-09-16T15:20:00Z',
-    created_at: '2026-09-16T14:10:00Z',
-    updated_at: '2026-09-16T15:20:00Z',
-  },
-];
-
 
 

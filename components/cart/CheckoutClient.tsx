@@ -3,11 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Trash2, Plus, Minus, ArrowLeft, MessageCircle, ShieldCheck, ShoppingBag, CheckCircle2, Clock, Loader2, Sparkles } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowLeft, MessageCircle, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { StoreSettings, CustomerOrderDetails, CartItem } from '@/lib/types';
+import { StoreSettings, CustomerOrderDetails } from '@/lib/types';
 import { generateOrderWhatsAppUrl } from '@/lib/whatsapp';
-import { placeOrderAction } from '@/app/actions/store';
 
 interface CheckoutClientProps {
   settings: StoreSettings;
@@ -24,161 +23,29 @@ export default function CheckoutClient({ settings }: CheckoutClientProps) {
   });
 
   const [validationAttempted, setValidationAttempted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [placedOrder, setPlacedOrder] = useState<{
-    orderNumber: string;
-    customerName: string;
-    customerPhone: string;
-    deliveryAddress: string;
-    items: CartItem[];
-    subtotal: number;
-    waUrl: string;
-  } | null>(null);
 
   const isFormValid =
     customer.name.trim().length > 0 &&
     customer.phone.trim().length > 0 &&
     customer.address.trim().length > 0;
 
-  const handleWhatsAppOrder = async (e: React.FormEvent) => {
+  const handleWhatsAppOrder = (e: React.FormEvent) => {
     e.preventDefault();
     setValidationAttempted(true);
 
-    if (!isFormValid || items.length === 0 || isSubmitting) {
+    if (!isFormValid || items.length === 0) {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      // 1. Log the order into the database ONLY when the user clicks the checkout submit button
-      const res = await placeOrderAction({
-        customer_name: customer.name.trim(),
-        customer_phone: customer.phone.trim(),
-        delivery_address: customer.address.trim(),
-        notes: customer.notes?.trim() || undefined,
-        items: items.map((item) => ({
-          id: item.id,
-          product_id: item.product.id,
-          product_name: item.product.name,
-          product_code: item.product.product_code || item.product.id,
-          image_url: item.product.images?.[0],
-          size: item.size,
-          quantity: item.quantity,
-          unit_price: item.price,
-          subtotal: item.price * item.quantity,
-          sku: item.product.variants?.find((v) => v.size === item.size)?.sku,
-        })),
-        subtotal,
-        total: subtotal,
-        currency_symbol: settings.currency_symbol || 'Rs.',
-      });
-
-      const orderNumber = res.success && res.order ? res.order.order_number : undefined;
-
-      // 2. Generate WhatsApp chat link with official order number embedded
-      const waUrl = generateOrderWhatsAppUrl(
-        items,
-        customer,
-        settings.currency_symbol || 'Rs.',
-        settings.whatsapp_number,
-        orderNumber
-      );
-
-      // Open WhatsApp
-      window.open(waUrl, '_blank');
-
-      if (orderNumber) {
-        setPlacedOrder({
-          orderNumber,
-          customerName: customer.name,
-          customerPhone: customer.phone,
-          deliveryAddress: customer.address,
-          items: [...items],
-          subtotal,
-          waUrl,
-        });
-        clearCart();
-      }
-    } catch (err) {
-      console.error('Error logging order on checkout:', err);
-      // Fail-safe: still launch WhatsApp so the customer order is never lost
-      const waUrl = generateOrderWhatsAppUrl(
-        items,
-        customer,
-        settings.currency_symbol || 'Rs.',
-        settings.whatsapp_number
-      );
-      window.open(waUrl, '_blank');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // If order was just placed, display boutique confirmation screen
-  if (placedOrder) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 text-center animate-in fade-in duration-300">
-        <div className="bg-white border border-neutral-200 p-8 sm:p-12 shadow-sm rounded-xs space-y-6">
-          <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-200">
-            <CheckCircle2 className="w-8 h-8" />
-          </div>
-
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-mono font-semibold uppercase tracking-wider rounded-xs mb-3">
-              <Clock className="w-3.5 h-3.5 text-amber-600" />
-              <span>Status: Pending Boutique Confirmation</span>
-            </div>
-            <h1 className="font-serif text-3xl sm:text-4xl text-[#1A1A1A] font-light">
-              Order Logged & WhatsApp Opened
-            </h1>
-            <p className="text-xs text-neutral-500 max-w-lg mx-auto font-light mt-2 leading-relaxed">
-              Your order has been recorded under reference{' '}
-              <strong className="text-neutral-900 font-mono font-bold">#{placedOrder.orderNumber}</strong>. 
-              Our boutique atelier will review your pieces and confirm sizing, payment, and courier dispatch on WhatsApp.
-            </p>
-          </div>
-
-          {/* Itemized summary */}
-          <div className="bg-neutral-50 border border-neutral-200 p-5 text-left text-xs space-y-3 rounded-xs">
-            <div className="flex justify-between items-center pb-2 border-b border-neutral-200 font-semibold text-neutral-800 uppercase tracking-wider">
-              <span>Order Summary (#{placedOrder.orderNumber})</span>
-              <span className="text-[#FF55D2]">{settings.currency_symbol || 'Rs.'} {placedOrder.subtotal.toLocaleString()}</span>
-            </div>
-            <div className="space-y-2">
-              {placedOrder.items.map((it) => (
-                <div key={it.id} className="flex justify-between items-center text-neutral-600">
-                  <span>{it.quantity}x {it.product.name} ({it.size})</span>
-                  <span className="font-medium text-neutral-900">{settings.currency_symbol || 'Rs.'} {(it.price * it.quantity).toLocaleString()}</span>
-                </div>
-              ))}
-            </div>
-            <div className="pt-2 border-t border-neutral-200 text-[11px] text-neutral-500">
-              <strong>Delivery to:</strong> {placedOrder.customerName}, {placedOrder.deliveryAddress}
-            </div>
-          </div>
-
-          {/* Re-open CTA or Continue shopping */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-            <a
-              href={placedOrder.waUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3.5 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-colors rounded-xs shadow-xs"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span>Re-open WhatsApp Chat</span>
-            </a>
-            <Link
-              href="/shop"
-              className="px-6 py-3.5 border border-neutral-300 hover:border-black text-[#1A1A1A] text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-colors rounded-xs"
-            >
-              <span>Explore More Designs</span>
-            </Link>
-          </div>
-        </div>
-      </div>
+    const waUrl = generateOrderWhatsAppUrl(
+      items,
+      customer,
+      settings.currency_symbol || 'Rs.',
+      settings.whatsapp_number
     );
-  }
+
+    window.open(waUrl, '_blank');
+  };
 
   if (items.length === 0) {
     return (
@@ -453,20 +320,10 @@ export default function CheckoutClient({ settings }: CheckoutClientProps) {
               {/* Submit CTA */}
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-4 px-6 bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] disabled:bg-neutral-300 disabled:cursor-not-allowed text-white text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer"
+                className="w-full py-4 px-6 bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer"
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Logging Order & Opening WhatsApp...</span>
-                  </>
-                ) : (
-                  <>
-                    <MessageCircle className="w-4 h-4" />
-                    <span>Complete Order on WhatsApp</span>
-                  </>
-                )}
+                <MessageCircle className="w-4 h-4" />
+                <span>Complete Order on WhatsApp</span>
               </button>
             </form>
           </div>

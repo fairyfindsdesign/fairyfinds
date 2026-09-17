@@ -22,14 +22,7 @@ import {
   updateServerReviews,
   updateServerSeoConfig,
   checkSupabaseSeoStatus,
-  getServerOrders,
-  getServerOrderById,
-  createServerOrder,
-  confirmServerOrder,
-  updateServerOrderStatus,
-  deleteServerOrder,
 } from './server-store';
-import { Order, OrderStatus } from '../types';
 
 export async function getNavigation() {
   return getServerNavigation();
@@ -128,34 +121,5 @@ export async function checkSeoDbStatus() {
   return checkSupabaseSeoStatus();
 }
 
-export async function getOrders(): Promise<Order[]> {
-  return getServerOrders();
-}
 
-export async function getOrderById(id: string): Promise<Order | null> {
-  return getServerOrderById(id);
-}
 
-export async function createOrder(orderData: Partial<Order>): Promise<Order> {
-  return createServerOrder(orderData);
-}
-
-export async function confirmOrder(
-  id: string,
-  confirmationNotes?: string,
-  deductStock: boolean = true
-): Promise<Order> {
-  return confirmServerOrder(id, confirmationNotes, deductStock);
-}
-
-export async function updateOrderStatus(
-  id: string,
-  status: OrderStatus,
-  notes?: string
-): Promise<Order> {
-  return updateServerOrderStatus(id, status, notes);
-}
-
-export async function deleteOrder(id: string, restoreStock: boolean = true): Promise<boolean> {
-  return deleteServerOrder(id, restoreStock);
-}

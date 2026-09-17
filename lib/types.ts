@@ -228,37 +228,3 @@ export interface CustomerReview {
   display_order?: number;
   created_at?: string;
 }
-
-export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED';
-
-export interface OrderItem {
-  id: string;
-  product_id: string;
-  product_name: string;
-  product_code?: string;
-  image_url?: string;
-  size: string;
-  quantity: number;
-  unit_price: number;
-  subtotal: number;
-  sku?: string;
-}
-
-export interface Order {
-  id: string;
-  order_number: string; // e.g. "FF-1001"
-  customer_name: string;
-  customer_phone: string;
-  delivery_address: string;
-  notes?: string;
-  items: OrderItem[];
-  subtotal: number;
-  total: number;
-  currency_symbol: string;
-  status: OrderStatus;
-  confirmation_notes?: string;
-  confirmed_at?: string;
-  created_at: string;
-  updated_at: string;
-}
-

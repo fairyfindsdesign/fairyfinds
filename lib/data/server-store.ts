@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { Category, Collection, CustomerReview, HomepageSection, NavItem, Order, OrderItem, OrderStatus, Product, SeoConfig, StoreSettings } from '../types';
-import { initialCategories, initialCollections, initialNavigation, initialOrders, initialProducts, initialReviews, initialSections, initialSeoConfig, initialSettings } from './initial-data';
+import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, SeoConfig, StoreSettings } from '../types';
+import { initialCategories, initialCollections, initialNavigation, initialProducts, initialReviews, initialSections, initialSeoConfig, initialSettings } from './initial-data';
 import { getAdminSupabase } from '../supabase/admin';
 import { generateUniqueProductCode } from '../utils/product-code';
 
@@ -16,7 +16,6 @@ interface StoreData {
   products: Product[];
   sections: HomepageSection[];
   reviews: CustomerReview[];
-  orders: Order[];
 }
 
 // Global in-memory cache for serverless environments (Vercel) where the filesystem is read-only
@@ -44,7 +43,6 @@ export function getLocalData(): StoreData {
         products: parsed.products || initialProducts,
         sections: parsed.sections || initialSections,
         reviews: parsed.reviews || initialReviews,
-        orders: parsed.orders || initialOrders,
       };
       globalStore.__fairyStoreData = data;
       return data;
@@ -61,7 +59,6 @@ export function getLocalData(): StoreData {
     products: initialProducts,
     sections: initialSections,
     reviews: initialReviews,
-    orders: initialOrders,
   };
   globalStore.__fairyStoreData = defaultData;
   return defaultData;
@@ -994,317 +991,5 @@ export async function updateServerReviews(reviews: CustomerReview[]): Promise<Cu
     }
   }
   return data.reviews;
-}
-
-// --- Orders Management ---
-
-function generateNextOrderNumber(existingOrders: Order[]): string {
-  let maxNum = 1000;
-  for (const o of existingOrders) {
-    if (o.order_number) {
-      const match = o.order_number.match(/FF-(\d+)/i);
-      if (match) {
-        const num = parseInt(match[1], 10);
-        if (!isNaN(num) && num > maxNum) {
-          maxNum = num;
-        }
-      }
-    }
-  }
-  return `FF-${maxNum + 1}`;
-}
-
-export async function getServerOrders(): Promise<Order[]> {
-  const supabase = getAdminSupabase();
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        return data.map((o: any) => ({
-          id: o.id,
-          order_number: o.order_number,
-          customer_name: o.customer_name,
-          customer_phone: o.customer_phone,
-          delivery_address: o.delivery_address,
-          notes: o.notes || undefined,
-          items: Array.isArray(o.items) ? o.items : [],
-          subtotal: Number(o.subtotal || 0),
-          total: Number(o.total || 0),
-          currency_symbol: o.currency_symbol || 'Rs.',
-          status: (o.status || 'PENDING') as OrderStatus,
-          confirmation_notes: o.confirmation_notes || undefined,
-          confirmed_at: o.confirmed_at || undefined,
-          created_at: o.created_at || new Date().toISOString(),
-          updated_at: o.updated_at || new Date().toISOString(),
-        }));
-      }
-    } catch (err) {
-      console.error('Error fetching orders from Supabase:', err);
-    }
-  }
-
-  const local = getLocalData();
-  const orders = local.orders || initialOrders;
-  return [...orders].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
-}
-
-export async function getServerOrderById(id: string): Promise<Order | null> {
-  const orders = await getServerOrders();
-  return orders.find((o) => o.id === id || o.order_number === id) || null;
-}
-
-export async function createServerOrder(orderData: Partial<Order>): Promise<Order> {
-  const data = getLocalData();
-  const existingOrders = data.orders || [];
-
-  const orderNumber = orderData.order_number || generateNextOrderNumber(existingOrders);
-  const id = orderData.id || `ord-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-  const now = new Date().toISOString();
-
-  const items: OrderItem[] = (orderData.items || []).map((item, idx) => ({
-    id: item.id || `item-${idx + 1}-${Date.now()}`,
-    product_id: item.product_id || '',
-    product_name: item.product_name || 'Garment Item',
-    product_code: item.product_code,
-    image_url: item.image_url,
-    size: item.size || 'Standard',
-    quantity: item.quantity || 1,
-    unit_price: item.unit_price || 0,
-    subtotal: item.subtotal || (item.unit_price || 0) * (item.quantity || 1),
-    sku: item.sku,
-  }));
-
-  const subtotal =
-    orderData.subtotal ?? items.reduce((acc, item) => acc + item.subtotal, 0);
-  const total = orderData.total ?? subtotal;
-
-  const newOrder: Order = {
-    id,
-    order_number: orderNumber,
-    customer_name: (orderData.customer_name || 'Guest Customer').trim(),
-    customer_phone: (orderData.customer_phone || '').trim(),
-    delivery_address: (orderData.delivery_address || '').trim(),
-    notes: orderData.notes ? orderData.notes.trim() : undefined,
-    items,
-    subtotal,
-    total,
-    currency_symbol: orderData.currency_symbol || data.settings?.currency_symbol || 'Rs.',
-    status: 'PENDING',
-    created_at: now,
-    updated_at: now,
-  };
-
-  data.orders = [newOrder, ...existingOrders];
-  saveLocalData(data);
-
-  const supabase = getAdminSupabase();
-  if (supabase) {
-    try {
-      const { error } = await supabase.from('orders').upsert({
-        id: newOrder.id,
-        order_number: newOrder.order_number,
-        customer_name: newOrder.customer_name,
-        customer_phone: newOrder.customer_phone,
-        delivery_address: newOrder.delivery_address,
-        notes: newOrder.notes || null,
-        items: newOrder.items,
-        subtotal: newOrder.subtotal,
-        total: newOrder.total,
-        currency_symbol: newOrder.currency_symbol,
-        status: newOrder.status,
-        created_at: newOrder.created_at,
-        updated_at: newOrder.updated_at,
-      });
-
-      if (error) {
-        console.error('Supabase error inserting order:', error);
-      }
-    } catch (err) {
-      console.error('Error inserting order in Supabase:', err);
-    }
-  }
-
-  return newOrder;
-}
-
-export async function confirmServerOrder(
-  id: string,
-  confirmationNotes?: string,
-  deductStock: boolean = true
-): Promise<Order> {
-  const data = getLocalData();
-  const orderIndex = data.orders.findIndex((o) => o.id === id || o.order_number === id);
-
-  if (orderIndex === -1) {
-    throw new Error(`Order not found: ${id}`);
-  }
-
-  const order = data.orders[orderIndex];
-  const previousStatus = order.status;
-  const now = new Date().toISOString();
-
-  order.status = 'CONFIRMED';
-  order.confirmed_at = now;
-  order.updated_at = now;
-  if (confirmationNotes !== undefined) {
-    order.confirmation_notes = confirmationNotes.trim();
-  }
-
-  // Deduct variant stock if transition from PENDING -> CONFIRMED
-  if (deductStock && previousStatus === 'PENDING') {
-    const supabase = getAdminSupabase();
-    for (const item of order.items) {
-      const product = data.products.find(
-        (p) => p.id === item.product_id || p.product_code === item.product_code
-      );
-      if (product && product.variants) {
-        const variant = product.variants.find((v) => v.size === item.size);
-        if (variant) {
-          variant.stock_quantity = Math.max(0, variant.stock_quantity - item.quantity);
-          if (supabase && variant.id) {
-            try {
-              await supabase
-                .from('product_variants')
-                .update({ stock_quantity: variant.stock_quantity })
-                .eq('id', variant.id);
-            } catch (vErr) {
-              console.error('Error updating stock in Supabase variant:', vErr);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  data.orders[orderIndex] = order;
-  saveLocalData(data);
-
-  const supabase = getAdminSupabase();
-  if (supabase) {
-    try {
-      await supabase
-        .from('orders')
-        .update({
-          status: order.status,
-          confirmed_at: order.confirmed_at,
-          confirmation_notes: order.confirmation_notes || null,
-          updated_at: order.updated_at,
-        })
-        .eq('id', order.id);
-    } catch (err) {
-      console.error('Error updating confirmed order in Supabase:', err);
-    }
-  }
-
-  return order;
-}
-
-export async function updateServerOrderStatus(
-  id: string,
-  status: OrderStatus,
-  notes?: string
-): Promise<Order> {
-  const data = getLocalData();
-  const orderIndex = data.orders.findIndex((o) => o.id === id || o.order_number === id);
-
-  if (orderIndex === -1) {
-    throw new Error(`Order not found: ${id}`);
-  }
-
-  const order = data.orders[orderIndex];
-  const now = new Date().toISOString();
-
-  order.status = status;
-  order.updated_at = now;
-  if (status === 'CONFIRMED' && !order.confirmed_at) {
-    order.confirmed_at = now;
-  }
-  if (notes !== undefined) {
-    order.confirmation_notes = notes.trim();
-  }
-
-  data.orders[orderIndex] = order;
-  saveLocalData(data);
-
-  const supabase = getAdminSupabase();
-  if (supabase) {
-    try {
-      await supabase
-        .from('orders')
-        .update({
-          status: order.status,
-          confirmed_at: order.confirmed_at || null,
-          confirmation_notes: order.confirmation_notes || null,
-          updated_at: order.updated_at,
-        })
-        .eq('id', order.id);
-    } catch (err) {
-      console.error('Error updating order status in Supabase:', err);
-    }
-  }
-
-  return order;
-}
-
-/**
- * Deletes an order log permanently from both local storage and database.
- * If the order was CONFIRMED and stock was decremented, restores variant stock.
- */
-export async function deleteServerOrder(id: string, restoreStock: boolean = true): Promise<boolean> {
-  const data = getLocalData();
-  const orderIndex = data.orders.findIndex((o) => o.id === id || o.order_number === id);
-
-  if (orderIndex === -1) {
-    return false;
-  }
-
-  const order = data.orders[orderIndex];
-
-  // Restore inventory if previously confirmed
-  if (restoreStock && order.status === 'CONFIRMED') {
-    const supabase = getAdminSupabase();
-    for (const item of order.items) {
-      const product = data.products.find(
-        (p) => p.id === item.product_id || p.product_code === item.product_code
-      );
-      if (product && product.variants) {
-        const variant = product.variants.find((v) => v.size === item.size);
-        if (variant) {
-          variant.stock_quantity += item.quantity;
-          if (supabase && variant.id) {
-            try {
-              await supabase
-                .from('product_variants')
-                .update({ stock_quantity: variant.stock_quantity })
-                .eq('id', variant.id);
-            } catch (vErr) {
-              console.error('Error restoring stock in Supabase variant:', vErr);
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Remove from array
-  data.orders = data.orders.filter((o) => o.id !== order.id && o.order_number !== order.order_number);
-  saveLocalData(data);
-
-  const supabase = getAdminSupabase();
-  if (supabase) {
-    try {
-      await supabase.from('orders').delete().eq('id', order.id);
-    } catch (err) {
-      console.error('Error deleting order from Supabase:', err);
-    }
-  }
-
-  return true;
 }
 

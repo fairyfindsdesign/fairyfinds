@@ -1,23 +1,19 @@
 import React from 'react';
 import Link from 'next/link';
-import { getProducts, getCollections, getSettings, getHomepageSections, getCategories, getOrders } from '@/lib/data/store';
-import { Package, Layers, LayoutTemplate, Phone, AlertCircle, ArrowRight, Plus, Tag, BookOpen, ClipboardList, Clock, CheckCircle2 } from 'lucide-react';
+import { getProducts, getCollections, getSettings, getHomepageSections, getCategories } from '@/lib/data/store';
+import { Package, Layers, LayoutTemplate, Phone, AlertCircle, ArrowRight, Plus, Tag, BookOpen } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AdminDashboardPage() {
-  const [products, collections, settings, sections, categories, orders] = await Promise.all([
+  const [products, collections, settings, sections, categories] = await Promise.all([
     getProducts(),
     getCollections(),
     getSettings(),
     getHomepageSections(),
     getCategories(),
-    getOrders(),
   ]);
-
-  const pendingOrdersCount = orders.filter((o) => o.status === 'PENDING').length;
-  const confirmedOrdersCount = orders.filter((o) => o.status === 'CONFIRMED').length;
 
   // Inventory stats
   let totalStockCount = 0;
@@ -65,33 +61,8 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Pending Orders Attention Banner */}
-      {pendingOrdersCount > 0 && (
-        <div className="p-4 sm:p-5 bg-amber-50 border border-amber-300 rounded-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-          <div className="flex items-start sm:items-center gap-3">
-            <div className="p-2 bg-amber-100 border border-amber-300 rounded-xs text-amber-800 shrink-0">
-              <Clock className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="font-semibold text-sm text-amber-900">
-                {pendingOrdersCount} Order{pendingOrdersCount > 1 ? 's' : ''} Awaiting Owner Confirmation
-              </div>
-              <p className="text-xs text-amber-700 mt-0.5 font-light">
-                Customers have submitted bag checkout orders. Review sizing, stock, and confirm them into valid orders.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/admin/orders"
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs uppercase tracking-wider font-semibold rounded-xs transition-colors shrink-0 text-center shadow-xs"
-          >
-            Review & Confirm Orders →
-          </Link>
-        </div>
-      )}
-
-      {/* Metrics Cards - 5 columns on desktop */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-5">
+      {/* Metrics Cards - 2 columns on mobile */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
         {/* Total Products */}
         <div className="bg-white border border-neutral-200 p-4 sm:p-5 shadow-xs">
           <div className="flex items-center justify-between text-neutral-400 mb-3">
@@ -116,25 +87,6 @@ export default async function AdminDashboardPage() {
           <p className="text-[11px] text-neutral-500 mt-1">Across all standard sizes</p>
         </div>
 
-        {/* Orders Logged */}
-        <div className={`p-4 sm:p-5 shadow-xs border ${
-          pendingOrdersCount > 0 ? 'bg-amber-50/50 border-amber-300' : 'bg-white border-neutral-200'
-        }`}>
-          <div className="flex items-center justify-between text-neutral-400 mb-3">
-            <span className="text-[11px] uppercase tracking-widest font-semibold text-neutral-700">Orders Logged</span>
-            <ClipboardList className={`w-4 h-4 ${pendingOrdersCount > 0 ? 'text-amber-600' : 'text-[#FF55D2]'}`} />
-          </div>
-          <div className="font-sans text-3xl font-bold text-[#1A1A1A]">
-            {orders.length}
-          </div>
-          <Link
-            href="/admin/orders"
-            className="text-[11px] text-[#FF55D2] hover:underline mt-1 inline-block font-medium"
-          >
-            {pendingOrdersCount > 0 ? `${pendingOrdersCount} Unconfirmed →` : 'View Orders →'}
-          </Link>
-        </div>
-
         {/* Stock Alerts */}
         <div className="bg-white border border-neutral-200 p-4 sm:p-5 shadow-xs">
           <div className="flex items-center justify-between text-neutral-400 mb-3">
@@ -148,7 +100,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* WhatsApp Business Phone */}
-        <div className="bg-white border border-neutral-200 p-4 sm:p-5 shadow-xs col-span-2 sm:col-span-1">
+        <div className="bg-white border border-neutral-200 p-4 sm:p-5 shadow-xs">
           <div className="flex items-center justify-between text-neutral-400 mb-3">
             <span className="text-[11px] uppercase tracking-widest font-semibold">Order WhatsApp</span>
             <Phone className="w-4 h-4 text-[#FF55D2]" />
@@ -167,29 +119,6 @@ export default async function AdminDashboardPage() {
 
       {/* Quick Access Tiles */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <Link
-          href="/admin/orders"
-          className="p-6 bg-white border border-neutral-200 hover:border-[#FF55D2] transition-colors group shadow-xs flex flex-col justify-between relative overflow-hidden"
-        >
-          {pendingOrdersCount > 0 && (
-            <div className="absolute top-0 right-0 bg-amber-500 text-white text-[9px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-bl-xs">
-              {pendingOrdersCount} Needs Review
-            </div>
-          )}
-          <div>
-            <ClipboardList className="w-6 h-6 text-[#1A1A1A] group-hover:text-[#FF55D2] transition-colors mb-3" />
-            <h3 className="font-serif text-lg font-medium text-[#1A1A1A] mb-1">
-              Orders & Confirmation
-            </h3>
-            <p className="text-xs text-neutral-500 font-light mb-4">
-              Review customer orders, manually confirm valid orders, print packing slips, and chat on WhatsApp.
-            </p>
-          </div>
-          <span className="text-xs font-semibold text-[#FF55D2] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-            Manage Orders ({orders.length}) <ArrowRight className="w-3.5 h-3.5" />
-          </span>
-        </Link>
-
         <Link
           href="/admin/products"
           className="p-6 bg-white border border-neutral-200 hover:border-[#FF55D2] transition-colors group shadow-xs flex flex-col justify-between"

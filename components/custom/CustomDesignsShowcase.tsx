@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CustomDesign } from '@/lib/types';
+import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Video, X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 
 interface CustomDesignsShowcaseProps {
@@ -62,8 +63,8 @@ export default function CustomDesignsShowcase({
           </Link>
         </div>
 
-        {/* Designs Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        {/* Designs Grid - Horizontally Scrollable on Mobile */}
+        <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
           {publishedDesigns.map((design) => {
             const hasMultiple = design.images && design.images.length > 1;
 
@@ -71,14 +72,14 @@ export default function CustomDesignsShowcase({
               <div
                 key={design.id}
                 onClick={() => openGallery(design)}
-                className="group cursor-pointer bg-white border border-neutral-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-[#FF55D2]/50 transition-all duration-300 flex flex-col"
+                className="w-[280px] sm:w-auto shrink-0 snap-start group cursor-pointer bg-white border border-neutral-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-[#FF55D2]/50 transition-all duration-500 flex flex-col"
               >
                 <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden">
                   <Image
                     src={design.images?.[0] || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800'}
                     alt={design.title}
                     fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    sizes="(max-width: 640px) 280px, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   {/* Badges */}
@@ -105,7 +106,7 @@ export default function CustomDesignsShowcase({
 
                 <div className="p-5 space-y-2 flex-1 flex flex-col justify-between bg-white">
                   <div>
-                    <h3 className="font-serif text-lg text-neutral-900 group-hover:text-[#FF55D2] transition-colors font-medium">
+                    <h3 className="font-serif text-lg text-neutral-900 group-hover:text-[#FF55D2] transition-colors duration-500 font-medium">
                       {design.title}
                     </h3>
                     <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed font-light mt-1">
@@ -113,7 +114,7 @@ export default function CustomDesignsShowcase({
                     </p>
                   </div>
                   <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-xs">
-                    <span className="text-[#FF55D2] font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                    <span className="text-[#FF55D2] font-semibold group-hover:translate-x-1 transition-transform duration-500 inline-flex items-center gap-1">
                       View Photos →
                     </span>
                   </div>
@@ -124,128 +125,147 @@ export default function CustomDesignsShowcase({
         </div>
       </div>
 
-      {/* Lightbox / Gallery Modal */}
-      {selectedDesign && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative max-w-4xl w-full bg-white rounded-xs overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col md:flex-row">
-            {/* Close button */}
-            <button
+      {/* Lightbox / Gallery Modal with 0.5s Transition */}
+      <AnimatePresence>
+        {selectedDesign && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+            {/* Backdrop with 0.5s Fade */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
               onClick={closeGallery}
-              className="absolute top-3 right-3 z-20 p-2 bg-black/60 hover:bg-black text-white rounded-full transition-colors"
-              aria-label="Close modal"
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
+            />
+
+            {/* Modal Window with 0.5s Scale & Fade */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="relative max-w-4xl w-full bg-white rounded-xs overflow-hidden shadow-2xl z-10 max-h-[90vh] flex flex-col md:flex-row"
             >
-              <X className="w-5 h-5" />
-            </button>
+              {/* Close button */}
+              <button
+                onClick={closeGallery}
+                className="absolute top-3 right-3 z-20 min-w-[44px] min-h-[44px] flex items-center justify-center bg-black/60 hover:bg-black text-white rounded-full transition-colors duration-500 cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
 
-            {/* Left/Image Area */}
-            <div className="relative flex-1 aspect-[3/4] md:aspect-auto md:min-h-[500px] bg-neutral-900 overflow-hidden flex items-center justify-center">
-              <Image
-                src={selectedDesign.images?.[activeImageIndex] || selectedDesign.images?.[0] || ''}
-                alt={selectedDesign.title}
-                fill
-                className="object-contain"
-              />
+              {/* Left/Image Area */}
+              <div className="relative flex-1 aspect-[3/4] md:aspect-auto md:min-h-[500px] bg-neutral-900 overflow-hidden flex items-center justify-center">
+                <Image
+                  src={selectedDesign.images?.[activeImageIndex] || selectedDesign.images?.[0] || ''}
+                  alt={selectedDesign.title}
+                  fill
+                  className="object-contain"
+                />
 
-              {/* Prev / Next controls if multiple images */}
-              {selectedDesign.images && selectedDesign.images.length > 1 && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : selectedDesign.images.length - 1));
-                    }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 hover:bg-black text-white flex items-center justify-center"
-                    aria-label="Previous photo"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveImageIndex((prev) => (prev < selectedDesign.images.length - 1 ? prev + 1 : 0));
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 hover:bg-black text-white flex items-center justify-center"
-                    aria-label="Next photo"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </>
-              )}
-
-              {/* Thumbnails */}
-              {selectedDesign.images && selectedDesign.images.length > 1 && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1 bg-black/50 rounded-xs">
-                  {selectedDesign.images.map((_, idx) => (
+                {/* Prev / Next controls if multiple images */}
+                {selectedDesign.images && selectedDesign.images.length > 1 && (
+                  <>
                     <button
-                      key={idx}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setActiveImageIndex(idx);
+                        setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : selectedDesign.images.length - 1));
                       }}
-                      className={`w-2.5 h-2.5 rounded-full transition-all ${
-                        idx === activeImageIndex ? 'bg-[#FF55D2] scale-125' : 'bg-white/60'
-                      }`}
-                      aria-label={`Go to image ${idx + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Right/Details Area */}
-            <div className="w-full md:w-80 p-6 flex flex-col justify-between space-y-6 bg-white shrink-0">
-              <div className="space-y-3">
-                {selectedDesign.category && (
-                  <span className="text-[10px] uppercase tracking-widest font-semibold text-[#FF55D2] block">
-                    {selectedDesign.category}
-                  </span>
-                )}
-                <h3 className="font-serif text-2xl text-neutral-900 font-normal">
-                  {selectedDesign.title}
-                </h3>
-                <p className="text-xs text-neutral-600 leading-relaxed font-light">
-                  {selectedDesign.description}
-                </p>
-
-                {selectedDesign.video_url && (
-                  <div className="pt-2">
-                    <a
-                      href={selectedDesign.video_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-xs font-semibold text-[#FF55D2] hover:underline"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] rounded-full bg-black/50 hover:bg-black text-white flex items-center justify-center transition-colors duration-500"
+                      aria-label="Previous photo"
                     >
-                      <Video className="w-4 h-4" />
-                      <span>Watch on Instagram Reel →</span>
-                    </a>
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveImageIndex((prev) => (prev < selectedDesign.images.length - 1 ? prev + 1 : 0));
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] rounded-full bg-black/50 hover:bg-black text-white flex items-center justify-center transition-colors duration-500"
+                      aria-label="Next photo"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
+
+                {/* Thumbnails */}
+                {selectedDesign.images && selectedDesign.images.length > 1 && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1 bg-black/50 rounded-xs">
+                    {selectedDesign.images.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveImageIndex(idx);
+                        }}
+                        className={`w-2.5 h-2.5 rounded-full transition-all duration-500 cursor-pointer ${
+                          idx === activeImageIndex ? 'bg-[#FF55D2] scale-125' : 'bg-white/60'
+                        }`}
+                        aria-label={`Go to image ${idx + 1}`}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
 
-              <div className="space-y-3 pt-4 border-t border-neutral-100">
-                <a
-                  href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(
-                    `Hello Fairy Finds, I loved your custom design "${selectedDesign.title}". Can I discuss creating something similar?`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider rounded-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Inquire via WhatsApp</span>
-                </a>
-                <Link
-                  href="/custom"
-                  onClick={closeGallery}
-                  className="w-full py-2.5 px-4 border border-neutral-300 hover:border-black text-neutral-800 text-xs font-semibold uppercase tracking-wider rounded-xs flex items-center justify-center transition-colors"
-                >
-                  Custom Order Form
-                </Link>
+              {/* Right/Details Area */}
+              <div className="w-full md:w-80 p-6 flex flex-col justify-between space-y-6 bg-white shrink-0">
+                <div className="space-y-3">
+                  {selectedDesign.category && (
+                    <span className="text-[10px] uppercase tracking-widest font-semibold text-[#FF55D2] block">
+                      {selectedDesign.category}
+                    </span>
+                  )}
+                  <h3 className="font-serif text-2xl text-neutral-900 font-normal">
+                    {selectedDesign.title}
+                  </h3>
+                  <p className="text-xs text-neutral-600 leading-relaxed font-light">
+                    {selectedDesign.description}
+                  </p>
+
+                  {selectedDesign.video_url && (
+                    <div className="pt-2">
+                      <a
+                        href={selectedDesign.video_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-xs font-semibold text-[#FF55D2] hover:underline"
+                      >
+                        <Video className="w-4 h-4" />
+                        <span>Watch on Instagram Reel →</span>
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3 pt-4 border-t border-neutral-100">
+                  <a
+                    href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(
+                      `Hello Fairy Finds, I loved your custom design "${selectedDesign.title}". Can I discuss creating something similar?`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider rounded-xs flex items-center justify-center gap-2 transition-colors duration-500 shadow-xs"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Inquire via WhatsApp</span>
+                  </a>
+                  <Link
+                    href="/custom"
+                    onClick={closeGallery}
+                    className="w-full py-2.5 px-4 border border-neutral-300 hover:border-black text-neutral-800 text-xs font-semibold uppercase tracking-wider rounded-xs flex items-center justify-center transition-colors duration-500"
+                  >
+                    Custom Order Form
+                  </Link>
+                </div>
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </section>
   );
 }

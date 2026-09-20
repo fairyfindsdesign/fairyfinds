@@ -117,10 +117,12 @@ export default async function HomePage() {
                     </Link>
                   </div>
 
-                  {/* 3–4 Signature Products with Large Photography & Minimal Text */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                  {/* 3–4 Signature Products with Large Photography & Minimal Text - Horizontally Scrollable on Mobile */}
+                  <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
                     {signatureArrivals.map((product) => (
-                      <ProductCard key={product.id} product={product} />
+                      <div key={product.id} className="w-[260px] sm:w-auto shrink-0 snap-start flex flex-col">
+                        <ProductCard product={product} />
+                      </div>
                     ))}
                   </div>
                 </div>

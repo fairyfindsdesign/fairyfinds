@@ -328,8 +328,8 @@ export default function ProductListClient({ initialProducts }: ProductListClient
 
       {/* Confirmation Modal for Mobile & Desktop Deletion */}
       {productToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white border border-neutral-200 rounded-xs max-w-sm w-full p-5 sm:p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-500">
+          <div className="bg-white border border-neutral-200 rounded-xs max-w-sm w-full p-5 sm:p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-500">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shrink-0">
                 <AlertTriangle className="w-5 h-5" />

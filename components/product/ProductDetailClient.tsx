@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Product, StoreSettings, SizeChart } from '@/lib/types';
 import { useCart } from '@/context/CartContext';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   ShoppingBag,
   Heart,
@@ -21,6 +22,7 @@ import {
   Zap,
   ArrowRight,
   Truck,
+  X,
 } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
 
@@ -29,6 +31,20 @@ interface ProductDetailClientProps {
   relatedProducts: Product[];
   settings: StoreSettings;
   sizeChart?: SizeChart | null;
+}
+
+function formatMeasurement(val: string | undefined, unit: 'inches' | 'cm'): string {
+  if (!val || val === '-') return '-';
+  const match = val.match(/([\d.]+)/);
+  if (!match) return val;
+  const num = parseFloat(match[1]);
+  if (isNaN(num)) return val;
+
+  if (unit === 'cm') {
+    const inCm = Math.round(num * 2.54);
+    return `${inCm} cm`;
+  }
+  return val.includes('"') || val.toLowerCase().includes('in') ? val : `${val}"`;
 }
 
 export default function ProductDetailClient({
@@ -45,12 +61,30 @@ export default function ProductDetailClient({
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [sizeChartOpen, setSizeChartOpen] = useState(false);
+  const [sizeUnit, setSizeUnit] = useState<'inches' | 'cm'>('inches');
   const [fabricOpen, setFabricOpen] = useState(true);
   const [careOpen, setCareOpen] = useState(false);
   const [addedNotice, setAddedNotice] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [sizePrompt, setSizePrompt] = useState(false);
   const sizeSelectorRef = useRef<HTMLDivElement>(null);
+
+  // Lock body scroll and handle Escape key when size guide modal is open
+  useEffect(() => {
+    if (sizeChartOpen) {
+      document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setSizeChartOpen(false);
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [sizeChartOpen]);
 
   // Selected variant stock info
   const selectedVariant = product.variants?.find((v) => v.size === selectedSize);
@@ -412,79 +446,6 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
               </div>
             </div>
 
-            {/* Size Chart Modal / Drawer */}
-            {sizeChartOpen && (
-              <div className="mt-6 p-4 bg-neutral-50 border border-neutral-200 text-xs rounded-xs">
-                <div className="flex justify-between items-center mb-3">
-                  <span className="font-semibold uppercase tracking-wider text-neutral-800">
-                    {sizeChart?.name || 'Standard Size Guide (Inches)'}
-                  </span>
-                  <button
-                    onClick={() => setSizeChartOpen(false)}
-                    className="text-neutral-400 hover:text-black text-xs font-medium cursor-pointer"
-                  >
-                    Close
-                  </button>
-                </div>
-
-                {sizeChart && sizeChart.columns && sizeChart.columns.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[280px]">
-                      <thead>
-                        <tr className="border-b border-neutral-300 text-neutral-600">
-                          {sizeChart.columns.map((col, idx) => (
-                            <th key={idx} className="py-2 px-2 font-semibold capitalize">{col}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-neutral-200 text-neutral-700">
-                        {sizeChart.rows.map((row, rIdx) => (
-                          <tr key={rIdx} className={row.size === selectedSize ? 'bg-pink-50/70 font-medium' : ''}>
-                            {sizeChart.columns.map((col, cIdx) => (
-                              <td key={cIdx} className="py-2 px-2">
-                                {cIdx === 0 ? (
-                                  <span className="font-semibold text-neutral-900">{row[col] || row.size}</span>
-                                ) : (
-                                  <span>{row[col] || '-'}</span>
-                                )}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-neutral-300 text-neutral-500">
-                        <th className="py-1.5">Size</th>
-                        <th className="py-1.5">Bust</th>
-                        <th className="py-1.5">Waist</th>
-                        <th className="py-1.5">Hip</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-neutral-200 text-neutral-700">
-                      <tr><td className="py-1.5 font-medium">S</td><td>34"</td><td>26"</td><td>36"</td></tr>
-                      <tr><td className="py-1.5 font-medium">M</td><td>36"</td><td>28"</td><td>38"</td></tr>
-                      <tr><td className="py-1.5 font-medium">L</td><td>38"</td><td>30"</td><td>40"</td></tr>
-                      <tr><td className="py-1.5 font-medium">XL</td><td>40"</td><td>32"</td><td>42"</td></tr>
-                    </tbody>
-                  </table>
-                )}
-
-                {(sizeChart?.notes || sizeChart?.description) && (
-                  <p className="mt-2 text-[11px] text-neutral-500 italic">
-                    {sizeChart.notes || sizeChart.description}
-                  </p>
-                )}
-
-                <p className="mt-3 text-[11px] text-neutral-500">
-                  Need a custom size? Reach out on WhatsApp or visit our <Link href="/custom" className="text-[#FF55D2] underline font-medium">Custom Orders</Link> page.
-                </p>
-              </div>
-            )}
-
             {/* Accordions: Fabric & Care */}
             <div className="mt-8 border-t border-neutral-200 divide-y divide-neutral-200">
               {product.fabric && (
@@ -525,27 +486,34 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
         </div>
       </div>
 
-      {/* Related Products */}
+      {/* Related Products - Horizontally scrollable on mobile */}
       {relatedProducts.length > 0 && (
-        <div className="mt-24 pt-12 border-t border-neutral-200 gsap-fade-up">
-          <div className="text-center mb-10">
-            <p className="text-xs uppercase tracking-[0.25em] text-[#FF55D2] font-semibold mb-1">
-              YOU MIGHT ALSO LIKE
-            </p>
-            <h2 className="font-serif text-3xl text-[#1A1A1A] font-light">
-              Similar Styles
-            </h2>
+        <div className="mt-20 sm:mt-24 pt-10 sm:pt-12 border-t border-neutral-200 gsap-fade-up">
+          <div className="flex items-end justify-between mb-8 sm:mb-10">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.25em] text-[#FF55D2] font-semibold mb-1">
+                YOU MIGHT ALSO LIKE
+              </p>
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#1A1A1A] font-light">
+                Similar Styles
+              </h2>
+            </div>
+            <span className="sm:hidden text-[11px] uppercase tracking-wider text-neutral-400 font-medium">
+              Swipe →
+            </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 gsap-stagger">
-            {relatedProducts.slice(0, 4).map((relProduct) => (
-              <ProductCard key={relProduct.id} product={relProduct} />
+          <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar gsap-stagger">
+            {relatedProducts.slice(0, 8).map((relProduct) => (
+              <div key={relProduct.id} className="w-[240px] sm:w-auto shrink-0 snap-start">
+                <ProductCard product={relProduct} />
+              </div>
             ))}
           </div>
         </div>
       )}
 
       {/* Mobile Sticky Bottom Purchase Bar with Dual Actions: Add to Cart & Buy Now */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-neutral-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] px-3 pt-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] animate-in slide-in-from-bottom duration-300">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-neutral-200/90 shadow-[0_-4px_25px_rgba(0,0,0,0.08)] px-3 pt-2 pb-[max(0.65rem,env(safe-area-inset-bottom))] animate-in slide-in-from-bottom duration-500">
         {/* Compact Product info line */}
         <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-neutral-100 text-xs">
           <div className="min-w-0 flex-1 pr-2 flex items-center gap-2">
@@ -560,7 +528,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
             <button
               type="button"
               onClick={() => sizeSelectorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-              className={`text-[10px] px-2 py-0.5 rounded-xs border font-medium transition-colors ${
+              className={`text-[10px] px-2 py-0.5 rounded-xs border font-medium transition-colors duration-500 ${
                 selectedSize
                   ? 'border-neutral-900 bg-neutral-900 text-white'
                   : 'border-[#FF55D2] bg-pink-50 text-[#FF55D2] animate-pulse'
@@ -578,7 +546,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
             type="button"
             disabled={isOutOfStock}
             onClick={handleAddToCart}
-            className={`min-h-[44px] px-3 py-2.5 text-[11px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs shrink-0 active:scale-95 rounded-xs border ${
+            className={`min-h-[44px] px-3 py-2.5 text-[11px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 transition-all duration-500 shadow-xs shrink-0 active:scale-95 rounded-xs border ${
               isOutOfStock
                 ? 'bg-neutral-100 border-neutral-200 text-neutral-400 cursor-not-allowed'
                 : addedNotice
@@ -604,7 +572,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
             type="button"
             disabled={isOutOfStock}
             onClick={handleBuyNow}
-            className={`min-h-[44px] px-3 py-2.5 text-[11px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm shrink-0 active:scale-95 rounded-xs ${
+            className={`min-h-[44px] px-3 py-2.5 text-[11px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 transition-all duration-500 shadow-sm shrink-0 active:scale-95 rounded-xs ${
               isOutOfStock
                 ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
                 : 'bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white shadow-[#FF55D2]/25'
@@ -615,6 +583,251 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
           </button>
         </div>
       </div>
+
+      {/* Size Guide Modal Dialog with 0.5s Transition */}
+      <AnimatePresence>
+        {sizeChartOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+            {/* Backdrop with 0.5s fade */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              onClick={() => setSizeChartOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs cursor-pointer"
+              aria-hidden="true"
+            />
+
+            {/* Modal Window with 0.5s transition */}
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="size-guide-modal-title"
+              initial={{ opacity: 0, scale: 0.94, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 20 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="relative bg-white border border-neutral-200 shadow-2xl rounded-xs w-full max-w-2xl max-h-[85vh] sm:max-h-[90vh] flex flex-col z-10 overflow-hidden"
+            >
+              {/* Header */}
+              <div className="p-4 sm:p-5 border-b border-neutral-200 flex items-center justify-between bg-white shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-pink-50 border border-pink-100 flex items-center justify-center text-[#FF55D2] shrink-0">
+                    <Ruler className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 id="size-guide-modal-title" className="font-serif text-lg sm:text-xl text-[#1A1A1A] font-medium">
+                      Size & Measurement Guide
+                    </h3>
+                    <p className="text-xs text-neutral-500">
+                      {sizeChart?.name || 'Standard Boutique Sizing'} • Fairy Finds
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSizeChartOpen(false)}
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xs text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition-colors duration-500 cursor-pointer"
+                  aria-label="Close size guide"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Scrollable Body */}
+              <div className="overflow-y-auto p-4 sm:p-6 space-y-6 text-neutral-700">
+                {/* Unit Switcher & Active Size Helper */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-neutral-100">
+                  <div className="flex items-center gap-2 text-xs text-neutral-600">
+                    <span className="font-medium">Selected Size:</span>
+                    <span className="px-2.5 py-0.5 bg-neutral-900 text-white font-semibold rounded-xs text-[11px]">
+                      {selectedSize || 'None Selected'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center bg-neutral-100 p-0.5 rounded-xs border border-neutral-200 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setSizeUnit('inches')}
+                      className={`px-3 py-1 font-medium rounded-xs transition-all duration-500 cursor-pointer ${
+                        sizeUnit === 'inches'
+                          ? 'bg-white text-neutral-900 shadow-xs font-semibold'
+                          : 'text-neutral-500 hover:text-neutral-900'
+                      }`}
+                    >
+                      Inches (in)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSizeUnit('cm')}
+                      className={`px-3 py-1 font-medium rounded-xs transition-all duration-500 cursor-pointer ${
+                        sizeUnit === 'cm'
+                          ? 'bg-white text-neutral-900 shadow-xs font-semibold'
+                          : 'text-neutral-500 hover:text-neutral-900'
+                      }`}
+                    >
+                      Centimeters (cm)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Horizontally Scrollable Table Section on Mobile with Sticky Left Column */}
+                <div className="space-y-2">
+                  <div className="sm:hidden flex items-center justify-between text-[11px] text-neutral-600 bg-pink-50/70 border border-pink-100 px-3 py-1.5 rounded-xs">
+                    <span className="flex items-center gap-1.5 font-medium text-pink-950">
+                      <Ruler className="w-3 h-3 text-[#FF55D2]" />
+                      <span>Scroll table horizontally for all measurements</span>
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider font-semibold text-[#FF55D2]">↔ Swipe</span>
+                  </div>
+
+                  <div className="overflow-x-auto -webkit-overflow-scrolling-touch border border-neutral-200 rounded-xs shadow-2xs">
+                    <table className="w-full text-left border-collapse min-w-[340px] text-xs">
+                      <thead>
+                        <tr className="bg-neutral-50 border-b border-neutral-200 text-neutral-600 uppercase tracking-wider text-[11px]">
+                          {(sizeChart?.columns && sizeChart.columns.length > 0 ? sizeChart.columns : ['Size', 'Bust', 'Waist', 'Hips']).map((col, idx) => (
+                            <th
+                              key={idx}
+                              className={`py-3 px-3.5 font-semibold capitalize ${
+                                idx === 0
+                                  ? 'sticky left-0 bg-neutral-50 z-10 border-r border-neutral-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]'
+                                  : ''
+                              }`}
+                            >
+                              {col}
+                            </th>
+                          ))}
+                          <th className="py-3 px-3.5 font-semibold text-right">Select</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-200 text-neutral-700">
+                        {(sizeChart?.rows && sizeChart.rows.length > 0
+                          ? sizeChart.rows
+                          : [
+                              { size: 'S', bust: '34"', waist: '26"', hips: '36"' },
+                              { size: 'M', bust: '36"', waist: '28"', hips: '38"' },
+                              { size: 'L', bust: '38"', waist: '30"', hips: '40"' },
+                              { size: 'XL', bust: '40"', waist: '32"', hips: '42"' },
+                            ]
+                        ).map((row, rIdx) => {
+                          const cols = sizeChart?.columns && sizeChart.columns.length > 0 ? sizeChart.columns : ['Size', 'Bust', 'Waist', 'Hips'];
+                          const isCurrent = row.size === selectedSize;
+                          return (
+                            <tr
+                              key={rIdx}
+                              className={`transition-colors duration-500 ${
+                                isCurrent ? 'bg-pink-50/80 font-medium' : 'hover:bg-neutral-50/60'
+                              }`}
+                            >
+                              {cols.map((col, cIdx) => (
+                                <td
+                                  key={cIdx}
+                                  className={`py-3 px-3.5 whitespace-nowrap ${
+                                    cIdx === 0
+                                      ? `sticky left-0 z-10 font-bold border-r border-neutral-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${
+                                          isCurrent ? 'bg-pink-100 text-[#FF55D2]' : 'bg-white text-neutral-900'
+                                        }`
+                                      : ''
+                                  }`}
+                                >
+                                  {cIdx === 0
+                                    ? row[col] || row.size
+                                    : formatMeasurement(row[col] || row[col.toLowerCase()] || '-', sizeUnit)}
+                                </td>
+                              ))}
+                              <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedSize(row.size);
+                                    setSizeChartOpen(false);
+                                  }}
+                                  className={`px-2.5 py-1 text-[11px] uppercase tracking-wider font-semibold rounded-xs transition-all duration-500 cursor-pointer ${
+                                    isCurrent
+                                      ? 'bg-[#FF55D2] text-white shadow-xs'
+                                      : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800'
+                                  }`}
+                                >
+                                  {isCurrent ? 'Selected' : 'Choose'}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Notes & Description */}
+                {(sizeChart?.notes || sizeChart?.description) && (
+                  <div className="p-3 bg-neutral-50 border-l-2 border-[#FF55D2] text-xs text-neutral-600 rounded-r-xs space-y-1">
+                    <p className="font-semibold text-neutral-900">Garment Note:</p>
+                    <p>{sizeChart.notes || sizeChart.description}</p>
+                  </div>
+                )}
+
+                {/* How to Measure Section */}
+                <div className="pt-2 border-t border-neutral-100">
+                  <h4 className="text-xs uppercase tracking-widest font-semibold text-neutral-900 mb-3">
+                    How to Measure
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-neutral-600">
+                    <div className="p-3 bg-neutral-50 border border-neutral-200/80 rounded-xs">
+                      <span className="font-semibold text-neutral-900 block mb-1">1. Bust</span>
+                      <span>Measure around the fullest part of your chest, keeping the tape comfortably level.</span>
+                    </div>
+                    <div className="p-3 bg-neutral-50 border border-neutral-200/80 rounded-xs">
+                      <span className="font-semibold text-neutral-900 block mb-1">2. Waist</span>
+                      <span>Measure around your natural waistline, typically the narrowest point of your torso.</span>
+                    </div>
+                    <div className="p-3 bg-neutral-50 border border-neutral-200/80 rounded-xs">
+                      <span className="font-semibold text-neutral-900 block mb-1">3. Hips</span>
+                      <span>Measure around the fullest part of your hips with your feet together.</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Custom Sizing Callout */}
+                <div className="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div>
+                    <span className="font-semibold text-emerald-950 block">Need a Custom Size?</span>
+                    <span className="text-emerald-800">
+                      Our boutique tailors custom fits to your exact body measurements with zero stress.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSizeChartOpen(false);
+                      directWhatsAppInquiry();
+                    }}
+                    className="min-h-[44px] px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-medium rounded-xs flex items-center justify-center gap-1.5 shrink-0 transition-colors duration-500 cursor-pointer"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>WhatsApp Stylist</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 border-t border-neutral-200 bg-neutral-50 flex items-center justify-between shrink-0">
+                <span className="text-xs text-neutral-500">
+                  Tip: If between sizes, sizing up is recommended.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSizeChartOpen(false)}
+                  className="min-h-[44px] px-5 py-2 bg-[#1A1A1A] hover:bg-neutral-800 text-white text-xs uppercase tracking-widest font-semibold rounded-xs transition-colors duration-500 cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -123,15 +123,18 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
 
   return (
     <div className="w-full bg-neutral-900 overflow-hidden -mt-16 sm:-mt-20">
+      {/* =========================================================================
+          1. DESKTOP / TABLET HERO (sm: and up): Full-screen 100dvh with Overlaid CTA
+          ========================================================================= */}
       <section
-        className="relative w-full h-[100dvh] min-h-[100dvh] flex items-center overflow-hidden bg-neutral-900 select-none"
+        className="hidden sm:flex relative w-full h-[100dvh] min-h-[100dvh] items-center overflow-hidden bg-neutral-900 select-none"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        aria-label="Featured Fashion Collection"
+        aria-label="Featured Fashion Collection (Desktop)"
       >
-        {/* Background Slide with Smooth Motion Crossfade */}
+        {/* Desktop Background Slide with Smooth Motion Crossfade */}
         <AnimatePresence initial={false} mode="wait">
           <motion.div
             key={currentSlide.id || activeIndex}
@@ -144,7 +147,6 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
             }}
             className="absolute inset-0"
           >
-            {/* Natural, Vibrant Background Image - Adapting to Screen Size */}
             <motion.div
               initial={shouldReduceMotion ? {} : { scale: 1.04 }}
               animate={shouldReduceMotion ? {} : { scale: 1.0 }}
@@ -166,8 +168,8 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
           </motion.div>
         </AnimatePresence>
 
-        {/* Content Container - Only CTA Buttons with Inverted Font & Filler */}
-        <div className="absolute inset-x-0 bottom-20 sm:bottom-28 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pointer-events-none">
+        {/* Desktop CTA Container: Overlaid on Image with Inverted Font & Filler */}
+        <div className="absolute inset-x-0 bottom-24 sm:bottom-28 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pointer-events-none">
           <div
             className={`flex w-full ${
               position === 'left'
@@ -217,7 +219,7 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
           </div>
         </div>
 
-        {/* Bottom Controls Bar: Slide Indicators & Numbers (Inverted Font & Filler based on image) */}
+        {/* Desktop Bottom Controls Bar */}
         {slides.length > 1 && (
           <div className="absolute bottom-6 sm:bottom-8 inset-x-0 z-30 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-none">
             {/* Slide Indicator Dashes */}
@@ -247,7 +249,7 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
               ))}
             </div>
 
-            {/* Slide Numbers & Pause/Play Indicator */}
+            {/* Slide Numbers & Pause/Play */}
             <div
               className={`flex items-center gap-3 font-mono text-xs tracking-widest pointer-events-auto backdrop-blur-md px-3.5 py-1.5 rounded-full border shadow-md transition-colors duration-500 ${
                 isLightBg
@@ -271,6 +273,85 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
           </div>
         )}
       </section>
+
+      {/* =========================================================================
+          2. MOBILE HERO (< sm:): Natural Image Size (No Resize) + CTA AFTER Image
+          ========================================================================= */}
+      <div className="block sm:hidden w-full bg-neutral-900">
+        <section
+          className="relative w-full overflow-hidden bg-neutral-900 select-none"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          aria-label="Featured Fashion Collection (Mobile)"
+        >
+          {/* Natural Image Container - Never stretched to 100dvh */}
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              key={currentSlide.id || activeIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: shouldReduceMotion ? 0.2 : 0.4,
+                ease: 'easeInOut',
+              }}
+              className="relative w-full"
+            >
+              <img
+                src={currentSlide.image_url}
+                alt={currentSlide.heading || 'Fairy Finds Boutique'}
+                className="w-full h-auto max-h-[75vh] object-cover block"
+                loading="eager"
+              />
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Minimal Mobile Indicator Dots on the image edge */}
+          {slides.length > 1 && (
+            <div className="absolute bottom-3 inset-x-0 z-20 flex items-center justify-center pointer-events-none">
+              <div className="flex items-center gap-1.5 pointer-events-auto bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20">
+                {slides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => goToSlide(idx)}
+                    className={`h-1.5 transition-all duration-300 rounded-full cursor-pointer ${
+                      idx === activeIndex ? 'w-5 bg-[#FF55D2]' : 'w-1.5 bg-white/60 hover:bg-white'
+                    }`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Mobile CTA: Clean block placed directly AFTER the image */}
+        {(currentSlide.button_text || currentSlide.secondary_button_text) && (
+          <div className="w-full px-4 py-4 bg-white border-b border-neutral-100 shadow-xs">
+            <div className="flex flex-col gap-2.5 max-w-md mx-auto">
+              {currentSlide.button_text && (
+                <Link
+                  href={currentSlide.button_link || '/shop'}
+                  className="w-full min-h-[48px] px-6 py-3.5 bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md flex items-center justify-center gap-2 rounded-xs active:scale-98 text-center"
+                >
+                  <span>{currentSlide.button_text}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              )}
+
+              {currentSlide.secondary_button_text && (
+                <Link
+                  href={currentSlide.secondary_button_link || '/custom'}
+                  className="w-full min-h-[48px] px-6 py-3.5 bg-[#1A1A1A] hover:bg-black active:bg-neutral-800 text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs flex items-center justify-center rounded-xs active:scale-98 text-center"
+                >
+                  <span>{currentSlide.secondary_button_text}</span>
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

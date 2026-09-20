@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Product, Category, Collection, ProductVariant, SizeChart } from '@/lib/types';
 import { saveProductAction, saveCategoryAction } from '@/app/actions/store';
-import { ArrowLeft, Save, Plus, Trash2, CheckCircle2, Sparkles, AlertCircle, Tag, X } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, CheckCircle2, Sparkles, AlertCircle, Tag, X, Table2, ChevronDown, LayoutGrid } from 'lucide-react';
 import ImageUpload from './ImageUpload';
 
 interface ProductFormClientProps {
@@ -163,6 +163,82 @@ export default function ProductFormClient({
   );
   const [sizeChartId, setSizeChartId] = useState(initialProduct?.size_chart_id || '');
   const [collectionId, setCollectionId] = useState(initialProduct?.collection_id || '');
+
+  // ----- Size Chart Mode: 'preset' | 'custom' -----
+  const [sizeChartMode, setSizeChartMode] = useState<'preset' | 'custom'>(
+    () => (initialProduct?.custom_size_chart && initialProduct.custom_size_chart.columns?.length > 0) ? 'custom' : 'preset'
+  );
+
+  type CustomChartState = {
+    unit: 'Inches' | 'cm';
+    columns: string[];
+    rows: Record<string, string>[];
+    notes: string;
+  };
+
+  const defaultCustomChart: CustomChartState = {
+    unit: 'Inches',
+    columns: ['Size', 'Bust', 'Waist', 'Hips'],
+    rows: [
+      { Size: 'S', Bust: '34"', Waist: '26"', Hips: '36"' },
+      { Size: 'M', Bust: '36"', Waist: '28"', Hips: '38"' },
+      { Size: 'L', Bust: '38"', Waist: '30"', Hips: '40"' },
+      { Size: 'XL', Bust: '40"', Waist: '32"', Hips: '42"' },
+    ],
+    notes: '',
+  };
+
+  const [customChart, setCustomChart] = useState<CustomChartState>(() => {
+    const c = initialProduct?.custom_size_chart;
+    if (c && c.columns?.length > 0) {
+      return {
+        unit: c.unit || 'Inches',
+        columns: c.columns,
+        rows: (c.rows as Record<string, string>[]) || [],
+        notes: c.notes || '',
+      };
+    }
+    return defaultCustomChart;
+  });
+
+  // Custom chart helpers
+  const addColumn = () => {
+    const colName = prompt('Column header name (e.g. Length, Shoulder):');
+    if (!colName || colName.trim() === '') return;
+    const trimmed = colName.trim();
+    if (customChart.columns.includes(trimmed)) return;
+    setCustomChart((prev) => ({
+      ...prev,
+      columns: [...prev.columns, trimmed],
+      rows: prev.rows.map((r) => ({ ...r, [trimmed]: '' })),
+    }));
+  };
+
+  const removeColumn = (col: string) => {
+    if (col === customChart.columns[0]) return; // Never remove the first (Size) column
+    setCustomChart((prev) => ({
+      ...prev,
+      columns: prev.columns.filter((c) => c !== col),
+      rows: prev.rows.map((r) => { const nr = { ...r }; delete nr[col]; return nr; }),
+    }));
+  };
+
+  const addRow = () => {
+    const emptyRow: Record<string, string> = {};
+    customChart.columns.forEach((c) => (emptyRow[c] = ''));
+    setCustomChart((prev) => ({ ...prev, rows: [...prev.rows, emptyRow] }));
+  };
+
+  const removeRow = (idx: number) => {
+    setCustomChart((prev) => ({ ...prev, rows: prev.rows.filter((_, i) => i !== idx) }));
+  };
+
+  const updateCell = (rowIdx: number, col: string, value: string) => {
+    setCustomChart((prev) => {
+      const rows = prev.rows.map((r, i) => i === rowIdx ? { ...r, [col]: value } : r);
+      return { ...prev, rows };
+    });
+  };
   const [description, setDescription] = useState(initialProduct?.description || '');
   const [fabric, setFabric] = useState(initialProduct?.fabric || '');
   const [careInstructions, setCareInstructions] = useState(initialProduct?.care_instructions || '');
@@ -184,6 +260,20 @@ export default function ProductFormClient({
       setSizeChartId(initialProduct.size_chart_id || '');
       setCategoryId(initialProduct.category_id || categories[0]?.id || '');
       setCollectionId(initialProduct.collection_id || '');
+      // Restore chart mode
+      if (initialProduct.custom_size_chart && initialProduct.custom_size_chart.columns?.length > 0) {
+        setSizeChartMode('custom');
+        const c = initialProduct.custom_size_chart;
+        setCustomChart({
+          unit: c.unit || 'Inches',
+          columns: c.columns,
+          rows: (c.rows as Record<string, string>[]) || [],
+          notes: c.notes || '',
+        });
+      } else {
+        setSizeChartMode('preset');
+        setSizeChartId(initialProduct.size_chart_id || '');
+      }
       setDescription(initialProduct.description || '');
       setFabric(initialProduct.fabric || '');
       setCareInstructions(initialProduct.care_instructions || '');
@@ -266,7 +356,10 @@ export default function ProductFormClient({
       product_code: productCode.trim(),
       price: parsedPrice,
       delivery_fee: parsedDeliveryFee,
-      size_chart_id: sizeChartId || undefined,
+      size_chart_id: sizeChartMode === 'preset' ? (sizeChartId || undefined) : undefined,
+      custom_size_chart: sizeChartMode === 'custom' && customChart.columns.length > 0
+        ? { columns: customChart.columns, rows: customChart.rows, notes: customChart.notes || undefined, unit: customChart.unit }
+        : undefined,
       category_id: categoryId || undefined,
       category_name: category?.name,
       collection_id: collectionId || undefined,
@@ -505,9 +598,9 @@ export default function ProductFormClient({
           </div>
         </div>
 
-        {/* Size Chart Selector */}
+        {/* Size Chart Section */}
         <div className="pt-2 border-t border-neutral-100">
-          <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center justify-between mb-3">
             <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800">
               Size Chart Guide
             </label>
@@ -516,24 +609,181 @@ export default function ProductFormClient({
               target="_blank"
               className="text-[11px] text-[#FF55D2] hover:underline font-semibold"
             >
-              Manage Size Charts →
+              Manage Global Charts →
             </Link>
           </div>
-          <select
-            value={sizeChartId}
-            onChange={(e) => setSizeChartId(e.target.value)}
-            className="w-full sm:max-w-md px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
-          >
-            <option value="">Standard Boutique Size Chart (Default)</option>
-            {sizeCharts.map((chart) => (
-              <option key={chart.id} value={chart.id}>
-                {chart.name} ({chart.unit})
-              </option>
-            ))}
-          </select>
-          <p className="text-[11px] text-neutral-400 mt-1">
-            Customers viewing this product will see this measurement table when they click "Size Guide".
-          </p>
+
+          {/* Mode Toggle Tabs */}
+          <div className="flex items-center bg-neutral-100 p-0.5 rounded-xs border border-neutral-200 text-xs w-fit mb-4">
+            <button
+              type="button"
+              onClick={() => setSizeChartMode('preset')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-semibold rounded-xs transition-all duration-200 cursor-pointer ${
+                sizeChartMode === 'preset'
+                  ? 'bg-white text-neutral-900 shadow-xs'
+                  : 'text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Use Global Preset
+            </button>
+            <button
+              type="button"
+              onClick={() => setSizeChartMode('custom')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-semibold rounded-xs transition-all duration-200 cursor-pointer ${
+                sizeChartMode === 'custom'
+                  ? 'bg-white text-neutral-900 shadow-xs'
+                  : 'text-neutral-500 hover:text-neutral-800'
+              }`}
+            >
+              <Table2 className="w-3.5 h-3.5" />
+              Custom Chart
+            </button>
+          </div>
+
+          {/* Preset Mode */}
+          {sizeChartMode === 'preset' && (
+            <div className="space-y-2">
+              <select
+                value={sizeChartId}
+                onChange={(e) => setSizeChartId(e.target.value)}
+                className="w-full sm:max-w-md px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
+              >
+                <option value="">Standard Boutique Size Chart (Default)</option>
+                {sizeCharts.map((chart) => (
+                  <option key={chart.id} value={chart.id}>
+                    {chart.name} ({chart.unit})
+                  </option>
+                ))}
+              </select>
+              <p className="text-[11px] text-neutral-400">
+                Customers viewing this product will see this measurement table when they click "Size Guide".
+              </p>
+            </div>
+          )}
+
+          {/* Custom Chart Builder */}
+          {sizeChartMode === 'custom' && (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Unit Toggle */}
+                <div className="flex items-center bg-neutral-100 p-0.5 rounded-xs border border-neutral-200 text-xs">
+                  {(['Inches', 'cm'] as const).map((u) => (
+                    <button
+                      key={u}
+                      type="button"
+                      onClick={() => setCustomChart((prev) => ({ ...prev, unit: u }))}
+                      className={`px-3 py-1 font-semibold rounded-xs transition-all duration-200 cursor-pointer ${
+                        customChart.unit === u
+                          ? 'bg-white text-neutral-900 shadow-xs'
+                          : 'text-neutral-500 hover:text-neutral-800'
+                      }`}
+                    >
+                      {u}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={addColumn}
+                  className="inline-flex items-center gap-1.5 text-xs text-[#FF55D2] hover:text-[#FD00B9] font-semibold px-2 py-1 border border-[#FF55D2]/30 hover:border-[#FF55D2] rounded-xs transition-colors active:scale-95 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Column
+                </button>
+
+                <button
+                  type="button"
+                  onClick={addRow}
+                  className="inline-flex items-center gap-1.5 text-xs text-neutral-600 hover:text-neutral-900 font-semibold px-2 py-1 border border-neutral-300 hover:border-neutral-500 rounded-xs transition-colors active:scale-95 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Row
+                </button>
+              </div>
+
+              {/* Table Editor */}
+              <div className="overflow-x-auto border border-neutral-200 rounded-xs">
+                <table className="w-full text-xs border-collapse min-w-[380px]">
+                  <thead>
+                    <tr className="bg-neutral-50 border-b border-neutral-200">
+                      {customChart.columns.map((col, cIdx) => (
+                        <th key={col} className="px-3 py-2 text-left font-semibold text-neutral-700 uppercase tracking-wide text-[11px] whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <span>{col}</span>
+                            {cIdx > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => removeColumn(col)}
+                                className="text-neutral-300 hover:text-red-500 transition-colors cursor-pointer"
+                                title={`Remove column ${col}`}
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        </th>
+                      ))}
+                      <th className="px-3 py-2 text-right text-[11px] font-semibold text-neutral-400">Del</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100">
+                    {customChart.rows.map((row, rIdx) => (
+                      <tr key={rIdx} className="hover:bg-neutral-50/60">
+                        {customChart.columns.map((col) => (
+                          <td key={col} className="px-2 py-1.5">
+                            <input
+                              type="text"
+                              value={row[col] ?? ''}
+                              onChange={(e) => updateCell(rIdx, col, e.target.value)}
+                              placeholder={col === customChart.columns[0] ? 'e.g. S' : 'e.g. 34"'}
+                              className="w-full min-w-[56px] px-2 py-1 bg-white border border-neutral-200 focus:border-[#FF55D2] focus:outline-none text-xs text-[#1A1A1A] rounded-xs"
+                            />
+                          </td>
+                        ))}
+                        <td className="px-2 py-1.5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => removeRow(rIdx)}
+                            className="text-neutral-300 hover:text-red-500 transition-colors cursor-pointer p-1"
+                            title="Remove row"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {customChart.rows.length === 0 && (
+                      <tr>
+                        <td colSpan={customChart.columns.length + 1} className="px-4 py-4 text-center text-neutral-400 text-xs">
+                          No rows yet — click "Add Row" to start building your chart.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Notes field */}
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-600 mb-1">
+                  Chart Notes (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={customChart.notes}
+                  onChange={(e) => setCustomChart((prev) => ({ ...prev, notes: e.target.value }))}
+                  placeholder="e.g. All measurements are in inches. For custom sizing, contact us."
+                  className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
+                />
+              </div>
+
+              <p className="text-[11px] text-neutral-400">
+                This custom chart is specific to this product and will override any global preset.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Product Photos */}

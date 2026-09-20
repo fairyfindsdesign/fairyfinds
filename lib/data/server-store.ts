@@ -558,6 +558,7 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
       'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=1000'
     ],
     size_chart_id: product.size_chart_id || undefined,
+    custom_size_chart: product.custom_size_chart || undefined,
     fabric: product.fabric,
     care_instructions: product.care_instructions,
     is_published: product.is_published ?? true,
@@ -608,11 +609,19 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
       if (newProduct.size_chart_id !== undefined) {
         upsertPayload.size_chart_id = newProduct.size_chart_id;
       }
+      if (newProduct.custom_size_chart !== undefined) {
+        upsertPayload.custom_size_chart = newProduct.custom_size_chart;
+      }
 
       let { error: prodErr } = await supabase.from('products').upsert(upsertPayload);
-      if (prodErr && (prodErr.message?.includes('delivery_fee') || prodErr.message?.includes('size_chart_id'))) {
+      if (prodErr && (
+        prodErr.message?.includes('delivery_fee') ||
+        prodErr.message?.includes('size_chart_id') ||
+        prodErr.message?.includes('custom_size_chart')
+      )) {
         delete upsertPayload.delivery_fee;
         delete upsertPayload.size_chart_id;
+        delete upsertPayload.custom_size_chart;
         const res = await supabase.from('products').upsert(upsertPayload);
         prodErr = res.error;
       }

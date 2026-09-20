@@ -24,6 +24,12 @@ export interface Product {
   images: string[];
   size_chart_id?: string;
   size_chart_url?: string;
+  custom_size_chart?: {
+    columns: string[];
+    rows: Record<string, string>[];
+    notes?: string;
+    unit?: 'Inches' | 'cm';
+  };
   fabric?: string;
   care_instructions?: string;
   is_published: boolean;

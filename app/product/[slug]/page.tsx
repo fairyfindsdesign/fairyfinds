@@ -148,7 +148,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const productSchema = generateProductSchema(product, settings);
   const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs);
-  const sizeChart = await getSizeChartById(product.size_chart_id || '');
+  const presetSizeChart = await getSizeChartById(product.size_chart_id || '');
+
+  // If no global preset, use the product's own inline custom chart
+  const sizeChart = presetSizeChart ?? (
+    product.custom_size_chart && product.custom_size_chart.columns?.length > 0
+      ? {
+          id: `custom-${product.id}`,
+          name: 'Custom Size Chart',
+          unit: (product.custom_size_chart.unit || 'Inches') as 'Inches' | 'cm',
+          columns: product.custom_size_chart.columns,
+          rows: product.custom_size_chart.rows as any,
+          notes: product.custom_size_chart.notes,
+        }
+      : null
+  );
 
   return (
     <>

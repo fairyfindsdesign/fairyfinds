@@ -57,13 +57,27 @@ CREATE TABLE IF NOT EXISTS orders (
   delivery_fee DECIMAL(12, 2) NOT NULL DEFAULT 0,
   total DECIMAL(12, 2) NOT NULL DEFAULT 0,
   notes TEXT,
-  status TEXT CHECK (status IN ('new','confirmed','preparing','ready','shipped','delivered','cancelled')) DEFAULT 'new',
+  status TEXT DEFAULT 'new',
   is_read BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 2. Indexes
+-- 2. Safely add any columns that may be missing on existing tables
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS items JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS subtotal DECIMAL(12, 2) NOT NULL DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_fee DECIMAL(12, 2) NOT NULL DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS total DECIMAL(12, 2) NOT NULL DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'new';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT false;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+
+UPDATE orders SET is_read = false WHERE is_read IS NULL;
+UPDATE orders SET delivery_fee = 0 WHERE delivery_fee IS NULL;
+
+-- 3. Indexes
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_is_read ON orders(is_read);

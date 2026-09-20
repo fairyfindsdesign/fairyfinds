@@ -83,8 +83,8 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
       <header
         className={`sticky top-0 z-[60] transition-all duration-300 ${
           isHeroTransparent
-            ? 'bg-transparent border-b border-transparent shadow-none'
-            : 'bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-xs'
+            ? 'bg-black/35 backdrop-blur-md border-b border-white/10 shadow-xs'
+            : 'bg-black/70 backdrop-blur-md border-b border-white/10 shadow-md'
         }`}
       >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -93,11 +93,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
           <div className="flex items-center lg:hidden">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className={`p-2 -ml-1 active:scale-95 transition-all cursor-pointer rounded-xs ${
-                isHeroTransparent
-                  ? 'text-white hover:text-[#FF55D2]'
-                  : 'text-neutral-800 hover:text-[#FF55D2]'
-              }`}
+              className="p-2 -ml-1 text-white hover:text-[#FF55D2] active:scale-95 transition-all cursor-pointer rounded-xs"
               aria-label="Open navigation menu"
             >
               <Menu className="w-6 h-6" />
@@ -109,7 +105,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
             <Link href="/" className="inline-flex items-center gap-2 sm:gap-2.5 group">
               <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden shrink-0 group-hover:scale-105 transition-transform duration-300">
                 <Image
-                  src={isHeroTransparent ? '/logo-white.png' : '/logo.png'}
+                  src="/logo-white.png"
                   alt="Fairy Finds Boutique Logo"
                   fill
                   sizes="32px"
@@ -118,20 +114,10 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                 />
               </div>
               <div className="flex flex-col text-left">
-                <span
-                  className={`font-serif text-lg sm:text-xl tracking-[0.18em] font-semibold transition-colors uppercase leading-none ${
-                    isHeroTransparent
-                      ? 'text-white group-hover:text-[#FF55D2]'
-                      : 'text-[#1A1A1A] group-hover:text-[#FF55D2]'
-                  }`}
-                >
+                <span className="font-serif text-lg sm:text-xl tracking-[0.18em] font-semibold text-white group-hover:text-[#FF55D2] transition-colors uppercase leading-none">
                   Fairy Finds
                 </span>
-                <span
-                  className={`text-[7.5px] sm:text-[8px] tracking-[0.3em] uppercase font-sans mt-0.5 transition-colors ${
-                    isHeroTransparent ? 'text-white/80' : 'text-neutral-400'
-                  }`}
-                >
+                <span className="text-[7.5px] sm:text-[8px] tracking-[0.3em] uppercase font-sans mt-0.5 text-white/70 transition-colors">
                   Boutique
                 </span>
               </div>
@@ -153,11 +139,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                     <button
                       type="button"
                       onClick={() => setDropdownOpen(!dropdownOpen)}
-                      className={`text-xs uppercase tracking-widest py-1 transition-colors flex items-center gap-1.5 font-medium cursor-pointer ${
-                        isHeroTransparent
-                          ? 'text-white/90 hover:text-[#FF55D2]'
-                          : 'text-neutral-700 hover:text-[#FF55D2]'
-                      }`}
+                      className="text-xs uppercase tracking-widest py-1 transition-colors flex items-center gap-1.5 font-medium cursor-pointer text-white/90 hover:text-[#FF55D2]"
                       aria-expanded={dropdownOpen}
                     >
                       <span>{item.label}</span>
@@ -165,9 +147,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                         className={`w-3.5 h-3.5 transition-transform duration-200 ${
                           dropdownOpen
                             ? 'rotate-180 text-[#FF55D2]'
-                            : isHeroTransparent
-                            ? 'text-white/70'
-                            : 'text-neutral-400'
+                            : 'text-white/70'
                         }`}
                       />
                     </button>
@@ -175,8 +155,8 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                     {/* Dropdown Menu Card */}
                     {dropdownOpen && (
                       <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-72 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="bg-white border border-neutral-200 shadow-xl p-2 rounded-xs">
-                          <div className="px-3 py-2 border-b border-neutral-100 mb-1">
+                        <div className="bg-[#1A1A1A]/95 backdrop-blur-xl border border-white/15 shadow-2xl p-2 rounded-xs">
+                          <div className="px-3 py-2 border-b border-white/10 mb-1">
                             <p className="text-[10px] uppercase tracking-[0.25em] text-[#FF55D2] font-semibold">
                               Boutique Collections
                             </p>
@@ -186,13 +166,13 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                               key={subItem.id}
                               href={subItem.href}
                               onClick={() => setDropdownOpen(false)}
-                              className="group block px-3 py-2.5 rounded-xs hover:bg-[#FAF9F6] transition-colors"
+                              className="group block px-3 py-2.5 rounded-xs hover:bg-white/10 transition-colors"
                             >
-                              <div className="font-sans text-sm font-medium text-[#1A1A1A] group-hover:text-[#FF55D2] transition-colors flex items-center justify-between">
+                              <div className="font-sans text-sm font-medium text-white group-hover:text-[#FF55D2] transition-colors flex items-center justify-between">
                                 <span>{subItem.label}</span>
                               </div>
                               {subItem.description && (
-                                <p className="text-[11px] text-neutral-400 group-hover:text-neutral-500 font-light mt-0.5 line-clamp-1">
+                                <p className="text-[11px] text-neutral-400 group-hover:text-neutral-300 font-light mt-0.5 line-clamp-1">
                                   {subItem.description}
                                 </p>
                               )}
@@ -213,12 +193,8 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                   href={item.href || '/'}
                   className={`text-xs uppercase tracking-widest transition-colors relative py-1 ${
                     active
-                      ? isHeroTransparent
-                        ? 'text-white font-semibold'
-                        : 'text-[#1A1A1A] font-semibold'
-                      : isHeroTransparent
-                      ? 'text-white/90 hover:text-[#FF55D2]'
-                      : 'text-neutral-600 hover:text-[#FF55D2]'
+                      ? 'text-white font-semibold'
+                      : 'text-white/90 hover:text-[#FF55D2]'
                   }`}
                 >
                   {item.label}
@@ -232,34 +208,18 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
             {/* Inline Cart Icon alongside navbar links */}
             <Link
               href="/cart"
-              className={`relative p-1.5 active:scale-90 transition-all cursor-pointer rounded-xs flex items-center gap-1.5 ml-2 pl-3 group ${
-                isHeroTransparent
-                  ? 'text-white hover:text-[#FF55D2] border-l border-white/25'
-                  : 'text-neutral-800 hover:text-[#FF55D2] border-l border-neutral-200'
-              }`}
+              className="relative p-1.5 active:scale-90 transition-all cursor-pointer rounded-xs flex items-center gap-1.5 ml-2 pl-3 group text-white hover:text-[#FF55D2] border-l border-white/20"
               aria-label={`Shopping Bag with ${totalCount} items`}
             >
               <div className="relative">
-                <ShoppingBag
-                  className={`w-4 h-4 transition-colors ${
-                    isHeroTransparent
-                      ? 'text-white group-hover:text-[#FF55D2]'
-                      : 'text-neutral-800 group-hover:text-[#FF55D2]'
-                  }`}
-                />
+                <ShoppingBag className="w-4 h-4 text-white group-hover:text-[#FF55D2] transition-colors" />
                 {totalCount > 0 && (
                   <span className="absolute -top-1.5 -right-2 bg-[#FF55D2] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs animate-cart-bounce">
                     {totalCount}
                   </span>
                 )}
               </div>
-              <span
-                className={`text-xs uppercase tracking-wider font-semibold transition-colors ${
-                  isHeroTransparent
-                    ? 'text-white group-hover:text-[#FF55D2]'
-                    : 'text-neutral-700 group-hover:text-[#FF55D2]'
-                }`}
-              >
+              <span className="text-xs uppercase tracking-wider font-semibold transition-colors text-white group-hover:text-[#FF55D2]">
                 Bag {totalCount > 0 ? `(${totalCount})` : ''}
               </span>
             </Link>
@@ -269,11 +229,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
           <div className="flex items-center lg:hidden">
             <Link
               href="/cart"
-              className={`relative p-2 active:scale-90 transition-all cursor-pointer rounded-xs ${
-                isHeroTransparent
-                  ? 'text-white hover:text-[#FF55D2]'
-                  : 'text-neutral-900 hover:text-[#FF55D2]'
-              }`}
+              className="relative p-2 active:scale-90 transition-all cursor-pointer rounded-xs text-white hover:text-[#FF55D2]"
               aria-label={`Shopping Bag with ${totalCount} items`}
             >
               <ShoppingBag className="w-5 h-5" />
@@ -296,18 +252,18 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="fixed inset-y-0 left-0 w-full max-w-[340px] sm:max-w-sm bg-white border-r border-neutral-200 shadow-2xl p-6 flex flex-col justify-between z-[101] animate-in slide-in-from-left duration-300">
+          <div className="fixed inset-y-0 left-0 w-full max-w-[340px] sm:max-w-sm bg-[#1A1A1A]/95 backdrop-blur-xl border-r border-white/10 shadow-2xl p-6 flex flex-col justify-between z-[101] animate-in slide-in-from-left duration-300 text-white">
             <div>
               {/* Mobile Drawer Header */}
-              <div className="flex items-center justify-between pb-6 border-b border-neutral-200/60">
+              <div className="flex items-center justify-between pb-6 border-b border-white/10">
                 <Link
                   href="/"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="inline-flex items-center gap-2 font-serif text-base tracking-[0.18em] font-semibold text-[#1A1A1A] uppercase"
+                  className="inline-flex items-center gap-2 font-serif text-base tracking-[0.18em] font-semibold text-white uppercase"
                 >
                   <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0">
                     <Image
-                      src="/logo.png"
+                      src="/logo-white.png"
                       alt="Fairy Finds Boutique Logo"
                       fill
                       sizes="24px"
@@ -318,7 +274,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                 </Link>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1.5 text-neutral-500 hover:text-black"
+                  className="p-1.5 text-white/70 hover:text-white transition-colors"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
@@ -334,24 +290,24 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                         <button
                           type="button"
                           onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
-                          className="w-full flex items-center justify-between py-2 text-base tracking-wider uppercase text-neutral-800 font-medium"
+                          className="w-full flex items-center justify-between py-2 text-base tracking-wider uppercase text-white/90 font-medium"
                         >
                           <span>{item.label}</span>
                           <ChevronDown
-                            className={`w-4 h-4 text-neutral-400 transition-transform ${
+                            className={`w-4 h-4 text-white/60 transition-transform ${
                               mobileDropdownOpen ? 'rotate-180 text-[#FF55D2]' : ''
                             }`}
                           />
                         </button>
 
                         {mobileDropdownOpen && (
-                          <div className="pl-3 mt-1 space-y-2 border-l-2 border-[#FF55D2]/40">
+                          <div className="pl-3 mt-1 space-y-2 border-l-2 border-[#FF55D2]/50">
                             {item.dropdownItems.map((subItem) => (
                               <Link
                                 key={subItem.id}
                                 href={subItem.href}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="block py-1.5 text-xs tracking-wider uppercase text-neutral-600 hover:text-[#FF55D2]"
+                                className="block py-1.5 text-xs tracking-wider uppercase text-neutral-300 hover:text-[#FF55D2] transition-colors"
                               >
                                 {subItem.label}
                               </Link>
@@ -371,8 +327,8 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`min-h-[44px] flex items-center px-3 text-base tracking-wider uppercase rounded-xs transition-colors ${
                         active
-                          ? 'text-[#FF55D2] font-semibold bg-[#FAF9F6]'
-                          : 'text-neutral-700 hover:text-[#FF55D2] active:bg-neutral-50'
+                          ? 'text-[#FF55D2] font-semibold bg-white/10'
+                          : 'text-white/85 hover:text-[#FF55D2] active:bg-white/5'
                       }`}
                     >
                       {item.label}
@@ -384,10 +340,10 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
                 <Link
                   href="/cart"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-between min-h-[44px] px-3 text-base tracking-wider uppercase text-neutral-800 font-medium hover:text-[#FF55D2] transition-colors rounded-xs border-t border-neutral-200/60 pt-3 mt-2"
+                  className="w-full flex items-center justify-between min-h-[44px] px-3 text-base tracking-wider uppercase text-white/90 font-medium hover:text-[#FF55D2] transition-colors rounded-xs border-t border-white/10 pt-3 mt-2"
                 >
                   <span className="flex items-center gap-2.5">
-                    <ShoppingBag className="w-5 h-5 text-neutral-700" />
+                    <ShoppingBag className="w-5 h-5 text-white/80" />
                     <span>Shopping Bag</span>
                   </span>
                   {totalCount > 0 && (
@@ -400,7 +356,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
             </div>
 
             {/* Mobile Footer Info */}
-            <div className="pt-6 border-t border-neutral-100">
+            <div className="pt-6 border-t border-white/10">
               <p className="text-xs text-neutral-400 font-light">
                 Fairy Finds Boutique • Ready-to-wear & custom tailoring
               </p>

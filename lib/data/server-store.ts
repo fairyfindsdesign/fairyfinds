@@ -245,6 +245,62 @@ async function ensureSupabaseSeeded(supabase: any) {
       });
     }
 
+    // 6. Check & Seed Size Charts if empty
+    try {
+      const { count: scCount } = await supabase
+        .from('size_charts')
+        .select('*', { count: 'exact', head: true });
+
+      if (scCount === 0) {
+        console.log('[Supabase] Seeding size charts...');
+        const chartsToSeed = local.size_charts && local.size_charts.length > 0 ? local.size_charts : initialSizeCharts;
+        await supabase.from('size_charts').upsert(
+          chartsToSeed.map((sc) => ({
+            id: sc.id,
+            name: sc.name,
+            description: sc.description,
+            unit: sc.unit,
+            columns: sc.columns,
+            rows: sc.rows,
+            notes: sc.notes,
+            is_default: Boolean(sc.is_default),
+            created_at: sc.created_at || new Date().toISOString(),
+            updated_at: sc.updated_at || new Date().toISOString(),
+          }))
+        );
+      }
+    } catch (e) {
+      // Table may not exist yet if migration hasn't been run
+    }
+
+    // 7. Check & Seed Custom Designs if empty
+    try {
+      const { count: cdCount } = await supabase
+        .from('custom_designs')
+        .select('*', { count: 'exact', head: true });
+
+      if (cdCount === 0) {
+        console.log('[Supabase] Seeding custom designs...');
+        const designsToSeed = local.custom_designs && local.custom_designs.length > 0 ? local.custom_designs : initialCustomDesigns;
+        await supabase.from('custom_designs').upsert(
+          designsToSeed.map((cd) => ({
+            id: cd.id,
+            title: cd.title,
+            description: cd.description,
+            images: cd.images,
+            video_url: cd.video_url,
+            category: cd.category || 'Custom Work',
+            display_order: cd.display_order,
+            is_published: cd.is_published,
+            created_at: cd.created_at || new Date().toISOString(),
+            updated_at: cd.updated_at || new Date().toISOString(),
+          }))
+        );
+      }
+    } catch (e) {
+      // Table may not exist yet if migration hasn't been run
+    }
+
     isSeeding = false;
   } catch (err) {
     console.error('Error in ensureSupabaseSeeded:', err);
@@ -1049,6 +1105,18 @@ export async function updateServerReviews(reviews: CustomerReview[]): Promise<Cu
 
 // --- Size Charts ---
 export async function getServerSizeCharts(): Promise<SizeChart[]> {
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      await ensureSupabaseSeeded(supabase);
+      const { data, error } = await supabase.from('size_charts').select('*').order('created_at', { ascending: true });
+      if (!error && data && data.length > 0) {
+        return data;
+      }
+    } catch (err) {
+      console.error('Error fetching size_charts from Supabase:', err);
+    }
+  }
   const data = getLocalData();
   return data.size_charts || initialSizeCharts;
 }
@@ -1094,19 +1162,72 @@ export async function saveServerSizeChart(chart: Partial<SizeChart>): Promise<Si
   }
 
   saveLocalData(data);
+
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      if (newChart.is_default) {
+        await supabase.from('size_charts').update({ is_default: false }).neq('id', id);
+      }
+      const { error } = await supabase.from('size_charts').upsert({
+        id: newChart.id,
+        name: newChart.name,
+        description: newChart.description,
+        unit: newChart.unit,
+        columns: newChart.columns,
+        rows: newChart.rows,
+        notes: newChart.notes,
+        is_default: newChart.is_default,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) {
+        console.error('Supabase size_charts upsert error:', error);
+      }
+    } catch (err) {
+      console.error('Error saving size chart to Supabase:', err);
+    }
+  }
+
   return newChart;
 }
 
 export async function deleteServerSizeChart(id: string): Promise<boolean> {
   const data = getLocalData();
-  if (!data.size_charts) return true;
-  data.size_charts = data.size_charts.filter((c) => c.id !== id);
-  saveLocalData(data);
+  if (data.size_charts) {
+    data.size_charts = data.size_charts.filter((c) => c.id !== id);
+    saveLocalData(data);
+  }
+
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      await supabase.from('products').update({ size_chart_id: null }).eq('size_chart_id', id);
+      const { error } = await supabase.from('size_charts').delete().eq('id', id);
+      if (error) {
+        console.error('Supabase size_charts delete error:', error);
+      }
+    } catch (err) {
+      console.error('Error deleting size chart from Supabase:', err);
+    }
+  }
+
   return true;
 }
 
 // --- Custom Designs ---
 export async function getServerCustomDesigns(): Promise<CustomDesign[]> {
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      await ensureSupabaseSeeded(supabase);
+      const { data, error } = await supabase.from('custom_designs').select('*').order('display_order', { ascending: true });
+      if (!error && data && data.length > 0) {
+        return data;
+      }
+    } catch (err) {
+      console.error('Error fetching custom_designs from Supabase:', err);
+    }
+  }
   const data = getLocalData();
   return (data.custom_designs || initialCustomDesigns).sort((a, b) => a.display_order - b.display_order);
 }
@@ -1141,14 +1262,51 @@ export async function saveServerCustomDesign(design: Partial<CustomDesign>): Pro
   }
 
   saveLocalData(data);
+
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('custom_designs').upsert({
+        id: newDesign.id,
+        title: newDesign.title,
+        description: newDesign.description,
+        images: newDesign.images,
+        video_url: newDesign.video_url,
+        category: newDesign.category,
+        display_order: newDesign.display_order,
+        is_published: newDesign.is_published,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) {
+        console.error('Supabase custom_designs upsert error:', error);
+      }
+    } catch (err) {
+      console.error('Error saving custom design to Supabase:', err);
+    }
+  }
+
   return newDesign;
 }
 
 export async function deleteServerCustomDesign(id: string): Promise<boolean> {
   const data = getLocalData();
-  if (!data.custom_designs) return true;
-  data.custom_designs = data.custom_designs.filter((d) => d.id !== id);
-  saveLocalData(data);
+  if (data.custom_designs) {
+    data.custom_designs = data.custom_designs.filter((d) => d.id !== id);
+    saveLocalData(data);
+  }
+
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('custom_designs').delete().eq('id', id);
+      if (error) {
+        console.error('Supabase custom_designs delete error:', error);
+      }
+    } catch (err) {
+      console.error('Error deleting custom design from Supabase:', err);
+    }
+  }
+
   return true;
 }
 

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { HomepageSection, HeroSlide } from '@/lib/types';
-import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, Pause, Play } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 
 interface HeroCarouselProps {
   section: HomepageSection;
@@ -117,13 +117,12 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
   };
 
   const currentSlide = slides[activeIndex];
-  const isDarkText = currentSlide.text_color === 'dark';
   const position = currentSlide.text_position || 'left';
 
   return (
-    <div className="w-full bg-[#141414] overflow-hidden -mt-16 sm:-mt-20">
+    <div className="w-full bg-neutral-100 overflow-hidden -mt-16 sm:-mt-20">
       <section
-        className="relative w-full max-w-[1920px] mx-auto h-[82vh] min-h-[580px] max-h-[860px] flex items-center overflow-hidden bg-[#141414] select-none"
+        className="relative w-full max-w-[1920px] mx-auto h-[82vh] min-h-[580px] max-h-[860px] flex items-center overflow-hidden bg-neutral-100 select-none"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}
@@ -138,14 +137,14 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{
-              duration: shouldReduceMotion ? 0.2 : 0.9,
+              duration: shouldReduceMotion ? 0.2 : 0.8,
               ease: [0.25, 0.1, 0.25, 1],
             }}
             className="absolute inset-0"
           >
-            {/* Natural, Vibrant Background Image with Gentle Scale */}
+            {/* Natural, Vibrant Background Image - Pure, Zero Black Overlay */}
             <motion.div
-              initial={shouldReduceMotion ? {} : { scale: 1.05 }}
+              initial={shouldReduceMotion ? {} : { scale: 1.04 }}
               animate={shouldReduceMotion ? {} : { scale: 1.0 }}
               transition={{
                 duration: 7,
@@ -155,146 +154,54 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
             >
               <Image
                 src={currentSlide.image_url}
-                alt={currentSlide.heading}
+                alt={currentSlide.heading || 'Fairy Finds Boutique'}
                 fill
                 priority
                 sizes="(max-width: 1920px) 100vw, 1920px"
                 className="object-cover object-center"
               />
             </motion.div>
-
-            {/* Localized Subtle Gradients Only — No Gloomy Full-Screen Blackout! */}
-            {isDarkText ? (
-              // Light overlay variant for dark text
-              position === 'left' ? (
-                <div className="absolute inset-y-0 left-0 w-full sm:w-2/3 lg:w-1/2 bg-gradient-to-r from-white/90 via-white/60 to-transparent pointer-events-none" />
-              ) : position === 'right' ? (
-                <div className="absolute inset-y-0 right-0 w-full sm:w-2/3 lg:w-1/2 bg-gradient-to-l from-white/90 via-white/60 to-transparent pointer-events-none" />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-t from-white/85 via-white/50 to-white/30 pointer-events-none" />
-              )
-            ) : (
-              // Warm subtle shadow variant for light text (protects legibility while keeping colors bright)
-              position === 'left' ? (
-                <div className="absolute inset-y-0 left-0 w-full sm:w-3/4 lg:w-3/5 bg-gradient-to-r from-black/80 via-black/45 to-transparent pointer-events-none" />
-              ) : position === 'right' ? (
-                <div className="absolute inset-y-0 right-0 w-full sm:w-3/4 lg:w-3/5 bg-gradient-to-l from-black/80 via-black/45 to-transparent pointer-events-none" />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/25 pointer-events-none" />
-              )
-            )}
           </motion.div>
         </AnimatePresence>
 
-        {/* Content Container aligned according to text_position */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-20 pt-16 pb-14">
+        {/* Content Container - Only CTA Button */}
+        <div className="absolute inset-x-0 bottom-20 sm:bottom-24 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pointer-events-none">
           <div
             className={`flex w-full ${
               position === 'left'
-                ? 'justify-start text-left'
+                ? 'justify-start'
                 : position === 'right'
-                ? 'justify-end text-right sm:text-right'
-                : 'justify-center text-center'
+                ? 'justify-end'
+                : 'justify-center'
             }`}
           >
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentSlide.id || activeIndex}
-                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -15 }}
-                transition={{
-                  duration: 0.5,
-                  staggerChildren: 0.1,
-                  delayChildren: 0.1,
-                }}
-                className={`max-w-xl flex flex-col ${
-                  position === 'left'
-                    ? 'items-start text-left'
-                    : position === 'right'
-                    ? 'items-end text-right'
-                    : 'items-center text-center'
-                } space-y-4`}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+                transition={{ duration: 0.5 }}
+                className="pointer-events-auto flex flex-wrap items-center gap-3.5"
               >
-                {/* Eyebrow Badge */}
-                {currentSlide.badge && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-widest font-semibold backdrop-blur-md shadow-xs ${
-                      isDarkText
-                        ? 'bg-black/10 text-[#FF55D2] border border-black/10'
-                        : 'bg-white/15 text-pink-200 border border-white/20'
-                    }`}
+                {currentSlide.button_text && (
+                  <Link
+                    href={currentSlide.button_link || '/shop'}
+                    className="min-h-[48px] px-8 py-3.5 bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white text-xs uppercase tracking-widest font-semibold transition-all duration-500 shadow-xl flex items-center justify-center gap-2 rounded-xs active:scale-95 hover:shadow-2xl hover:scale-105"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-[#FF55D2]" />
-                    <span>{currentSlide.badge}</span>
-                  </motion.div>
+                    <span>{currentSlide.button_text}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 )}
 
-                {/* Main Headline - Short, Elegant, Punchy */}
-                <motion.h1
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                  className={`font-serif text-3xl sm:text-4xl md:text-5xl font-light tracking-tight leading-[1.15] drop-shadow-sm ${
-                    isDarkText ? 'text-neutral-900' : 'text-white'
-                  }`}
-                >
-                  {currentSlide.heading}
-                </motion.h1>
-
-                {/* Single Clear Sentence */}
-                {currentSlide.description && (
-                  <motion.p
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className={`text-sm sm:text-base leading-relaxed font-light max-w-lg ${
-                      isDarkText ? 'text-neutral-700' : 'text-neutral-200'
-                    }`}
+                {currentSlide.secondary_button_text && (
+                  <Link
+                    href={currentSlide.secondary_button_link || '/custom'}
+                    className="min-h-[48px] px-7 py-3.5 text-xs uppercase tracking-widest font-semibold transition-all duration-500 bg-white/95 hover:bg-white text-neutral-900 border border-neutral-200 shadow-xl backdrop-blur-xs rounded-xs active:scale-95 hover:shadow-2xl hover:scale-105"
                   >
-                    {currentSlide.description}
-                  </motion.p>
+                    <span>{currentSlide.secondary_button_text}</span>
+                  </Link>
                 )}
-
-                {/* Call To Action Buttons */}
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className={`pt-2 flex flex-wrap items-center gap-3.5 w-full sm:w-auto ${
-                    position === 'left'
-                      ? 'justify-start'
-                      : position === 'right'
-                      ? 'justify-end'
-                      : 'justify-center'
-                  }`}
-                >
-                  {currentSlide.button_text && (
-                    <Link
-                      href={currentSlide.button_link || '/shop'}
-                      className="min-h-[44px] px-7 py-3 bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white text-xs uppercase tracking-widest font-semibold transition-all shadow-md flex items-center justify-center gap-2 rounded-xs active:scale-95"
-                    >
-                      <span>{currentSlide.button_text}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  )}
-
-                  {currentSlide.secondary_button_text && (
-                    <Link
-                      href={currentSlide.secondary_button_link || '/custom'}
-                      className={`min-h-[44px] px-6 py-3 text-xs uppercase tracking-widest font-semibold transition-all backdrop-blur-md rounded-xs active:scale-95 border ${
-                        isDarkText
-                          ? 'border-neutral-900 text-neutral-900 hover:bg-neutral-900 hover:text-white'
-                          : 'border-white/50 text-white hover:border-white hover:bg-white/10'
-                      }`}
-                    >
-                      <span>{currentSlide.secondary_button_text}</span>
-                    </Link>
-                  )}
-                </motion.div>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -306,7 +213,7 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
             <button
               type="button"
               onClick={prevSlide}
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/30 hover:bg-black/60 text-white border border-white/20 backdrop-blur-md flex items-center justify-center active:scale-90 transition-all cursor-pointer shadow-md hover:border-[#FF55D2]"
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/80 hover:bg-white text-neutral-900 border border-neutral-200/80 backdrop-blur-md flex items-center justify-center active:scale-90 transition-all duration-500 cursor-pointer shadow-lg hover:border-[#FF55D2]"
               aria-label="Previous slide"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -314,7 +221,7 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
             <button
               type="button"
               onClick={nextSlide}
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/30 hover:bg-black/60 text-white border border-white/20 backdrop-blur-md flex items-center justify-center active:scale-90 transition-all cursor-pointer shadow-md hover:border-[#FF55D2]"
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/80 hover:bg-white text-neutral-900 border border-neutral-200/80 backdrop-blur-md flex items-center justify-center active:scale-90 transition-all duration-500 cursor-pointer shadow-lg hover:border-[#FF55D2]"
               aria-label="Next slide"
             >
               <ChevronRight className="w-5 h-5" />
@@ -326,16 +233,16 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
         {slides.length > 1 && (
           <div className="absolute bottom-6 sm:bottom-8 inset-x-0 z-30 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-none">
             {/* Slide Indicator Dashes */}
-            <div className="flex items-center gap-2 pointer-events-auto">
+            <div className="flex items-center gap-2 pointer-events-auto bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
               {slides.map((_, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => goToSlide(idx)}
-                  className={`h-1.5 transition-all duration-300 rounded-full cursor-pointer ${
+                  className={`h-1.5 transition-all duration-500 rounded-full cursor-pointer ${
                     idx === activeIndex
                       ? 'w-8 bg-[#FF55D2] shadow-xs'
-                      : 'w-2.5 bg-white/50 hover:bg-white/80'
+                      : 'w-2.5 bg-white/70 hover:bg-white'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
@@ -343,11 +250,11 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
             </div>
 
             {/* Slide Numbers & Pause/Play Indicator */}
-            <div className="flex items-center gap-3 text-white/90 font-mono text-xs tracking-widest pointer-events-auto bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
+            <div className="flex items-center gap-3 text-neutral-800 font-mono text-xs tracking-widest pointer-events-auto bg-white/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-neutral-200/80 shadow-md">
               <button
                 type="button"
                 onClick={() => setIsPaused(!isPaused)}
-                className="hover:text-[#FF55D2] transition-colors cursor-pointer"
+                className="hover:text-[#FF55D2] transition-colors duration-500 cursor-pointer"
                 title={isPaused ? 'Resume autoplay' : 'Pause autoplay'}
                 aria-label={isPaused ? 'Resume autoplay' : 'Pause autoplay'}
               >

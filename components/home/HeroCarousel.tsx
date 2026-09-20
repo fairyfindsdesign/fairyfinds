@@ -122,12 +122,12 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
   const isLightBg = currentSlide.text_color === 'dark';
 
   return (
-    <div className="w-full bg-neutral-900 overflow-hidden -mt-16 sm:-mt-20">
+    <div className="w-full bg-neutral-900 overflow-hidden">
       {/* =========================================================================
-          1. DESKTOP / TABLET HERO (sm: and up): Full-screen 100dvh with Overlaid CTA
+          1. DESKTOP / TABLET HERO (sm: and up): Fits cleanly below the navbar
           ========================================================================= */}
       <section
-        className="hidden sm:flex relative w-full h-[100dvh] min-h-[100dvh] items-center overflow-hidden bg-neutral-900 select-none"
+        className="hidden sm:flex relative w-full h-[calc(100dvh-5rem)] min-h-[580px] items-center overflow-hidden bg-neutral-900 select-none"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}

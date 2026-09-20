@@ -75,16 +75,13 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
     return pathname?.startsWith(href);
   };
 
-  const isHomepage = pathname === '/';
-  const isHeroTransparent = isHomepage && !isScrolled;
-
   return (
     <>
       <header
         className={`sticky top-0 z-[60] transition-all duration-300 ${
-          isHeroTransparent
-            ? 'bg-black/35 backdrop-blur-md border-b border-white/10 shadow-xs'
-            : 'bg-black/70 backdrop-blur-md border-b border-white/10 shadow-md'
+          isScrolled
+            ? 'bg-black/90 backdrop-blur-md border-b border-white/10 shadow-md'
+            : 'bg-black/80 backdrop-blur-md border-b border-white/10 shadow-xs'
         }`}
       >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

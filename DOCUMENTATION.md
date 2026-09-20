@@ -406,7 +406,7 @@ Accessed at [`/admin`](http://localhost:3000/admin).
   - **Natural Aspect Ratio**: Preserves natural image aspect ratio on mobile screens without aggressive cropping or arbitrary height cuts.
   - **Clean Fashion Photography**: Dark full-screen overlay and headline text are removed on mobile screens to present pristine, uncompromised dress photography.
   - **Below-Image CTA Placement**: The primary action button is positioned directly below the image container on mobile, ensuring quick tap access without obscuring the outfit.
-- **Translucent Black Shaded Navbar Overlay**: Styled with a luxury dark frosted glass aesthetic (`bg-black/35 backdrop-blur-md border-b border-white/10`) allowing vibrant photography to softly blur underneath while keeping the white brand logo, typography, and action icons sharp and legible. Smoothly transitions to a deeper translucent black (`bg-black/70 backdrop-blur-md`) upon scrolling down.
+- **Translucent Black Shaded Navbar (Zero Overlap)**: Styled with a luxury dark frosted glass aesthetic (`bg-black/80 backdrop-blur-md border-b border-white/10`) transitioning to deeper black (`bg-black/90 backdrop-blur-md`) when scrolled. The hero banner image sits cleanly below the navbar (zero negative top margin overlap), ensuring boutique photography, garment necklines, and models remain completely unobscured across both desktop and mobile screens.
 
 ### 8.2 Dark & Light Mode Adaptive Favicon
 - **Light Mode Browser**: Automatically displays the **black logo** favicon against light browser tab chrome.

@@ -130,6 +130,24 @@ CREATE TABLE IF NOT EXISTS store_settings (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- 10. Orders Table
+CREATE TABLE IF NOT EXISTS orders (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  order_number TEXT UNIQUE NOT NULL,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  delivery_address TEXT NOT NULL,
+  items JSONB NOT NULL DEFAULT '[]'::jsonb,
+  subtotal DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  delivery_fee DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  total DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  notes TEXT,
+  status TEXT CHECK (status IN ('new','confirmed','preparing','ready','shipped','delivered','cancelled')) DEFAULT 'new',
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- ==============================================================================
 -- SECTION A: INCREMENTAL MIGRATION (RUN THIS ON EXISTING DB)
 -- Paste and run this section if you already have tables in Supabase.
@@ -145,6 +163,25 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS fabric TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS care_instructions TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
+
+-- 1b. Create orders table if it doesn't exist (safe incremental add)
+CREATE TABLE IF NOT EXISTS orders (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  order_number TEXT UNIQUE NOT NULL,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  delivery_address TEXT NOT NULL,
+  items JSONB NOT NULL DEFAULT '[]'::jsonb,
+  subtotal DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  delivery_fee DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  total DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  notes TEXT,
+  status TEXT CHECK (status IN ('new','confirmed','preparing','ready','shipped','delivered','cancelled')) DEFAULT 'new',
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 
 -- 2. Ensure columns exist on store_settings
 ALTER TABLE store_settings ADD COLUMN IF NOT EXISTS whatsapp_number TEXT DEFAULT '+916282629144';
@@ -268,6 +305,16 @@ CREATE POLICY "Admin All Size Charts" ON size_charts FOR ALL USING (true) WITH C
 
 DROP POLICY IF EXISTS "Admin All Custom Designs" ON custom_designs;
 CREATE POLICY "Admin All Custom Designs" ON custom_designs FOR ALL USING (true) WITH CHECK (true);
+
+-- Orders: RLS (admin service-role only — customers never write from browser)
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admin All Orders" ON orders;
+CREATE POLICY "Admin All Orders" ON orders FOR ALL USING (true) WITH CHECK (true);
+
+-- Realtime: enable broadcast of INSERT events so the admin receives live notifications
+-- Run this once in Supabase SQL Editor:
+ALTER TABLE orders REPLICA IDENTITY FULL;
+
 
 -- ==============================================================================
 -- STORAGE BUCKET FOR BOUTIQUE MEDIA

@@ -1,0 +1,164 @@
+import { Order, OrderItem, OrderStatus } from '../types';
+import { getAdminSupabase } from '../supabase/admin';
+import fs from 'fs';
+import path from 'path';
+
+const LOCAL_ORDERS_FILE = path.join(process.cwd(), 'data', 'orders.json');
+
+function readLocalOrders(): Order[] {
+  try {
+    if (!fs.existsSync(LOCAL_ORDERS_FILE)) return [];
+    const raw = fs.readFileSync(LOCAL_ORDERS_FILE, 'utf-8');
+    return JSON.parse(raw) as Order[];
+  } catch {
+    return [];
+  }
+}
+
+function writeLocalOrders(orders: Order[]) {
+  try {
+    const dir = path.dirname(LOCAL_ORDERS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(LOCAL_ORDERS_FILE, JSON.stringify(orders, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[orders] Failed to write local orders.json:', err);
+  }
+}
+
+export function generateOrderNumber(): string {
+  const now = new Date();
+  const y = String(now.getFullYear()).slice(-2);
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const rand = Math.floor(Math.random() * 900 + 100);
+  return `FF${y}${m}${d}-${rand}`;
+}
+
+export async function saveOrder(order: Omit<Order, 'id' | 'created_at' | 'updated_at'>): Promise<Order> {
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+  const newOrder: Order = { ...order, id, created_at: now, updated_at: now };
+
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .insert({
+          id: newOrder.id,
+          order_number: newOrder.order_number,
+          customer_name: newOrder.customer_name,
+          customer_phone: newOrder.customer_phone,
+          delivery_address: newOrder.delivery_address,
+          items: newOrder.items,
+          subtotal: newOrder.subtotal,
+          delivery_fee: newOrder.delivery_fee,
+          total: newOrder.total,
+          notes: newOrder.notes || null,
+          status: newOrder.status,
+          is_read: false,
+        })
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      const local = readLocalOrders();
+      local.unshift(newOrder);
+      writeLocalOrders(local);
+      return data as Order;
+    } catch (err) {
+      console.error('[orders] Supabase save failed, using local fallback:', err);
+    }
+  }
+
+  const local = readLocalOrders();
+  local.unshift(newOrder);
+  writeLocalOrders(local);
+  return newOrder;
+}
+
+export async function getOrders(filters?: {
+  status?: OrderStatus;
+  is_read?: boolean;
+  search?: string;
+  limit?: number;
+}): Promise<Order[]> {
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
+      if (filters?.status) query = query.eq('status', filters.status);
+      if (filters?.is_read !== undefined) query = query.eq('is_read', filters.is_read);
+      if (filters?.limit) query = query.limit(filters.limit);
+      const { data, error } = await query;
+      if (!error && data) return data as Order[];
+    } catch (err) {
+      console.error('[orders] Supabase getOrders failed:', err);
+    }
+  }
+
+  let orders = readLocalOrders();
+  if (filters?.status) orders = orders.filter((o) => o.status === filters.status);
+  if (filters?.is_read !== undefined) orders = orders.filter((o) => o.is_read === filters.is_read);
+  if (filters?.search) {
+    const q = filters.search.toLowerCase();
+    orders = orders.filter(
+      (o) =>
+        o.customer_name.toLowerCase().includes(q) ||
+        o.customer_phone.includes(q) ||
+        o.order_number.toLowerCase().includes(q)
+    );
+  }
+  return orders;
+}
+
+export async function getOrderById(id: string): Promise<Order | null> {
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.from('orders').select('*').eq('id', id).single();
+      if (!error && data) return data as Order;
+    } catch {}
+  }
+  return readLocalOrders().find((o) => o.id === id) || null;
+}
+
+export async function updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
+  const supabase = getAdminSupabase();
+  const now = new Date().toISOString();
+  if (supabase) {
+    try {
+      await supabase.from('orders').update({ status, updated_at: now }).eq('id', id);
+    } catch (err) {
+      console.error('[orders] Supabase updateOrderStatus failed:', err);
+    }
+  }
+  const orders = readLocalOrders();
+  const idx = orders.findIndex((o) => o.id === id);
+  if (idx !== -1) { orders[idx] = { ...orders[idx], status, updated_at: now }; writeLocalOrders(orders); }
+}
+
+export async function markOrderRead(id: string): Promise<void> {
+  const supabase = getAdminSupabase();
+  const now = new Date().toISOString();
+  if (supabase) {
+    try {
+      await supabase.from('orders').update({ is_read: true, updated_at: now }).eq('id', id);
+    } catch (err) {
+      console.error('[orders] Supabase markOrderRead failed:', err);
+    }
+  }
+  const orders = readLocalOrders();
+  const idx = orders.findIndex((o) => o.id === id);
+  if (idx !== -1) { orders[idx] = { ...orders[idx], is_read: true, updated_at: now }; writeLocalOrders(orders); }
+}
+
+export async function getUnreadOrderCount(): Promise<number> {
+  const supabase = getAdminSupabase();
+  if (supabase) {
+    try {
+      const { count, error } = await supabase.from('orders').select('id', { count: 'exact', head: true }).eq('is_read', false);
+      if (!error && count !== null) return count;
+    } catch {}
+  }
+  return readLocalOrders().filter((o) => !o.is_read).length;
+}

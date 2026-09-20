@@ -9,7 +9,8 @@ export function generateOrderWhatsAppUrl(
   items: CartItem[],
   customer: CustomerOrderDetails,
   currencySymbol: string,
-  businessNumber: string
+  businessNumber: string,
+  orderNumber?: string
 ): string {
   const cleanNumber = cleanPhoneNumber(businessNumber);
 
@@ -30,8 +31,9 @@ export function generateOrderWhatsAppUrl(
     .join('\n\n');
 
   const deliveryFeeText = deliveryFee > 0 ? `${currencySymbol} ${deliveryFee.toLocaleString()}` : 'Free Delivery';
+  const orderRef = orderNumber ? `\n*Order Reference: #${orderNumber}*\n` : '';
 
-  const message = `*Fairy Finds Boutique - New Order*
+  const message = `*Fairy Finds Boutique - New Order*${orderRef}
 
 *Customer Details:*
 • Name: ${customer.name}

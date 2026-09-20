@@ -67,11 +67,14 @@ Master operational, architectural, and design reference for the **Fairy Finds Bo
 | **`/opengraph-image`** | Static (`○`) | **Dynamic OpenGraph Preview** rendering branded 1200×630 share card for WhatsApp, Facebook, X. |
 | **`/docs/Fairy_Finds_Admin_Portal_Guide.pdf`** | Static (`○`) | **Client Owner Handbook** (7-page vector PDF guide with SVG workflow diagrams for daily boutique operations). |
 | **`/admin`** | Dynamic (`ƒ`) | **Protected Owner Dashboard** with inventory metrics, categories count, stock alerts, and quick action cards. |
-| **`/admin/products`** | Dynamic (`ƒ`) | **Product & Stock Manager** with search, per-size stock breakdown, auto-generated product code, and delete actions. |
+| **`/admin/orders`** | Dynamic (`ƒ`) | **Order Management & Real-Time Alert Center** with live incoming orders, audio chime, lifecycle status workflow, customer WhatsApp communication, and unread order badge. |
+| **`/admin/products`** | Dynamic (`ƒ`) | **Product & Stock Manager** with search, per-size stock breakdown, auto-generated product code, preset/custom size chart builder, and delete actions. |
 | **`/admin/products/new`** | Dynamic (`ƒ`) | **Create Garment Form** with live unique product code auto-sync, inline "+ New Category" modal, and size matrix. |
-| **`/admin/products/[id]`** | Dynamic (`ƒ`) | **Edit Garment Form** to update pricing, descriptions, images, category, and stock counts. |
+| **`/admin/products/[id]`** | Dynamic (`ƒ`) | **Edit Garment Form** to update pricing, descriptions, images, category, delivery fee, and stock counts. |
 | **`/admin/categories`** | Dynamic (`ƒ`) | **Category Management Portal** to create, edit, search, re-order, and delete categories with product count tracking. |
 | **`/admin/collections`** | Dynamic (`ƒ`) | **Collections Manager** to create collections, edit editorial narratives, and toggle homepage visibility. |
+| **`/admin/size-charts`** | Dynamic (`ƒ`) | **Global Size Charts Manager** to manage reusable garment measurement charts and fit guidelines. |
+| **`/admin/custom-designs`** | Dynamic (`ƒ`) | **Custom Designs Showcase Manager** to curate bespoke atelier portfolio pieces with video/reels integration. |
 | **`/admin/homepage`** | Dynamic (`ƒ`) | **Homepage CMS** with Move Up / Move Down reordering, visibility toggles, and text editor. |
 | **`/admin/navigation`** | Dynamic (`ƒ`) | **Navigation & Dropdown CMS** to manage top-level nav visibility and customize the *Featured* dropdown menu links. |
 | **`/admin/reviews`** | Dynamic (`ƒ`) | **Customer Reviews CMS** to manage customer UGC outfit photos, testimonials, ratings, and worn product references. |
@@ -108,17 +111,33 @@ The complete SQL migration script is located at [`fairy-finds/supabase/schema.sq
    - `is_published BOOLEAN DEFAULT true`
    - `created_at TIMESTAMPTZ DEFAULT now()`
 
-3. **`products`**:
+3. **`size_charts`**:
+   - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
+   - `name TEXT NOT NULL`
+   - `description TEXT`
+   - `unit TEXT DEFAULT 'inches'` (`'inches'` | `'cm'`)
+   - `columns JSONB DEFAULT '[]'::jsonb` (e.g., `["Bust", "Waist", "Hips", "Length"]`)
+   - `rows JSONB DEFAULT '[]'::jsonb` (array of row objects with `size` and column measurements)
+   - `notes TEXT`
+   - `is_default BOOLEAN DEFAULT false`
+   - `created_at TIMESTAMPTZ DEFAULT now()`
+   - `updated_at TIMESTAMPTZ DEFAULT now()`
+
+4. **`products`**:
    - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
    - `product_code TEXT UNIQUE` (Standardized unique ID: `FF-[CAT]-[NAME]-[NUM]`)
    - `name TEXT NOT NULL`
    - `slug TEXT UNIQUE NOT NULL`
    - `description TEXT`
    - `price DECIMAL(10, 2) NOT NULL`
+   - `delivery_fee DECIMAL(10, 2) DEFAULT 0`
+   - `size_chart_id TEXT REFERENCES size_charts(id) ON DELETE SET NULL`
+   - `custom_size_chart JSONB DEFAULT NULL` (Per-garment custom measurement table override)
    - `product_type TEXT CHECK (product_type IN ('READY_MADE')) DEFAULT 'READY_MADE'`
    - `category_id TEXT REFERENCES categories(id) ON DELETE SET NULL`
    - `collection_id TEXT REFERENCES collections(id) ON DELETE SET NULL`
    - `images JSONB DEFAULT '[]'::jsonb`
+   - `size_chart_url TEXT`
    - `fabric TEXT`
    - `care_instructions TEXT`
    - `is_published BOOLEAN DEFAULT true`
@@ -126,7 +145,7 @@ The complete SQL migration script is located at [`fairy-finds/supabase/schema.sq
    - `created_at TIMESTAMPTZ DEFAULT now()`
    - `updated_at TIMESTAMPTZ DEFAULT now()`
 
-4. **`product_variants`**:
+5. **`product_variants`**:
    - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
    - `product_id TEXT REFERENCES products(id) ON DELETE CASCADE`
    - `size TEXT NOT NULL`
@@ -134,7 +153,7 @@ The complete SQL migration script is located at [`fairy-finds/supabase/schema.sq
    - `sku TEXT`
    - `UNIQUE(product_id, size)`
 
-5. **`homepage_sections`**:
+6. **`homepage_sections`**:
    - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
    - `section_type TEXT NOT NULL`
    - `title TEXT`
@@ -142,16 +161,71 @@ The complete SQL migration script is located at [`fairy-finds/supabase/schema.sq
    - `content JSONB DEFAULT '{}'::jsonb`
    - `display_order INT DEFAULT 0`
    - `is_visible BOOLEAN DEFAULT true`
+   - `created_at TIMESTAMPTZ DEFAULT now()`
+   - `updated_at TIMESTAMPTZ DEFAULT now()`
 
-6. **`store_settings`**:
-   - `id TEXT PRIMARY KEY DEFAULT 'default'`
-   - `whatsapp_number TEXT NOT NULL`
-   - `store_name TEXT NOT NULL`
-   - `contact_email TEXT`
-   - `instagram_url TEXT`
-   - `address TEXT`
-   - `announcement_bar TEXT`
+7. **`custom_designs`**:
+   - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
+   - `title TEXT NOT NULL`
+   - `description TEXT`
+   - `images JSONB DEFAULT '[]'::jsonb`
+   - `video_url TEXT`
+   - `category TEXT DEFAULT 'Custom Work'`
+   - `display_order INT DEFAULT 0`
+   - `is_published BOOLEAN DEFAULT true`
+   - `created_at TIMESTAMPTZ DEFAULT now()`
+   - `updated_at TIMESTAMPTZ DEFAULT now()`
+
+8. **`customer_reviews`**:
+   - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
+   - `customer_name TEXT NOT NULL`
+   - `location TEXT`
+   - `rating INT DEFAULT 5`
+   - `review_text TEXT NOT NULL`
+   - `image_url TEXT`
+   - `worn_product TEXT`
+   - `is_verified BOOLEAN DEFAULT true`
+   - `is_featured BOOLEAN DEFAULT true`
+   - `display_order INT DEFAULT 0`
+   - `created_at TIMESTAMPTZ DEFAULT now()`
+
+9. **`store_settings`**:
+   - `id INT PRIMARY KEY DEFAULT 1`
+   - `whatsapp_number TEXT NOT NULL DEFAULT '+916282629144'`
+   - `store_name TEXT DEFAULT 'Fairy Finds Boutique'`
+   - `contact_email TEXT DEFAULT 'hello@fairyfindsboutique.com'`
+   - `instagram_url TEXT DEFAULT 'https://instagram.com/fairyfinds.boutique'`
+   - `address TEXT DEFAULT 'Fairy Finds Boutique, Neendoor, Kottayam, Kerala'`
+   - `announcement_bar TEXT DEFAULT 'Free Delivery above Rs. 2,000 Order • Order Directly via WhatsApp'`
    - `currency_symbol TEXT DEFAULT 'Rs.'`
+   - `navigation JSONB DEFAULT '[]'::jsonb`
+   - `reviews JSONB DEFAULT '[]'::jsonb`
+   - `seo_config JSONB DEFAULT '{}'::jsonb`
+   - `updated_at TIMESTAMPTZ DEFAULT now()`
+
+10. **`orders`**:
+   - `id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text`
+   - `order_number TEXT UNIQUE NOT NULL` (Formatted: `FFYYMMDD-XXX`, e.g., `FF260920-412`)
+   - `customer_name TEXT NOT NULL`
+   - `customer_phone TEXT NOT NULL`
+   - `delivery_address TEXT NOT NULL`
+   - `items JSONB NOT NULL DEFAULT '[]'::jsonb` (Snapshot of ordered items with size, quantity, unit price, delivery fee, line total)
+   - `subtotal DECIMAL(12, 2) NOT NULL DEFAULT 0`
+   - `delivery_fee DECIMAL(12, 2) NOT NULL DEFAULT 0`
+   - `total DECIMAL(12, 2) NOT NULL DEFAULT 0`
+   - `notes TEXT` (Special delivery or custom fitting instructions)
+   - `status TEXT CHECK (status IN ('new','confirmed','preparing','ready','shipped','delivered','cancelled')) DEFAULT 'new'`
+   - `is_read BOOLEAN DEFAULT false` (Drives the unread notification badge in Admin)
+   - `created_at TIMESTAMPTZ DEFAULT now()`
+   - `updated_at TIMESTAMPTZ DEFAULT now()`
+
+### Realtime Database Replication & RLS
+- **Row Level Security**: Enabled on `orders`. Public users submit orders exclusively through Next.js Server Action (`saveOrderAction`) which uses the Supabase service role key, preventing unauthenticated direct database reads or tampering from browser consoles.
+- **Supabase Realtime Broadcast**:
+  ```sql
+  ALTER TABLE orders REPLICA IDENTITY FULL;
+  ```
+  Enabling full replica identity ensures Supabase broadcasts `INSERT` events over WebSocket channels to all active admin portal sessions with complete row payload data, triggering instant audio chimes and UI toasts.
 
 ---
 
@@ -165,8 +239,16 @@ The complete SQL migration script is located at [`fairy-finds/supabase/schema.sq
    - *Out of Stock*: Strikethrough; button disabled with prompt to commission custom making.
 3. **Cart Drawer**: Adding a product opens the slide-out quick cart drawer without navigating away.
 4. **Checkout Transition**: Clicking "Proceed to WhatsApp Order" routes the user to the dedicated [`/cart`](http://localhost:3000/cart) page.
-5. **Customer Details**: On `/cart`, the user provides Name, Phone number, and Delivery Address.
-6. **WhatsApp Launch**: Clicking "Complete Order on WhatsApp" launches WhatsApp with a pre-filled, itemized message formatted to the boutique's configured business number.
+5. **Customer Details**: On `/cart`, the user provides Name, Phone number, Delivery Address, and optional delivery notes.
+6. **Order Validation & Database Persistence**: When clicking "Complete Order on WhatsApp", the checkout calls `saveOrderAction`:
+   - Validates bag items, sizes, prices, and customer contact data.
+   - Generates a human-friendly unique order ID (e.g. `FF260920-412`).
+   - Persists the complete order snapshot (line items, sizing, per-product delivery fees, subtotal, and total) directly into the Supabase `orders` table (with local `data/orders.json` fallback).
+7. **Immediate Owner Alert Dispatch**:
+   - Supabase Realtime immediately broadcasts the new order to all open owner admin sessions.
+   - The owner hears an audio chime and sees a top-right floating alert toast with order amount and customer name.
+   - The unread badge counter in the admin navigation bar updates in real time.
+8. **WhatsApp Launch**: The customer's browser launches WhatsApp with a pre-filled, itemized message linked to the official boutique hotline (`6282629144`), complete with order reference number for instant cross-referencing.
 
 ### 5.2 Custom-Made Atelier Consultation Flow
 1. **Bespoke Landing**: User visits [`/custom`](http://localhost:3000/custom) explaining the 4-step tailored process: Design Consultation → Measurements & Fabric → Artisanal Tailoring → Delivery & Fitting.
@@ -181,12 +263,16 @@ All WhatsApp URLs are built by [`lib/whatsapp.ts`](file:///d:/works/Asme/Fairy%2
 
 ### Ready-Made Order Message Template
 ```text
-*Fairy Finds Boutique Order*
+*Fairy Finds Boutique - New Order*
+*Order Reference: #[Order Number]*
 
-*Customer Name:* [Customer Name]
-*Phone:* [Customer Phone]
+*Customer Details:*
+• Name: [Customer Name]
+• Phone: [Customer Phone]
+• Delivery Address: [Customer Address]
+• Special Notes: [Optional Notes]
 
-*Items:*
+*Ordered Items:*
 1. [Product 1 Name]
    Size: [Selected Size]
    Quantity: [Quantity]
@@ -197,13 +283,10 @@ All WhatsApp URLs are built by [`lib/whatsapp.ts`](file:///d:/works/Asme/Fairy%2
    Quantity: [Quantity]
    Price: Rs. [Unit Price]
 
-*Subtotal:* Rs. [Subtotal]
-*Total:* Rs. [Total]
-
-*Delivery Address:*
-[Customer Address]
-
-*Special Notes:* [Optional Notes]
+*Order Summary:*
+• Subtotal: Rs. [Subtotal]
+• Delivery Fee: [Delivery Fee / Free Delivery]
+• Total: Rs. [Total]
 ```
 
 ### Custom-Made Inquiry Message Template
@@ -263,6 +346,10 @@ Accessed at [`/admin`](http://localhost:3000/admin).
   - Title, unique product ID with auto-sync, price, category selector (with inline `+ New Category` modal), and collection dropdown.
   - Multi-image gallery uploader with drag-and-drop, Apple HEIC support, and automatic 80% compression.
   - Fabric composition and care instructions.
+  - **Per-Product Delivery Fee**: Set individual delivery fee (defaults to 0 / Free Delivery).
+  - **Dual Size Chart Option**:
+    - *Global Preset*: Select an existing size chart from the dropdown (e.g. Sarees, Lehengas, Kurtis).
+    - *Custom Size Chart for this piece*: Build a bespoke size chart directly in the editor with custom column names (Bust, Waist, Hips, Length, etc.), rows, measurement units (`inches` or `cm`), and fit notes.
   - **Size & Stock Matrix**: Interactive counters for S, M, L, XL, plus "Add Another Size" for custom sizes.
 - **Edit Piece Form** ([`/admin/products/[id]`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/products/[id]/page.tsx)).
 - Delete confirmation with instant catalog update.
@@ -299,14 +386,27 @@ Accessed at [`/admin`](http://localhost:3000/admin).
 - **Tab 4: Social & WhatsApp (Open Graph)**: Open Graph share title, description, banner image picker, and interactive WhatsApp chat link preview card mockup.
 - **Tab 5: Search Console, Analytics & Crawl**: Google Search Console verification meta token, Google Analytics 4 (GA4) ID injection, Meta Pixel ID, search engine indexing master toggle (`index, follow` vs `noindex, nofollow`), and XML sitemap / robots.txt quick inspectors.
 
+### 7.11 Order Management & Real-Time Alert System ([`/admin/orders`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/orders/page.tsx))
+- **Live Orders Stream**: Incoming orders appear in real time without refreshing the browser, accompanied by an audio chime and toast notification.
+- **Lifecycle Status Management**: Track orders through a clean 7-stage workflow: `new` ➔ `confirmed` ➔ `preparing` ➔ `ready` ➔ `shipped` ➔ `delivered` (or `cancelled`).
+- **Status Filter Tabs**: Instantly filter by status pill with live count badges on `New` and total orders.
+- **Instant Search**: Search orders on the fly by customer name, phone number, or order reference ID (e.g. `FF260920-412`).
+- **Customer WhatsApp Quick-Chat**: Direct one-click WhatsApp button to message the customer with pre-filled context regarding their specific order.
+- **Order Details Drawer**: View complete order metadata, delivery address, customer phone, individual line items, sizes, quantities, unit prices, delivery fee, subtotal, total, and special instructions.
+- **Mark as Read**: Mark orders as read to clear the notification dot and badge counter in the admin navigation bar.
+- **Dual Persistence**: Stored in Supabase PostgreSQL with real-time replication, backed up by local `data/orders.json` for resilience.
+
 ---
 
 ## 8. Storefront Aesthetics & Adaptive Design
 
-### 8.1 Hero Section (1920×1080 Dimensions)
-- **Banner Proportions**: Sized to `max-w-[1920px] lg:h-[1080px]` matching 1080p Full HD resolution and 16:9 banner proportions.
-- **Visual Alignment**: Headline centered at 32px font size (`text-[26px] sm:text-[32px]`), with narrative description and centered dual CTAs ("Explore Ready-to-Wear" and "Commission Bespoke").
-- **Transparent Navbar Overlay**: When positioned over the homepage hero banner, the navbar background and borders become transparent (`bg-transparent border-transparent`) with white logo, white text links, and white action icons, smoothly transitioning to solid white upon scrolling down.
+### 8.1 Hero Section (Desktop Editorial Canvas & Mobile Optimization)
+- **Desktop Banner Proportions**: Sized to `max-w-[1920px] lg:h-[1080px]` matching 1080p Full HD resolution and 16:9 banner proportions with centered typography and overlay dual CTAs ("Explore Ready-to-Wear" and "Commission Bespoke").
+- **Mobile Hero Optimization**:
+  - **Natural Aspect Ratio**: Preserves natural image aspect ratio on mobile screens without aggressive cropping or arbitrary height cuts.
+  - **Clean Fashion Photography**: Dark full-screen overlay and headline text are removed on mobile screens to present pristine, uncompromised dress photography.
+  - **Below-Image CTA Placement**: The primary action button is positioned directly below the image container on mobile, ensuring quick tap access without obscuring the outfit.
+- **Transparent Navbar Overlay**: When positioned over the homepage hero banner on desktop, the navbar background and borders become transparent (`bg-transparent border-transparent`) with white logo, white text links, and white action icons, smoothly transitioning to solid white upon scrolling down.
 
 ### 8.2 Dark & Light Mode Adaptive Favicon
 - **Light Mode Browser**: Automatically displays the **black logo** favicon against light browser tab chrome.
@@ -565,9 +665,9 @@ The SEO dashboard ([`SeoManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds
 
 ## 16. Size Charts Management System
 
-### 16.1 Architecture & Data Model
-- Storefront garments support assigned measurement charts via `size_chart_id` on the `Product` entity.
-- Admin route: [`app/admin/size-charts/page.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/size-charts/page.tsx) with [`SizeChartsManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/SizeChartsManagerClient.tsx).
+### 16.1 Global Size Chart Presets
+- Boutique-wide reusable measurement charts managed at [`app/admin/size-charts/page.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/size-charts/page.tsx) with [`SizeChartsManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/SizeChartsManagerClient.tsx).
+- Allows defining global templates for standardized garment categories (e.g. Standard Sarees, Festive Lehengas, Kurtis, Blouses).
 - Model definition in [`lib/types.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/lib/types.ts):
   ```ts
   export interface SizeChartRow {
@@ -582,15 +682,31 @@ The SEO dashboard ([`SeoManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds
     columns: string[]; // e.g. ['Bust', 'Waist', 'Hips', 'Length']
     rows: SizeChartRow[];
     notes?: string;
+    is_default?: boolean;
     created_at?: string;
     updated_at?: string;
   }
   ```
 
-### 16.2 Storefront Presentation
+### 16.2 Per-Product Custom Size Chart Builder
+- Located directly inside the product creation and editing forms ([`ProductFormClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/ProductFormClient.tsx)).
+- Boutique owners can choose between:
+  1. **Global Preset**: Pick from existing standardized charts via dropdown.
+  2. **Custom Size Chart for this piece**: An interactive, dynamic table builder embedded right into the garment form:
+     - Select measurement unit (`inches` or `cm`).
+     - Add or remove custom measurement columns (e.g., Bust, Waist, Hips, Length, Shoulder, Sleeve).
+     - Add or remove size rows (XS, S, M, L, XL, XXL, Free Size, etc.).
+     - Enter custom measurement values per cell.
+     - Add specialized measuring guidance and garment fit notes.
+- Stored directly on the product document in the `custom_size_chart` JSONB field in Supabase.
+
+### 16.3 Storefront Resolution & Sizing Modal
 - Embedded in [`ProductDetailClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/product/ProductDetailClient.tsx).
-- Automatically renders dynamic column headers and rows matching the assigned size chart (or boutique default fallback).
-- Includes measuring guidance notes and support hotline for custom sizing.
+- **Resolution Priority**:
+  1. `product.custom_size_chart`: If present and contains rows, displays the piece's bespoke measurement table.
+  2. `product.size_chart_id`: If linked to a global preset, loads the corresponding preset chart.
+  3. Default Fallback: Displays the boutique's standard default size guide.
+- Automatically renders dynamic column headers, unit tags, measuring instructions, and a direct WhatsApp hotline link for customers requesting custom tailoring assistance.
 
 ---
 
@@ -660,6 +776,88 @@ The SEO dashboard ([`SeoManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds
 
 ### 20.4 Floating WhatsApp Hotline
 - [`WhatsAppFloatingButton.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/layout/WhatsAppFloatingButton.tsx) provides a 48px pulsing button on all storefront pages linking directly to the store WhatsApp hotline (`6282629144`).
+
+---
+
+## 21. Real-Time Order Alert & Notification System
+
+### 21.1 End-to-End Architectural Pipeline
+1. **Customer Order Initiation**:
+   - Customer reviews their bag on the dedicated checkout page ([`/cart`](http://localhost:3000/cart) / [`CheckoutClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/cart/CheckoutClient.tsx)) and completes Name, Phone, Delivery Address, and optional instructions.
+   - Clicking "Complete Order on WhatsApp" triggers the public server action `saveOrderAction` ([`app/actions/orders.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/actions/orders.ts)).
+2. **Order Validation & Generation**:
+   - Validates that cart items and required customer contact fields are present.
+   - Generates an official human-readable order number: `FFYYMMDD-XXX` (e.g. `FF260920-412`).
+   - Computes immutable snapshots of item titles, SKUs, sizes, quantities, unit prices, individual delivery fees, and line totals.
+3. **Dual-Write Storage**:
+   - **Primary**: Persisted to PostgreSQL `orders` table via Supabase admin service-role client ([`lib/supabase/admin.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/lib/supabase/admin.ts)).
+   - **Local Fallback**: Written to [`data/orders.json`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/data/orders.json) ensuring full data durability during offline or local development.
+4. **WhatsApp Launch with Order Reference**:
+   - The action returns the official `orderNumber` and formatted WhatsApp URL.
+   - The client browser opens WhatsApp pre-populated with the order reference, customer details, and itemized summary, ensuring customer and store owner share identical order codes.
+
+### 21.2 Real-Time Broadcast & Polling Resilience
+- **Supabase Realtime Channel**:
+  - In [`OrderNotificationProvider.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/OrderNotificationProvider.tsx), all active admin sessions subscribe to `postgres_changes` on the `orders` table for `INSERT` events:
+    ```ts
+    const channel = supabase
+      .channel('admin-order-alerts')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'orders' },
+        (payload) => {
+          handleNewOrder(payload.new as Order);
+        }
+      )
+      .subscribe();
+    ```
+- **30-Second Polling Fallback**:
+  - In addition to WebSockets, a background timer polls `getUnreadCountAction` every 30 seconds.
+  - Ensures the owner never misses an order even if mobile devices sleep, WebSockets reconnect, or firewalls block persistent connections.
+
+### 21.3 Web Audio Chime Synthesizer (`lib/utils/order-sound.ts`)
+- **Native Synthesizer**: Uses HTML5 Web Audio API (`AudioContext`) to generate an instant, crystal-clear chime.
+- **Harmonic Chord**: Plays an elegant dual-tone frequency sequence (A5 880Hz → E6 1318.5Hz) with an exponential gain decay curve over 0.6 seconds.
+- **Zero External Assets**: No `.mp3` or `.wav` network downloads, 0ms latency, zero 404 risk, and fully cross-platform.
+
+### 21.4 Floating Order Alert Toast (`components/admin/OrderToast.tsx`)
+- Appears floating in the top-right corner of the admin portal whenever a new order arrives.
+- Displays:
+  - Pulsing pink brand indicator.
+  - Order Reference ID (`#FF260920-412`).
+  - Customer name and item count.
+  - Total order amount.
+  - Quick "View Order" button jumping directly to `/admin/orders`.
+  - Auto-dismisses smoothly after 10 seconds or via close button.
+
+### 21.5 Navigation Badge Counter (`AdminNavClient.tsx`)
+- Server-side pre-rendered initial count in `app/admin/layout.tsx` eliminates client hydration flash.
+- Sidebar and mobile navigation header display an animated pink pill badge showing the count of unread orders.
+- Unread count decrements dynamically whenever an order is marked as read or updated.
+
+### 21.6 Orders Management Dashboard (`/admin/orders`)
+- Component: [`OrdersClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/OrdersClient.tsx).
+- **Status Lifecycle Filter Tabs**:
+  - `All` (total orders count)
+  - `New` (accent badge for unread/action-required orders)
+  - `Confirmed`
+  - `Preparing`
+  - `Ready`
+  - `Shipped`
+  - `Delivered`
+  - `Cancelled`
+- **Instant Search**: Filter by customer name, phone number, or order ID.
+- **Order Details Drawer / Modal**:
+  - Customer name, phone, full delivery address, and delivery instructions.
+  - Complete garment breakdown: image, garment title, SKU, size, quantity, unit price, delivery fee, line total.
+  - Financial totals: Subtotal, total delivery fees, and grand total.
+- **Customer WhatsApp Launcher**:
+  - One-click button to start a WhatsApp conversation with the customer, pre-populated with order details and current status.
+- **Status Changer**:
+  - Dropdown enabling instant status updates (`new` → `confirmed` → `preparing` → `ready` → `shipped` → `delivered` → `cancelled`) with immediate database write and Next.js cache revalidation.
+- **Mark as Read**:
+  - One-click button to acknowledge new orders and clear unread badges.
+
 
 
 

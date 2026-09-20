@@ -1,5 +1,48 @@
 export type ProductType = 'READY_MADE';
 
+// ─── Order System ───────────────────────────────────────────────────────────
+
+export type OrderStatus =
+  | 'new'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled';
+
+export interface OrderItem {
+  product_id: string;
+  product_code: string;
+  product_name: string;
+  product_image?: string;
+  size: string;
+  quantity: number;
+  unit_price: number;
+  delivery_fee: number;
+  line_total: number;
+}
+
+export interface Order {
+  id: string;
+  order_number: string;
+  customer_name: string;
+  customer_phone: string;
+  delivery_address: string;
+  items: OrderItem[];
+  subtotal: number;
+  delivery_fee: number;
+  total: number;
+  notes?: string;
+  status: OrderStatus;
+  is_read: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
+// ─── End Order System ────────────────────────────────────────────────────────
+
+
 export interface ProductVariant {
   id: string;
   product_id: string;

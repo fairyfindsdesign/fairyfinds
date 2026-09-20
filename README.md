@@ -9,22 +9,25 @@ A high-performance luxury fashion e-commerce web application built with Next.js 
 ## ✨ Features
 
 - **Storefront Experience**:
-  - **1920×1080 Editorial Hero Canvas**: Centered typography, narrative storytelling, and transparent-to-solid overlay navigation.
+  - **1920×1080 Editorial Hero Canvas**: Centered typography, narrative storytelling, and transparent-to-solid overlay navigation, with natural aspect-ratio image display and below-image CTA on mobile screens.
   - **Ready-to-Wear Catalog**: Filter by category, collection, size, and in-stock availability.
-  - **Size & Stock Intelligence**: Real-time stock indicators per size with out-of-stock commission prompts.
-  - **Bespoke Tailoring Studio**: 4-step consultation flow for custom bridal, lehenga, and saree commissions.
-  - **Direct WhatsApp Checkout**: Itemized cart messages formatted directly to the boutique hotline.
+  - **Size & Stock Intelligence**: Real-time stock indicators per size with out-of-stock commission prompts and interactive size charts (both global presets and bespoke per-garment measurement tables).
+  - **Bespoke Tailoring Studio & Custom Portfolio**: 4-step consultation flow for custom bridal, lehenga, and saree commissions with video/reels gallery.
+  - **Direct WhatsApp Checkout & Order Reference**: Generates unique order codes (`FFYYMMDD-XXX`), itemizes delivery fees, saves orders to database, and pre-fills WhatsApp hotline chats.
   - **Client Review UGC Marquee**: Editorial portrait cards showing patrons wearing their garments, 5-star ratings, testimonials, and worn garment attribution (touch-scrollable on mobile).
   - **Dark & Light Mode Adaptive Favicon**: Automatically switches between black and white logo icons based on browser/OS theme.
   - **Production-Ready SEO & Schema.org System**: Dynamic `/sitemap.xml`, `/robots.txt` with AI bot permissions, Google Sitelinks schema (`SiteNavigationElement`), dynamic 1200×630 OpenGraph social cards, canonical URLs, and full Schema.org structured data (`ClothingStore`, `Product`, `Offer`, `BreadcrumbList`, `ItemList`).
   - **Agentic Browsing & LLM Discovery**: Native `/llms.txt` and `/llms-full.txt` served from Vercel Edge CDN with CORS & UTF-8 headers for AI agent accessibility.
 
 - **Administrative Portal (`/admin`)**:
+  - **Real-Time Order Alert Center (`/admin/orders`)**: Instant order notifications with native Web Audio chime, floating interactive toast alerts, unread badges in navigation, status lifecycle management (`new` ➔ `confirmed` ➔ `shipped` ➔ `delivered`), and one-click customer WhatsApp launcher.
   - **Edge-Level Security**: Protected via Next.js 16 Edge proxy (`proxy.ts`), authenticated session cookies, and Server Action mutation guards (`assertAdmin()`).
   - **Client Onboarding Handbook**: Complete 7-page visual PDF guide with SVG diagrams available at `/docs/Fairy_Finds_Admin_Portal_Guide.pdf`.
   - **Unique Product ID Auto-Generation**: Standardized collision-free SKU generator (`FF-[CAT]-[NAME]-[NUM]`) with live sync and manual override.
+  - **Dual Size Chart Management**: Manage reusable boutique-wide presets (`/admin/size-charts`) or build custom per-piece measurement tables directly in the product editor.
   - **Category Management**: Dedicated portal to create, edit, search, and delete categories, plus inline `+ New Category` quick-add inside the product form.
   - **Collections CMS**: Create signature edits, manage banners, and toggle homepage feature status.
+  - **Custom Designs Showcase**: Curate bespoke couture portfolio pieces with Instagram video/reels integration (`/admin/custom-designs`).
   - **Homepage Section CMS**: Move Up / Move Down section reordering, visibility toggles, and live text editor.
   - **Apple HEIC Support & Smart Compression**: Client-side conversion of iPhone HEIC/HEIF photos and 80% compression.
   - **Customer Review CMS**: Manage customer UGC outfit photos and testimonials.

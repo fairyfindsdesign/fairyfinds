@@ -22,29 +22,43 @@ import {
   Globe,
   Ruler,
   Sparkles,
+  ShoppingCart,
 } from 'lucide-react';
+import OrderNotificationProvider, { useOrderNotifications } from './OrderNotificationProvider';
+import OrderToastContainer from './OrderToast';
 
 interface AdminNavClientProps {
   children: React.ReactNode;
+  initialUnreadCount?: number;
 }
 
-export default function AdminNavClient({ children }: AdminNavClientProps) {
+export default function AdminNavClient({ children, initialUnreadCount = 0 }: AdminNavClientProps) {
+  const pathname = usePathname();
+  // If on admin login page, bypass the admin navigation layout
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+  return (
+    <OrderNotificationProvider initialUnreadCount={initialUnreadCount}>
+      <AdminNavInner>{children}</AdminNavInner>
+      <OrderToastContainer />
+    </OrderNotificationProvider>
+  );
+}
+
+function AdminNavInner({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const { unreadCount } = useOrderNotifications();
 
   // Close mobile drawer and clear pending on route change
   useEffect(() => {
     setPendingPath(null);
     setMobileMenuOpen(false);
   }, [pathname]);
-
-  // If on admin login page, bypass the admin navigation layout
-  if (pathname === '/admin/login') {
-    return <>{children}</>;
-  }
 
   const handleSignOut = async () => {
     await logoutAdmin();
@@ -62,6 +76,7 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: Store },
+    { name: 'Orders', href: '/admin/orders', icon: ShoppingCart, badge: true },
     { name: 'Products & Stock', href: '/admin/products', icon: Package },
     { name: 'Size Charts', href: '/admin/size-charts', icon: Ruler },
     { name: 'Custom Designs', href: '/admin/custom-designs', icon: Sparkles },
@@ -146,9 +161,10 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
 
       {/* Mobile Horizontal Quick-Scroll Navigation Strip */}
       <div className="md:hidden bg-[#242424] border-b border-neutral-800 px-3 py-2 overflow-x-auto scrollbar-none flex items-center gap-2 shrink-0 z-30">
-        {navigation.map((item) => {
+      {navigation.map((item) => {
           const active = isLinkActive(item.href);
           const Icon = item.icon;
+          const badgeCount = item.badge ? unreadCount : 0;
 
           return (
             <Link
@@ -164,6 +180,11 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{item.name.replace('Store ', '').replace(' & Stock', '')}</span>
+              {badgeCount > 0 && (
+                <span className={`ml-0.5 min-w-[16px] h-4 px-1 text-[10px] font-bold rounded-full flex items-center justify-center ${
+                  active ? 'bg-white text-[#FF55D2]' : 'bg-red-500 text-white'
+                }`}>{badgeCount > 99 ? '99+' : badgeCount}</span>
+              )}
             </Link>
           );
         })}
@@ -201,6 +222,7 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
                 {navigation.map((item) => {
                   const active = isLinkActive(item.href);
                   const Icon = item.icon;
+                  const badgeCount = item.badge ? unreadCount : 0;
 
                   return (
                     <Link
@@ -217,6 +239,11 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
                       <div className="flex items-center gap-3">
                         <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-neutral-500'}`} />
                         <span>{item.name}</span>
+                        {badgeCount > 0 && (
+                          <span className={`min-w-[18px] h-4.5 px-1.5 text-[10px] font-bold rounded-full flex items-center justify-center ${
+                            active ? 'bg-white text-[#FF55D2]' : 'bg-red-500 text-white'
+                          }`}>{badgeCount > 99 ? '99+' : badgeCount}</span>
+                        )}
                       </div>
                       <ChevronRight className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-neutral-300'}`} />
                     </Link>
@@ -258,9 +285,10 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
           <div className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold px-3 py-2">
             Management
           </div>
-          {navigation.map((item) => {
+                {navigation.map((item) => {
             const active = isLinkActive(item.href);
             const Icon = item.icon;
+            const badgeCount = item.badge ? unreadCount : 0;
 
             return (
               <Link
@@ -275,7 +303,12 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
                 }`}
               >
                 <Icon className={`w-4 h-4 ${active ? 'text-[#FF55D2]' : 'text-neutral-500'}`} />
-                <span>{item.name}</span>
+                <span className="flex-1">{item.name}</span>
+                {badgeCount > 0 && (
+                  <span className="min-w-[18px] h-[18px] px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white flex items-center justify-center">
+                    {badgeCount > 99 ? '99+' : badgeCount}
+                  </span>
+                )}
               </Link>
             );
           })}

@@ -402,7 +402,7 @@ export default function Navbar({ initialNavigation: navProp }: NavbarProps) {
             {/* Mobile Footer Info */}
             <div className="pt-6 border-t border-neutral-100">
               <p className="text-xs text-neutral-400 font-light">
-                Fairy Finds Boutique • Artisanal ready-to-wear & custom tailoring
+                Fairy Finds Boutique • Ready-to-wear & custom tailoring
               </p>
             </div>
           </div>

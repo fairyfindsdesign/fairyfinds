@@ -13,7 +13,7 @@ interface CheckoutClientProps {
 }
 
 export default function CheckoutClient({ settings }: CheckoutClientProps) {
-  const { items, removeItem, updateQuantity, clearCart, subtotal, totalCount } = useCart();
+  const { items, removeItem, updateQuantity, clearCart, subtotal, deliveryFee, total, totalCount } = useCart();
 
   const [customer, setCustomer] = useState<CustomerOrderDetails>({
     name: '',
@@ -295,26 +295,28 @@ export default function CheckoutClient({ settings }: CheckoutClientProps) {
               {/* Pricing Totals */}
               <div className="pt-4 mt-6 border-t border-neutral-200 space-y-2">
                 <div className="flex justify-between text-xs text-neutral-600">
-                  <span>Garments Subtotal</span>
+                  <span>Subtotal ({totalCount} items)</span>
                   <span className="font-semibold text-neutral-900">
                     {settings.currency_symbol || 'Rs.'} {subtotal.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-neutral-500">
-                  <span>Courier Delivery</span>
-                  <span>Calculated & confirmed via WhatsApp</span>
+                <div className="flex justify-between text-xs text-neutral-600">
+                  <span>Delivery Fee</span>
+                  <span className="font-semibold text-neutral-900">
+                    {deliveryFee > 0 ? `${settings.currency_symbol || 'Rs.'} ${deliveryFee.toLocaleString()}` : 'Free Delivery'}
+                  </span>
                 </div>
                 <div className="flex justify-between text-base font-sans font-bold text-[#1A1A1A] pt-2 border-t border-neutral-200">
-                  <span>Estimated Total</span>
+                  <span>Total</span>
                   <span className="text-[#1A1A1A]">
-                    {settings.currency_symbol || 'Rs.'} {subtotal.toLocaleString()}
+                    {settings.currency_symbol || 'Rs.'} {total.toLocaleString()}
                   </span>
                 </div>
               </div>
 
               {/* How it works info */}
               <div className="p-3 bg-neutral-50 text-[11px] text-neutral-500 leading-relaxed border border-neutral-200 rounded-xs">
-                <strong>No online payment is taken.</strong> Clicking the button below will open WhatsApp with your itemized order details pre-filled. Our team will promptly confirm stock, sizing, and payment details.
+                <strong>No online payment required now.</strong> Clicking the button below opens WhatsApp with your order details pre-filled. Our boutique team will confirm your order, sizing, and payment options.
               </div>
 
               {/* Submit CTA */}

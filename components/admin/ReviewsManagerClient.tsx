@@ -313,7 +313,7 @@ export default function ReviewsManagerClient({ initialReviews }: ReviewsManagerC
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="e.g. Bridal Silk Edit, Custom Bespoke Client, Verified Purchase"
+                  placeholder="e.g. Bridal Silk Edit, Custom Order Client, Verified Purchase"
                   value={tag}
                   onChange={(e) => setTag(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 bg-neutral-50/50 border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2] focus:bg-white"

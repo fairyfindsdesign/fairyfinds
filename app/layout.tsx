@@ -21,6 +21,7 @@ const manrope = Manrope({
 });
 
 import BackToTop from '@/components/ui/BackToTop';
+import WhatsAppFloatingButton from '@/components/layout/WhatsAppFloatingButton';
 import ScrollReset from '@/components/ui/ScrollReset';
 import DynamicFavicon from '@/components/ui/DynamicFavicon';
 import GSAPProvider from '@/components/animation/GSAPProvider';
@@ -174,6 +175,7 @@ export default async function RootLayout({
             <main className="flex-1 pb-20 lg:pb-0">{children}</main>
           </GSAPProvider>
           <BackToTop />
+          <WhatsAppFloatingButton settings={settings} />
           <Footer settings={settings} collections={collections} />
         </CartProvider>
       </body>

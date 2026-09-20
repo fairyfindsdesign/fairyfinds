@@ -1,7 +1,7 @@
 import React from 'react';
 import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
-import { getProductBySlug, getProducts, getSettings, getCategories } from '@/lib/data/store';
+import { getProductBySlug, getProducts, getSettings, getCategories, getSizeChartById } from '@/lib/data/store';
 import ProductDetailClient from '@/components/product/ProductDetailClient';
 import JsonLd from '@/components/seo/JsonLd';
 import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo/schema';
@@ -148,6 +148,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const productSchema = generateProductSchema(product, settings);
   const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs);
+  const sizeChart = await getSizeChartById(product.size_chart_id || '');
 
   return (
     <>
@@ -157,6 +158,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         product={product}
         relatedProducts={relatedProducts}
         settings={settings}
+        sizeChart={sizeChart}
       />
     </>
   );

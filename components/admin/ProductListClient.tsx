@@ -17,6 +17,7 @@ export default function ProductListClient({ initialProducts }: ProductListClient
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [productToDelete, setProductToDelete] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     setProducts(initialProducts);
@@ -28,23 +29,31 @@ export default function ProductListClient({ initialProducts }: ProductListClient
     (p.category_name && p.category_name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete "${name}" from your catalog?`)) {
-      setDeletingId(id);
-      try {
-        const res = await deleteProductAction(id);
-        if (!res.success) {
-          alert(`Could not delete product: ${res.error}`);
-          return;
-        }
-        setProducts((prev) => prev.filter((p) => p.id !== id));
-        router.refresh();
-      } catch (err: any) {
-        console.error('Failed to delete product:', err);
-        alert('Could not delete product: ' + (err?.message || 'Server action failed'));
-      } finally {
-        setDeletingId(null);
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+    const { id, name } = productToDelete;
+    setDeletingId(id);
+    const previousProducts = [...products];
+
+    // Optimistically remove from state immediately
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+    setProductToDelete(null);
+
+    try {
+      const res = await deleteProductAction(id);
+      if (!res.success) {
+        // Rollback optimistic removal on error
+        setProducts(previousProducts);
+        alert(`Could not delete "${name}": ${res.error}`);
+        return;
       }
+      router.refresh();
+    } catch (err: any) {
+      setProducts(previousProducts);
+      console.error('Failed to delete product:', err);
+      alert(`Could not delete "${name}": ${err?.message || 'Action failed'}`);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -54,10 +63,10 @@ export default function ProductListClient({ initialProducts }: ProductListClient
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl text-[#1A1A1A] font-light">
-            Products & Stock Inventory
+            Products & Stock
           </h1>
           <p className="text-xs text-neutral-500 font-light mt-1">
-            Manage your ready-to-wear pieces, image galleries, and size-specific quantities.
+            Manage your products, photos, and size quantities.
           </p>
         </div>
         <Link
@@ -65,7 +74,7 @@ export default function ProductListClient({ initialProducts }: ProductListClient
           className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-wider font-semibold shadow-xs transition-colors rounded-xs active:scale-95"
         >
           <Plus className="w-4 h-4" />
-          <span>Add New Piece</span>
+          <span>Add New Product</span>
         </Link>
       </div>
 
@@ -163,15 +172,15 @@ export default function ProductListClient({ initialProducts }: ProductListClient
                 <div className="flex items-center gap-2 pt-2.5 border-t border-neutral-100">
                   <Link
                     href={`/admin/products/${prod.id}`}
-                    className="flex-1 min-h-[42px] px-3 bg-[#1A1A1A] hover:bg-[#FF55D2] text-white text-xs font-semibold flex items-center justify-center uppercase tracking-wider rounded-xs transition-colors active:scale-95 shadow-xs"
+                    className="flex-1 min-h-[44px] px-3 bg-[#1A1A1A] hover:bg-[#FF55D2] text-white text-xs font-semibold flex items-center justify-center uppercase tracking-wider rounded-xs transition-colors active:scale-95 shadow-xs"
                   >
-                    Edit Garment
+                    Edit Product
                   </Link>
 
                   <Link
                     href={`/product/${prod.slug}`}
                     target="_blank"
-                    className="w-10 h-10 min-w-[40px] flex items-center justify-center border border-neutral-200 rounded-xs text-neutral-600 hover:bg-neutral-100 active:scale-90 transition-transform"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center border border-neutral-200 rounded-xs text-neutral-600 hover:bg-neutral-100 active:scale-90 transition-transform"
                     title="View live product"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -179,10 +188,11 @@ export default function ProductListClient({ initialProducts }: ProductListClient
 
                   <button
                     type="button"
-                    onClick={() => handleDelete(prod.id, prod.name)}
+                    onClick={() => setProductToDelete({ id: prod.id, name: prod.name })}
                     disabled={deletingId === prod.id}
-                    className="w-10 h-10 min-w-[40px] flex items-center justify-center border border-neutral-200 rounded-xs text-neutral-400 hover:text-red-600 hover:bg-red-50 active:scale-90 transition-transform disabled:opacity-40"
-                    title="Delete piece"
+                    className="min-h-[44px] min-w-[44px] px-3 flex items-center justify-center border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 active:scale-90 transition-transform rounded-xs disabled:opacity-40"
+                    title="Delete product"
+                    aria-label={`Delete ${prod.name}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -197,7 +207,7 @@ export default function ProductListClient({ initialProducts }: ProductListClient
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-neutral-200 bg-neutral-50 text-neutral-500 uppercase tracking-wider">
-                <th className="py-3 px-5">Garment</th>
+                <th className="py-3 px-5">Product</th>
                 <th className="py-3 px-4">Code</th>
                 <th className="py-3 px-4">Category / Collection</th>
                 <th className="py-3 px-4">Price</th>
@@ -297,10 +307,12 @@ export default function ProductListClient({ initialProducts }: ProductListClient
                           <Edit2 className="w-3.5 h-3.5" />
                         </Link>
                         <button
-                          onClick={() => handleDelete(prod.id, prod.name)}
+                          type="button"
+                          onClick={() => setProductToDelete({ id: prod.id, name: prod.name })}
                           disabled={deletingId === prod.id}
                           className="text-neutral-400 hover:text-red-600 p-1 inline-block"
-                          title="Delete piece"
+                          title="Delete product"
+                          aria-label={`Delete ${prod.name}`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -313,6 +325,42 @@ export default function ProductListClient({ initialProducts }: ProductListClient
           </table>
         </div>
       </div>
+
+      {/* Confirmation Modal for Mobile & Desktop Deletion */}
+      {productToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white border border-neutral-200 rounded-xs max-w-sm w-full p-5 sm:p-6 shadow-xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-neutral-900">Delete Product?</h3>
+                <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                  Are you sure you want to remove <strong className="text-neutral-800 font-semibold">"{productToDelete.name}"</strong>? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2 border-t border-neutral-100">
+              <button
+                type="button"
+                onClick={() => setProductToDelete(null)}
+                className="flex-1 min-h-[44px] px-4 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-semibold uppercase tracking-wider rounded-xs transition-colors active:scale-95"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="flex-1 min-h-[44px] px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold uppercase tracking-wider rounded-xs transition-colors active:scale-95 shadow-xs"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

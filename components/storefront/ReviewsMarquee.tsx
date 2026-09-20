@@ -13,9 +13,9 @@ interface ReviewsMarqueeProps {
 }
 
 export default function ReviewsMarquee({
-  heading = 'Cherished by Our Muses',
+  heading = 'Loved by Our Customers',
   subtitle,
-  description = 'Authentic stories and 5-star Google experiences from patrons who celebrate their most treasured moments in our bespoke designs.',
+  description = 'Real stories and 5-star Google reviews from customers celebrating their special moments in our outfits.',
   badge,
 }: ReviewsMarqueeProps) {
   const badgeLabel = badge || subtitle || 'Google Reviews • 4.9 ★ Rating';

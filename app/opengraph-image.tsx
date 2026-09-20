@@ -77,7 +77,7 @@ export default async function Image() {
             marginBottom: '32px',
           }}
         >
-          Artisanal Ready-to-Wear Garments & Bespoke Haute Couture Commissions
+          Ready-to-Wear Fashion & Custom Tailored Outfits
         </div>
 
         {/* Category Pills */}

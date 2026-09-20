@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Product, StoreSettings } from '@/lib/types';
+import { Product, StoreSettings, SizeChart } from '@/lib/types';
 import { useCart } from '@/context/CartContext';
 import {
   ShoppingBag,
@@ -20,6 +20,7 @@ import {
   Copy,
   Zap,
   ArrowRight,
+  Truck,
 } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
 
@@ -27,12 +28,14 @@ interface ProductDetailClientProps {
   product: Product;
   relatedProducts: Product[];
   settings: StoreSettings;
+  sizeChart?: SizeChart | null;
 }
 
 export default function ProductDetailClient({
   product,
   relatedProducts,
   settings,
+  sizeChart,
 }: ProductDetailClientProps) {
   const router = useRouter();
   const { addItem } = useCart();
@@ -219,10 +222,21 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
             </h1>
 
             {/* Price */}
-            <div className="mt-4 flex items-baseline gap-3">
+            <div className="mt-4 flex flex-wrap items-baseline gap-3">
               <span className="text-2xl font-semibold text-[#1A1A1A]">
                 Rs. {product.price.toLocaleString()}
               </span>
+              {typeof product.delivery_fee === 'number' && product.delivery_fee > 0 ? (
+                <span className="inline-flex items-center gap-1 text-xs text-neutral-600 bg-neutral-100 border border-neutral-200 px-2 py-0.5 rounded-xs">
+                  <Truck className="w-3 h-3 text-neutral-500" />
+                  + Rs. {product.delivery_fee} delivery
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-xs font-medium">
+                  <Truck className="w-3 h-3 text-emerald-600" />
+                  Free Delivery
+                </span>
+              )}
               <span className="text-xs text-neutral-400">All local taxes included</span>
             </div>
 
@@ -280,7 +294,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
               <div className="mt-3 text-xs flex items-center gap-2">
                 {isOutOfStock ? (
                   <span className="text-red-500 font-medium">
-                    Selected size is currently out of stock. Contact us for custom making.
+                    Selected size is currently out of stock. Contact us for custom orders.
                   </span>
                 ) : isLimitedStock ? (
                   <span className="text-[#FF55D2] font-medium flex items-center gap-1.5">
@@ -393,43 +407,80 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
                   className="w-full py-3.5 px-6 border border-neutral-300 hover:border-[#1A1A1A] text-[#1A1A1A] text-xs uppercase tracking-widest font-medium flex items-center justify-center gap-2 transition-colors bg-white cursor-pointer rounded-xs"
                 >
                   <MessageCircle className="w-4 h-4 text-emerald-600" />
-                  <span>Ask Stylist via WhatsApp</span>
+                  <span>Chat with Us on WhatsApp</span>
                 </button>
               </div>
             </div>
 
             {/* Size Chart Modal / Drawer */}
             {sizeChartOpen && (
-              <div className="mt-6 p-4 bg-neutral-50 border border-neutral-200 text-xs">
+              <div className="mt-6 p-4 bg-neutral-50 border border-neutral-200 text-xs rounded-xs">
                 <div className="flex justify-between items-center mb-3">
                   <span className="font-semibold uppercase tracking-wider text-neutral-800">
-                    Boutique Standard Sizing (Inches)
+                    {sizeChart?.name || 'Standard Size Guide (Inches)'}
                   </span>
                   <button
                     onClick={() => setSizeChartOpen(false)}
-                    className="text-neutral-400 hover:text-black text-xs"
+                    className="text-neutral-400 hover:text-black text-xs font-medium cursor-pointer"
                   >
                     Close
                   </button>
                 </div>
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-neutral-300 text-neutral-500">
-                      <th className="py-1.5">Size</th>
-                      <th className="py-1.5">Bust</th>
-                      <th className="py-1.5">Waist</th>
-                      <th className="py-1.5">Hip</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-200 text-neutral-700">
-                    <tr><td className="py-1.5 font-medium">S</td><td>34"</td><td>26"</td><td>36"</td></tr>
-                    <tr><td className="py-1.5 font-medium">M</td><td>36"</td><td>28"</td><td>38"</td></tr>
-                    <tr><td className="py-1.5 font-medium">L</td><td>38"</td><td>30"</td><td>40"</td></tr>
-                    <tr><td className="py-1.5 font-medium">XL</td><td>40"</td><td>32"</td><td>42"</td></tr>
-                  </tbody>
-                </table>
+
+                {sizeChart && sizeChart.columns && sizeChart.columns.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[280px]">
+                      <thead>
+                        <tr className="border-b border-neutral-300 text-neutral-600">
+                          {sizeChart.columns.map((col, idx) => (
+                            <th key={idx} className="py-2 px-2 font-semibold capitalize">{col}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-200 text-neutral-700">
+                        {sizeChart.rows.map((row, rIdx) => (
+                          <tr key={rIdx} className={row.size === selectedSize ? 'bg-pink-50/70 font-medium' : ''}>
+                            {sizeChart.columns.map((col, cIdx) => (
+                              <td key={cIdx} className="py-2 px-2">
+                                {cIdx === 0 ? (
+                                  <span className="font-semibold text-neutral-900">{row[col] || row.size}</span>
+                                ) : (
+                                  <span>{row[col] || '-'}</span>
+                                )}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-neutral-300 text-neutral-500">
+                        <th className="py-1.5">Size</th>
+                        <th className="py-1.5">Bust</th>
+                        <th className="py-1.5">Waist</th>
+                        <th className="py-1.5">Hip</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-200 text-neutral-700">
+                      <tr><td className="py-1.5 font-medium">S</td><td>34"</td><td>26"</td><td>36"</td></tr>
+                      <tr><td className="py-1.5 font-medium">M</td><td>36"</td><td>28"</td><td>38"</td></tr>
+                      <tr><td className="py-1.5 font-medium">L</td><td>38"</td><td>30"</td><td>40"</td></tr>
+                      <tr><td className="py-1.5 font-medium">XL</td><td>40"</td><td>32"</td><td>42"</td></tr>
+                    </tbody>
+                  </table>
+                )}
+
+                {(sizeChart?.notes || sizeChart?.description) && (
+                  <p className="mt-2 text-[11px] text-neutral-500 italic">
+                    {sizeChart.notes || sizeChart.description}
+                  </p>
+                )}
+
                 <p className="mt-3 text-[11px] text-neutral-500">
-                  Need a bespoke size? Reach out on WhatsApp or visit our <Link href="/custom" className="text-[#FF55D2] underline">Custom Made</Link> page.
+                  Need a custom size? Reach out on WhatsApp or visit our <Link href="/custom" className="text-[#FF55D2] underline font-medium">Custom Orders</Link> page.
                 </p>
               </div>
             )}
@@ -442,7 +493,7 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
                     onClick={() => setFabricOpen(!fabricOpen)}
                     className="w-full flex justify-between items-center text-xs uppercase tracking-widest font-semibold text-neutral-900"
                   >
-                    <span>Fabric & Artisanal Details</span>
+                    <span>Fabric & Material Details</span>
                     {fabricOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
                   {fabricOpen && (
@@ -479,10 +530,10 @@ Hello Fairy Finds, I would like to inquire about / order this piece. Is this siz
         <div className="mt-24 pt-12 border-t border-neutral-200 gsap-fade-up">
           <div className="text-center mb-10">
             <p className="text-xs uppercase tracking-[0.25em] text-[#FF55D2] font-semibold mb-1">
-              COMPLEMENTARY PIECES
+              YOU MIGHT ALSO LIKE
             </p>
             <h2 className="font-serif text-3xl text-[#1A1A1A] font-light">
-              You May Also Admire
+              Similar Styles
             </h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 gsap-stagger">

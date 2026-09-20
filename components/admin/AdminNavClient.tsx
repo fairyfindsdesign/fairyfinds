@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -20,6 +20,8 @@ import {
   ShieldCheck,
   Tag,
   Globe,
+  Ruler,
+  Sparkles,
 } from 'lucide-react';
 
 interface AdminNavClientProps {
@@ -28,11 +30,14 @@ interface AdminNavClientProps {
 
 export default function AdminNavClient({ children }: AdminNavClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
 
-  // Close mobile drawer on route change
+  // Close mobile drawer and clear pending on route change
   useEffect(() => {
+    setPendingPath(null);
     setMobileMenuOpen(false);
   }, [pathname]);
 
@@ -46,9 +51,20 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
     window.location.href = '/admin/login';
   };
 
+  const handleNavClick = (href: string, e: React.MouseEvent) => {
+    if (href === pathname) return;
+    setPendingPath(href);
+    setMobileMenuOpen(false);
+    startTransition(() => {
+      router.push(href);
+    });
+  };
+
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: Store },
     { name: 'Products & Stock', href: '/admin/products', icon: Package },
+    { name: 'Size Charts', href: '/admin/size-charts', icon: Ruler },
+    { name: 'Custom Designs', href: '/admin/custom-designs', icon: Sparkles },
     { name: 'Categories', href: '/admin/categories', icon: Tag },
     { name: 'Collections', href: '/admin/collections', icon: Layers },
     { name: 'Homepage CMS', href: '/admin/homepage', icon: LayoutTemplate },
@@ -59,10 +75,11 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
   ];
 
   const isLinkActive = (href: string) => {
+    const target = pendingPath || pathname;
     if (href === '/admin') {
-      return pathname === '/admin';
+      return target === '/admin';
     }
-    return pathname?.startsWith(href);
+    return target?.startsWith(href);
   };
 
   return (
@@ -122,6 +139,11 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
         </div>
       </header>
 
+      {/* Top Transition Progress Bar for Instant Click Feedback */}
+      {isPending && (
+        <div className="fixed top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#FF55D2] via-[#FD00B9] to-[#FF55D2] z-[100] animate-pulse" />
+      )}
+
       {/* Mobile Horizontal Quick-Scroll Navigation Strip */}
       <div className="md:hidden bg-[#242424] border-b border-neutral-800 px-3 py-2 overflow-x-auto scrollbar-none flex items-center gap-2 shrink-0 z-30">
         {navigation.map((item) => {
@@ -132,9 +154,11 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
             <Link
               key={item.name}
               href={item.href}
+              prefetch={true}
+              onClick={(e) => handleNavClick(item.href, e)}
               className={`min-h-[36px] px-3.5 py-1.5 text-[11px] uppercase tracking-wider font-semibold whitespace-nowrap rounded-xs flex items-center gap-1.5 transition-all active:scale-95 ${
                 active
-                  ? 'bg-[#FF55D2] text-white shadow-xs'
+                  ? 'bg-[#FF55D2] text-white shadow-xs font-bold'
                   : 'bg-neutral-800 text-neutral-300 hover:text-white'
               }`}
             >
@@ -182,7 +206,8 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
                     <Link
                       key={item.name}
                       href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
+                      prefetch={true}
+                      onClick={(e) => handleNavClick(item.href, e)}
                       className={`min-h-[44px] flex items-center justify-between px-3 py-2 text-xs uppercase tracking-wider font-medium rounded-xs transition-colors ${
                         active
                           ? 'bg-[#FF55D2] text-white font-semibold shadow-xs'
@@ -241,6 +266,8 @@ export default function AdminNavClient({ children }: AdminNavClientProps) {
               <Link
                 key={item.name}
                 href={item.href}
+                prefetch={true}
+                onClick={(e) => handleNavClick(item.href, e)}
                 className={`flex items-center gap-3 px-3 py-2.5 text-xs uppercase tracking-wider font-medium rounded-xs transition-colors ${
                   active
                     ? 'bg-neutral-100 text-[#FF55D2] font-semibold border-l-2 border-[#FF55D2]'

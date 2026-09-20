@@ -15,8 +15,12 @@ import {
   updateServerNavigation,
   updateServerReviews,
   updateServerSeoConfig,
+  saveServerSizeChart,
+  deleteServerSizeChart,
+  saveServerCustomDesign,
+  deleteServerCustomDesign,
 } from '@/lib/data/server-store';
-import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, SeoConfig, StoreSettings } from '@/lib/types';
+import { Category, Collection, CustomerReview, CustomDesign, HomepageSection, NavItem, Product, SeoConfig, SizeChart, StoreSettings } from '@/lib/types';
 import { checkAdminSession } from './auth';
 
 async function assertAdmin() {
@@ -252,6 +256,64 @@ export async function saveReviewsAction(reviews: CustomerReview[]) {
   } catch (err: any) {
     console.error('saveReviewsAction error:', err);
     return { success: false, error: err?.message || 'Database error saving reviews' };
+  }
+}
+
+export async function saveSizeChartAction(chart: Partial<SizeChart>) {
+  try {
+    await assertAdmin();
+    const result = await saveServerSizeChart(chart);
+    purgeStorefrontCache();
+    revalidatePath('/admin/size-charts', 'page');
+    revalidatePath('/admin/products', 'page');
+    return { success: true, chart: result };
+  } catch (err: any) {
+    console.error('saveSizeChartAction error:', err);
+    return { success: false, error: err?.message || 'Error saving size chart' };
+  }
+}
+
+export async function deleteSizeChartAction(id: string) {
+  try {
+    await assertAdmin();
+    await deleteServerSizeChart(id);
+    purgeStorefrontCache();
+    revalidatePath('/admin/size-charts', 'page');
+    revalidatePath('/admin/products', 'page');
+    return { success: true };
+  } catch (err: any) {
+    console.error('deleteSizeChartAction error:', err);
+    return { success: false, error: err?.message || 'Error deleting size chart' };
+  }
+}
+
+export async function saveCustomDesignAction(design: Partial<CustomDesign>) {
+  try {
+    await assertAdmin();
+    const result = await saveServerCustomDesign(design);
+    purgeStorefrontCache();
+    revalidatePath('/admin/custom-designs', 'page');
+    revalidatePath('/custom', 'page');
+    revalidatePath('/', 'page');
+    return { success: true, design: result };
+  } catch (err: any) {
+    console.error('saveCustomDesignAction error:', err);
+    return { success: false, error: err?.message || 'Error saving custom design' };
+  }
+}
+
+export async function deleteCustomDesignAction(id: string) {
+  try {
+    await assertAdmin();
+    await deleteServerCustomDesign(id);
+    purgeStorefrontCache();
+    revalidatePath('/admin/custom-designs', 'page');
+    revalidatePath('/custom', 'page');
+    revalidatePath('/', 'page');
+    return { success: true };
+  } catch (err: any) {
+    console.error('deleteCustomDesignAction error:', err);
+    return { success: false, error: err?.message || 'Error deleting custom design' };
   }
 }
 

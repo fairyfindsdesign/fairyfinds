@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = formatMetaTitle(rawTitle);
   const description =
     contactSeo?.description ||
-    'Contact Fairy Finds Boutique in Neendoor, Kottayam, Kerala. Connect via WhatsApp or email for ready-to-wear orders, bespoke bridal tailoring, and consultations across India.';
+    'Contact Fairy Finds Boutique in Neendoor, Kottayam, Kerala. Connect via WhatsApp or email for ready-to-wear orders, custom bridal tailoring, and orders across India.';
 
   return {
     title: {
@@ -83,10 +83,10 @@ export default async function ContactPage() {
           GET IN TOUCH
         </p>
         <h1 className="font-serif text-4xl sm:text-5xl text-[#1A1A1A] font-light">
-          We Are Delighted to Assist You
+          We Are Here to Help
         </h1>
         <p className="mt-3 text-sm text-neutral-500 font-light leading-relaxed">
-          For styling guidance, size verification, or custom commission inquiries, our boutique team is available on WhatsApp and email.
+          For sizing questions, order help, or custom orders, our team is happy to assist you on WhatsApp and email.
         </p>
       </div>
 
@@ -97,7 +97,7 @@ export default async function ContactPage() {
             <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700">
               <MessageCircle className="w-6 h-6" />
             </div>
-            <h3 className="font-serif text-2xl text-[#1A1A1A] font-medium">WhatsApp Boutique Desk</h3>
+            <h3 className="font-serif text-2xl text-[#1A1A1A] font-medium">WhatsApp Chat</h3>
             <p className="text-xs text-neutral-600 leading-relaxed font-light">
               Immediate replies for order confirmations, custom fittings, and inquiries.
             </p>

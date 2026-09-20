@@ -28,7 +28,7 @@ export async function generateMetadata({ searchParams }: ShopPageProps): Promise
   let title = shopSeo?.title || 'Ready-to-Wear Fashion & Designer Outfits';
   let description =
     shopSeo?.description ||
-    'Browse curated ready-to-wear women\'s clothing, sarees, dresses, and designer outfits from Fairy Finds Boutique in Kottayam, Kerala. All-India shipping.';
+    'Browse ready-to-wear women\'s clothing, sarees, dresses, and designer outfits from Fairy Finds Boutique in Kottayam, Kerala. All-India shipping.';
 
   if (params.category) {
     const cat = categories.find((c) => c.slug.toLowerCase() === params.category?.toLowerCase());
@@ -37,19 +37,19 @@ export async function generateMetadata({ searchParams }: ShopPageProps): Promise
       if (lower.includes('dress')) {
         title = "Women's Dresses";
         description =
-          "Shop ready-to-wear women's dresses from Fairy Finds Boutique in Kottayam, Kerala. Fluid silhouettes and contemporary fashion with delivery across India.";
+          "Shop ready-to-wear women's dresses from Fairy Finds Boutique in Kottayam, Kerala. Graceful styles and modern fashion with delivery across India.";
       } else if (lower.includes('saree')) {
         title = 'Saree Collection';
         description =
-          'Discover artisanal pure silk, georgette, and organza sarees handcrafted for celebrations by Fairy Finds Boutique in Kottayam, Kerala.';
+          'Discover pure silk, georgette, and organza sarees handcrafted for celebrations by Fairy Finds Boutique in Kottayam, Kerala.';
       } else if (lower.includes('kurithi') || lower.includes('kurti')) {
         title = 'Kurithi Collection';
         description =
           'Shop elegant ready-to-wear Kurithis and ethnic designer ensembles from Fairy Finds Boutique in Kottayam, Kerala. Fast shipping across India.';
       } else if (lower.includes('blouse') || lower.includes('top')) {
-        title = 'Artisanal Blouses & Tops';
+        title = 'Designer Blouses & Tops';
         description =
-          'Intricately tailored blouses and structured tops designed to elevate any ensemble from Fairy Finds Boutique, Kottayam.';
+          'Intricately tailored blouses and structured tops designed to elevate any outfit from Fairy Finds Boutique, Kottayam.';
       } else {
         title = cat.name;
         description =

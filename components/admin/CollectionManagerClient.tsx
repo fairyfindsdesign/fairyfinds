@@ -392,7 +392,7 @@ export default function CollectionManagerClient({
               <textarea
                 required
                 rows={3}
-                placeholder="Narrative about the textiles, occasion, craftsmanship, or artisanal drape of this collection..."
+                placeholder="Details about the fabric, style, colors, and occasion for this collection..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full p-3 bg-neutral-50 border border-neutral-300 text-xs rounded-xs focus:bg-white focus:outline-none focus:border-[#FF55D2] resize-y"
@@ -506,7 +506,7 @@ export default function CollectionManagerClient({
             <Layers className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
             <h3 className="font-serif text-lg text-neutral-800">No Collections Configured</h3>
             <p className="text-xs text-neutral-500 mt-1">
-              Click "Create New Collection" to add your first curated editorial edit.
+              Click "Create New Collection" to add your first collection.
             </p>
           </div>
         ) : (

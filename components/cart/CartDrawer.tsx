@@ -13,6 +13,8 @@ export default function CartDrawer() {
     updateQuantity,
     totalCount,
     subtotal,
+    deliveryFee,
+    total,
     isCartDrawerOpen,
     setIsCartDrawerOpen,
   } = useCart();
@@ -64,7 +66,7 @@ export default function CartDrawer() {
                 <ShoppingBag className="w-12 h-12 text-neutral-300 mb-4 stroke-1" />
                 <p className="font-sans text-base font-medium text-neutral-800 mb-1">Your bag is currently empty</p>
                 <p className="text-xs text-neutral-400 mb-6 max-w-xs font-sans">
-                  Explore our curated ready-to-wear pieces and find something exquisite.
+                  Explore our collection and find an outfit you love.
                 </p>
                 <Link
                   href="/shop"
@@ -156,14 +158,20 @@ export default function CartDrawer() {
                     Rs. {subtotal.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm font-sans font-bold text-[#1A1A1A] pt-1 border-t border-neutral-200/60">
-                  <span>Estimated Total</span>
+                <div className="flex justify-between text-xs text-neutral-500">
+                  <span>Delivery Fee</span>
+                  <span className="font-semibold text-neutral-900">
+                    {deliveryFee > 0 ? `Rs. ${deliveryFee.toLocaleString()}` : 'Free'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm font-sans font-bold text-[#1A1A1A] pt-1.5 border-t border-neutral-200/60">
+                  <span>Total</span>
                   <span className="text-[#1A1A1A]">
-                    Rs. {subtotal.toLocaleString()}
+                    Rs. {total.toLocaleString()}
                   </span>
                 </div>
                 <p className="text-[11px] text-neutral-400">
-                  Taxes and personalized delivery options confirmed via WhatsApp.
+                  Confirmed directly with our team on WhatsApp before dispatch.
                 </p>
               </div>
 
@@ -173,7 +181,7 @@ export default function CartDrawer() {
                   onClick={() => setIsCartDrawerOpen(false)}
                   className="w-full py-3.5 px-4 bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white text-xs font-semibold uppercase tracking-widest flex items-center justify-center space-x-2 transition-colors shadow-sm"
                 >
-                  <span>Proceed to WhatsApp Order</span>
+                  <span>Order on WhatsApp</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
 

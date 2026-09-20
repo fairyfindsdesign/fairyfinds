@@ -40,13 +40,13 @@ export default function CustomOrderFlow({ settings }: CustomOrderFlowProps) {
       <div className="text-center max-w-3xl mx-auto mb-16">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#FAF9F6] border border-neutral-200 text-xs uppercase tracking-widest text-[#FF55D2] font-semibold mb-4">
           <Scissors className="w-3.5 h-3.5" />
-          <span>Bespoke Tailoring & Design Consultation</span>
+          <span>Custom Tailoring & Design</span>
         </div>
         <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-[#1A1A1A] font-light leading-tight">
           Custom Made to Your Measurements
         </h1>
         <p className="mt-4 text-sm sm:text-base text-neutral-600 font-light leading-relaxed">
-          From bridal couture drapes to bespoke evening silhouettes, collaborate directly with our boutique designers through WhatsApp to create a made-to-measure piece tailored exclusively to your vision.
+          From wedding outfits to festive dresses, talk directly with us on WhatsApp to create an outfit tailored to your measurements and personal preferences.
         </p>
       </div>
 
@@ -55,23 +55,23 @@ export default function CustomOrderFlow({ settings }: CustomOrderFlowProps) {
         {[
           {
             step: '01',
-            title: 'Design Consultation',
-            desc: 'Fill out your style preferences below and start a direct WhatsApp chat with our boutique designer.',
+            title: 'Share Your Idea',
+            desc: 'Tell us what style you want below and chat directly with us on WhatsApp.',
           },
           {
             step: '02',
             title: 'Measurements & Fabric',
-            desc: 'We assist with measurement guides and curate fabric swatches (pure silks, organzas, velvets).',
+            desc: 'We help you with simple measurements and show you available fabrics (silks, organzas, velvets).',
           },
           {
             step: '03',
-            title: 'Artisanal Tailoring',
-            desc: 'Our master craftsmen cut and hand-embroider your garment to exact specifications.',
+            title: 'Careful Tailoring',
+            desc: 'Our tailors cut and stitch your garment carefully according to your measurements.',
           },
           {
             step: '04',
-            title: 'Fittings & Delivery',
-            desc: 'Delivered securely to your address with complimentary fitting adjustments if desired.',
+            title: 'Doorstep Delivery',
+            desc: 'Delivered safely to your address anywhere in India with prompt updates.',
           },
         ].map((item) => (
           <div key={item.step} className="p-6 bg-[#FAF9F6] border border-neutral-200 flex flex-col justify-between">
@@ -95,7 +95,7 @@ export default function CustomOrderFlow({ settings }: CustomOrderFlowProps) {
         {/* Form Column */}
         <div className="lg:col-span-7 p-8 sm:p-12">
           <h2 className="font-serif text-2xl sm:text-3xl text-[#1A1A1A] font-light mb-2">
-            Start Your Custom Design Inquiry
+            Start Your Custom Order
           </h2>
           <p className="text-xs text-neutral-500 mb-8 font-light">
             Fill in your details below. Clicking "Start on WhatsApp" will format your inquiry into a WhatsApp message where you can send reference photos directly to our stylist.
@@ -156,7 +156,7 @@ export default function CustomOrderFlow({ settings }: CustomOrderFlowProps) {
                   <option value="Custom Evening Gown">Custom Evening Gown</option>
                   <option value="Embroidered Designer Blouse">Embroidered Designer Blouse</option>
                   <option value="Party / Cocktail Dress">Party / Cocktail Dress</option>
-                  <option value="Other Bespoke Creation">Other Bespoke Creation</option>
+                  <option value="Other Custom Outfit">Other Custom Outfit</option>
                 </select>
               </div>
 
@@ -234,10 +234,10 @@ export default function CustomOrderFlow({ settings }: CustomOrderFlowProps) {
             {/* CTA */}
             <button
               type="submit"
-              className="w-full py-4 px-6 bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm"
+              className="w-full py-4 px-6 bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>Start Consultation on WhatsApp</span>
+              <span>Start Order on WhatsApp</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -247,7 +247,7 @@ export default function CustomOrderFlow({ settings }: CustomOrderFlowProps) {
         <div className="lg:col-span-5 relative bg-neutral-100 min-h-[400px]">
           <Image
             src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=1000"
-            alt="Bespoke Tailoring and Bridal Embroidery - Fairy Finds Boutique"
+            alt="Custom Tailoring and Bridal Embroidery - Fairy Finds Boutique"
             fill
             sizes="(max-width: 1024px) 100vw, 500px"
             className="object-cover"

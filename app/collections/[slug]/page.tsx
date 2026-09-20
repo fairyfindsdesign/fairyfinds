@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
   const title = `${collection.name} Collection`;
   const description =
     collection.description ||
-    `Explore the ${collection.name} collection at Fairy Finds Boutique in Kottayam, Kerala. Curated artisanal women\'s fashion with all-India shipping.`;
+    `Explore the ${collection.name} collection at Fairy Finds Boutique in Kottayam, Kerala. Quality women\'s fashion with all-India shipping.`;
 
   const canonicalUrl = `${canonicalBase}/collections/${collection.slug}`;
   const ogTitle = `${collection.name} Collection | Fairy Finds Boutique`;
@@ -124,7 +124,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             <span className="text-[#FF55D2] font-semibold">{collection.name}</span>
           </nav>
           <p className="text-xs uppercase tracking-[0.3em] text-[#FF55D2] font-semibold">
-            CURATED BOUTIQUE EDIT
+            SIGNATURE BOUTIQUE EDIT
           </p>
           <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-light text-white">
             {collection.name}

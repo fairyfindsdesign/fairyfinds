@@ -15,18 +15,55 @@ export interface Product {
   slug: string;
   description: string;
   price: number;
+  delivery_fee?: number;
   product_type: ProductType;
   category_id?: string;
   category_name?: string;
   collection_id?: string;
   collection_name?: string;
   images: string[];
+  size_chart_id?: string;
   size_chart_url?: string;
   fabric?: string;
   care_instructions?: string;
   is_published: boolean;
   is_featured: boolean;
   variants: ProductVariant[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface SizeChartRow {
+  size: string;
+  bust?: string;
+  waist?: string;
+  hips?: string;
+  length?: string;
+  [key: string]: string | undefined;
+}
+
+export interface SizeChart {
+  id: string;
+  name: string;
+  unit: 'Inches' | 'cm';
+  columns: string[];
+  rows: SizeChartRow[];
+  notes?: string;
+  description?: string;
+  is_default?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CustomDesign {
+  id: string;
+  title: string;
+  description: string;
+  images: string[];
+  video_url?: string;
+  category?: string;
+  display_order: number;
+  is_published: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -61,6 +98,7 @@ export type SectionType =
   | 'BANNER'
   | 'CATEGORY_CARDS'
   | 'CUSTOM_MADE'
+  | 'CUSTOM_DESIGNS'
   | 'REVIEWS'
   | 'FEATURED_COLLECTIONS'
   | 'FEATURED_PRODUCTS';
@@ -76,6 +114,8 @@ export interface HeroSlide {
   secondary_button_text?: string;
   secondary_button_link?: string;
   image_url: string;
+  text_color?: 'light' | 'dark';
+  text_position?: 'left' | 'center' | 'right';
 }
 
 export interface HomepageSection {

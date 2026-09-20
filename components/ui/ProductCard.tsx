@@ -119,9 +119,20 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           </div>
         )}
 
-        {/* Price */}
-        <div className="mt-2 text-sm font-semibold text-[#1A1A1A]">
-          Rs. {product.price.toLocaleString()}
+        {/* Price & Delivery */}
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-sm font-semibold text-[#1A1A1A]">
+            Rs. {product.price.toLocaleString()}
+          </span>
+          {typeof product.delivery_fee === 'number' && product.delivery_fee > 0 ? (
+            <span className="text-[10px] text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded-xs">
+              + Rs. {product.delivery_fee} del.
+            </span>
+          ) : (
+            <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-xs font-medium">
+              Free Del.
+            </span>
+          )}
         </div>
       </div>
     </div>

@@ -36,25 +36,25 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   let title = category.name;
   let description =
     category.description ||
-    `Shop the ${category.name} collection at Fairy Finds Boutique in Kottayam, Kerala. Artisanal women\'s fashion with shipping across India.`;
+    `Shop the ${category.name} collection at Fairy Finds Boutique in Kottayam, Kerala. Quality women\'s fashion with shipping across India.`;
 
   const lowerSlug = category.slug.toLowerCase();
   if (lowerSlug.includes('dress')) {
     title = "Women's Dresses";
     description =
-      "Shop ready-to-wear women's dresses from Fairy Finds Boutique in Kottayam, Kerala. Discover fluid silhouettes, floral prints, and contemporary styles with delivery across India.";
+      "Shop ready-to-wear women's dresses from Fairy Finds Boutique in Kottayam, Kerala. Discover floral prints, elegant cuts, and contemporary styles with delivery across India.";
   } else if (lowerSlug.includes('saree')) {
     title = 'Saree Collection';
     description =
-      'Discover artisanal pure silk, georgette, and organza sarees handcrafted for celebrations by Fairy Finds Boutique in Kottayam, Kerala. All-India shipping available.';
+      'Discover pure silk, georgette, and organza sarees handcrafted for celebrations by Fairy Finds Boutique in Kottayam, Kerala. All-India shipping available.';
   } else if (lowerSlug.includes('kurithi') || lowerSlug.includes('kurti')) {
     title = 'Kurithi Collection';
     description =
-      'Explore elegant ready-to-wear Kurithis and ethnic designer outfits from Fairy Finds Boutique in Kottayam, Kerala. Artisanal craftsmanship with delivery across India.';
+      'Explore elegant ready-to-wear Kurithis and ethnic designer outfits from Fairy Finds Boutique in Kottayam, Kerala. Beautiful craftsmanship with delivery across India.';
   } else if (lowerSlug.includes('blouse') || lowerSlug.includes('top')) {
-    title = 'Artisanal Blouses & Tops';
+    title = 'Designer Blouses & Tops';
     description =
-      'Intricately tailored blouses and structured tops designed to elevate any ensemble. Fairy Finds Boutique, Kottayam, Kerala.';
+      'Intricately tailored blouses and structured tops designed to elevate any outfit. Fairy Finds Boutique, Kottayam, Kerala.';
   }
 
   const canonicalUrl = `${canonicalBase}/category/${category.slug}`;
@@ -169,7 +169,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           <div className="py-20 text-center bg-[#FAF9F6] p-8 border border-neutral-200">
             <h2 className="font-serif text-2xl text-[#1A1A1A] mb-2">New Pieces Coming Soon</h2>
             <p className="text-xs text-neutral-500 mb-6">
-              Garments for the {category.name} category are currently being curated and handcrafted.
+              Garments for the {category.name} category are currently being prepared.
             </p>
             <Link
               href="/shop"

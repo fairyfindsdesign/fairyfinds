@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = formatMetaTitle(rawTitle);
   const description =
     aboutSeo?.description ||
-    'Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Artisanal textile craftsmanship, ready-to-wear grace, and bespoke women\'s fashion shipping across India.';
+    'Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Quality craftsmanship, ready-to-wear dresses, and custom tailored outfits shipping across India.';
 
   return {
     title: {
@@ -53,12 +53,12 @@ const faqs = [
   {
     question: 'What types of clothing does Fairy Finds offer?',
     answer:
-      'We offer curated ready-to-wear women\'s fashion—including designer sarees, kurtis, dresses, and festive sets—as well as bespoke custom-tailored outfits and bridal wear.',
+      'We offer ready-to-wear women\'s fashion—including designer sarees, kurtis, dresses, and festive sets—as well as custom-tailored outfits and bridal wear.',
   },
   {
     question: 'Do you offer custom stitching and bridal blouse embroidery in Kottayam?',
     answer:
-      'Yes, we specialize in custom stitching, bespoke bridal trousseaus, hand-embroidered wedding blouses, and made-to-measure tailoring with personalized 1-on-1 consultations via WhatsApp.',
+      'Yes, we specialize in custom stitching, bridal outfits, hand-embroidered wedding blouses, and made-to-measure tailoring with friendly 1-on-1 consultations via WhatsApp.',
   },
   {
     question: 'How can I place an order?',
@@ -88,10 +88,10 @@ export default function AboutPage() {
           ABOUT FAIRY FINDS BOUTIQUE
         </p>
         <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-[#1A1A1A] font-light leading-tight">
-          Artisanal Craftsmanship Meets Modern Femininity
+          Quality Craftsmanship Meets Modern Femininity
         </h1>
         <p className="mt-4 text-sm sm:text-base text-neutral-600 font-light leading-relaxed">
-          Rooted in Neendoor, Kottayam, Fairy Finds Boutique was founded with a singular purpose: to bring graceful, fluid silhouettes, bridal couture, and traditional textile artistry into the contemporary wardrobe.
+          Rooted in Neendoor, Kottayam, Fairy Finds Boutique was founded with a singular purpose: to bring graceful dresses, bridal wear, and traditional textile artistry into the modern wardrobe.
         </p>
       </div>
 
@@ -119,7 +119,7 @@ export default function AboutPage() {
             Based in Kottayam, Kerala, every garment at Fairy Finds Boutique is created in limited runs or crafted as an individualized custom bridal order. We believe true luxury lies in the intention behind each stitch, the drape of pure fabrics, and the comfort of garments tailored to celebrate the feminine form.
           </p>
           <p className="text-sm text-neutral-600 leading-relaxed font-light">
-            Whether choosing from our curated ready-to-wear edit or commissioning a custom bridal ensemble, our clients receive personalized styling attention through direct one-on-one communication on WhatsApp.
+            Whether choosing from our ready-to-wear collection or ordering a custom bridal outfit, our clients receive personalized styling attention through direct one-on-one communication on WhatsApp.
           </p>
         </div>
 
@@ -148,17 +148,17 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="p-8 bg-[#FAF9F6] border border-neutral-200 space-y-3">
             <Sparkles className="w-6 h-6 text-[#FF55D2]" />
-            <h3 className="font-serif text-xl font-medium text-[#1A1A1A]">Curated Ready-to-Wear</h3>
+            <h3 className="font-serif text-xl font-medium text-[#1A1A1A]">Ready-to-Wear Outfits</h3>
             <p className="text-xs text-neutral-600 leading-relaxed font-light">
-              Limited capsule collections produced with refined fabrics, ready for immediate delivery with exact size guidance.
+              Limited collections made with quality fabrics, ready for immediate delivery with exact size guidance.
             </p>
           </div>
 
           <div className="p-8 bg-[#FAF9F6] border border-neutral-200 space-y-3">
             <Scissors className="w-6 h-6 text-[#FF55D2]" />
-            <h3 className="font-serif text-xl font-medium text-[#1A1A1A]">Bespoke Made-to-Measure</h3>
+            <h3 className="font-serif text-xl font-medium text-[#1A1A1A]">Custom Tailoring</h3>
             <p className="text-xs text-neutral-600 leading-relaxed font-light">
-              Collaborative bespoke commissions for bridal wear, wedding sarees, custom blouse embroidery, and festive couture designed to individual measurements.
+              Custom orders for bridal wear, wedding sarees, blouse embroidery, and festive outfits made to your measurements.
             </p>
           </div>
 
@@ -166,7 +166,7 @@ export default function AboutPage() {
             <Heart className="w-6 h-6 text-[#FF55D2]" />
             <h3 className="font-serif text-xl font-medium text-[#1A1A1A]">Personal Boutique Care</h3>
             <p className="text-xs text-neutral-600 leading-relaxed font-light">
-              No automated bots or impersonal checkouts. You converse directly with our stylists to guarantee delight with every order.
+              No automated bots or impersonal checkouts. You converse directly with our team to guarantee delight with every order.
             </p>
           </div>
         </div>
@@ -206,7 +206,7 @@ export default function AboutPage() {
           Experience the Fairy Finds Collection
         </h2>
         <p className="text-xs sm:text-sm text-neutral-300 max-w-xl mx-auto mb-8 font-light">
-          Discover our current ready-to-wear pieces or initiate a bespoke tailoring request today.
+          Discover our current ready-to-wear pieces or start a custom tailoring order today.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link

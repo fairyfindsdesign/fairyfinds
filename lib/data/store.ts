@@ -22,6 +22,13 @@ import {
   updateServerReviews,
   updateServerSeoConfig,
   checkSupabaseSeoStatus,
+  getServerSizeCharts,
+  getServerSizeChartById,
+  saveServerSizeChart,
+  deleteServerSizeChart,
+  getServerCustomDesigns,
+  saveServerCustomDesign,
+  deleteServerCustomDesign,
 } from './server-store';
 
 export async function getNavigation() {
@@ -119,6 +126,34 @@ export async function updateSeoConfig(seoConfig: any) {
 
 export async function checkSeoDbStatus() {
   return checkSupabaseSeoStatus();
+}
+
+export async function getSizeCharts() {
+  return getServerSizeCharts();
+}
+
+export async function getSizeChartById(id: string) {
+  return getServerSizeChartById(id);
+}
+
+export async function saveSizeChart(chart: any) {
+  return saveServerSizeChart(chart);
+}
+
+export async function deleteSizeChart(id: string) {
+  return deleteServerSizeChart(id);
+}
+
+export async function getCustomDesigns() {
+  return getServerCustomDesigns();
+}
+
+export async function saveCustomDesign(design: any) {
+  return saveServerCustomDesign(design);
+}
+
+export async function deleteCustomDesign(id: string) {
+  return deleteServerCustomDesign(id);
 }
 
 

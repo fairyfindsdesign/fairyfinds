@@ -134,7 +134,7 @@ export function generateProductSchema(product: Product, settings?: StoreSettings
     name: product.name,
     description:
       product.description ||
-      `${product.name} from Fairy Finds Boutique. Artisanal women's fashion in Kottayam, Kerala.`,
+      `${product.name} from Fairy Finds Boutique. Women's fashion in Kottayam, Kerala.`,
     image: absoluteImages.length > 0 ? absoluteImages : [`${SITE_URL}/logo.png`],
     sku: product.product_code || undefined,
     mpn: product.product_code || undefined,
@@ -223,13 +223,13 @@ export function generateSiteNavigationSchema(siteUrl = SITE_URL) {
       {
         '@type': 'SiteNavigationElement',
         name: 'Shop Ready-to-Wear',
-        description: 'Explore curated sarees, dresses, and designer outfits ready to ship',
+        description: 'Explore sarees, dresses, and designer outfits ready to ship',
         url: `${siteUrl}/shop`,
       },
       {
         '@type': 'SiteNavigationElement',
         name: 'Custom Made Outfits',
-        description: 'Bespoke bridal wear, custom stitching and tailored consultations',
+        description: 'Custom bridal wear, stitching, and tailoring consultations',
         url: `${siteUrl}/custom`,
       },
       {

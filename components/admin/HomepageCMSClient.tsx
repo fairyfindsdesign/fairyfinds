@@ -111,23 +111,25 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
           : [
               {
                 id: 'slide-1',
-                heading: section.content.heading || 'Artisanal Elegance, Crafted for the Modern Muse',
+                heading: section.content.heading || 'Dress For Your Moment',
                 badge: section.content.badge || 'New Season 2026',
                 description:
                   section.content.description ||
-                  'Discover curated ready-to-wear silhouettes and bespoke couture tailored exclusively to your measurements.',
-                button_text: section.content.button_text || 'Explore Ready-to-Wear',
+                  'Handmade dresses and sarees tailored for everyday elegance and celebrations in Kottayam, Kerala.',
+                button_text: section.content.button_text || 'Shop the Collection',
                 button_link: section.content.button_link || '/shop',
-                secondary_button_text: section.content.secondary_button_text || 'Custom Tailoring',
+                secondary_button_text: section.content.secondary_button_text || 'Custom Orders',
                 secondary_button_link: section.content.secondary_button_link || '/custom',
                 image_url:
                   section.content.image_url ||
                   'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1600',
+                text_color: 'light',
+                text_position: 'left',
               },
             ];
       setHeroSlides(initialSlides);
       setActiveSlideIdx(0);
-      setAutoplayInterval(section.content.autoplay_interval || 5000);
+      setAutoplayInterval(section.content.autoplay_interval || 6000);
     }
   };
 
@@ -141,16 +143,18 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
   const handleAddSlide = () => {
     const newSlide: HeroSlide = {
       id: `slide-${Date.now()}`,
-      heading: 'New Editorial Collection',
-      badge: 'Atelier Spotlight',
+      heading: 'New Season Arrivals',
+      badge: 'Featured',
       description:
-        'Handcrafted luxury silhouettes tailored with pure silk drapes and bespoke finishing.',
-      button_text: 'Explore Collection',
+        'Handmade dresses and sarees tailored for your special occasions.',
+      button_text: 'Shop Collection',
       button_link: '/shop',
-      secondary_button_text: 'Bespoke Order',
+      secondary_button_text: 'Custom Orders',
       secondary_button_link: '/custom',
       image_url:
         'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&q=80&w=1600',
+      text_color: 'light',
+      text_position: 'left',
     };
     const nextList = [...heroSlides, newSlide];
     setHeroSlides(nextList);
@@ -161,15 +165,17 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
     if (!urls || urls.length === 0) return;
     const newSlides: HeroSlide[] = urls.map((url, i) => ({
       id: `slide-${Date.now()}-${i}`,
-      heading: 'New Editorial Collection',
-      badge: 'Atelier Spotlight',
+      heading: 'New Season Arrivals',
+      badge: 'Featured',
       description:
-        'Handcrafted luxury silhouettes tailored with pure silk drapes and bespoke finishing.',
-      button_text: 'Explore Collection',
+        'Handmade dresses and sarees tailored for your special occasions.',
+      button_text: 'Shop Collection',
       button_link: '/shop',
-      secondary_button_text: 'Bespoke Order',
+      secondary_button_text: 'Custom Orders',
       secondary_button_link: '/custom',
       image_url: url,
+      text_color: 'light',
+      text_position: 'left',
     }));
     const nextList = [...heroSlides, ...newSlides];
     setHeroSlides(nextList);
@@ -567,7 +573,7 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                                 type="text"
                                 value={currentHeroSlide.heading || ''}
                                 onChange={(e) => updateCurrentSlide({ heading: e.target.value })}
-                                placeholder="e.g. Artisanal Elegance, Crafted for the Modern Muse"
+                                placeholder="e.g. Dress For Your Moment"
                                 className="w-full px-3 py-2 bg-neutral-50/50 border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2] focus:bg-white font-sans"
                               />
                             </div>
@@ -581,9 +587,41 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                               rows={2}
                               value={currentHeroSlide.description || ''}
                               onChange={(e) => updateCurrentSlide({ description: e.target.value })}
-                              placeholder="Describe the collection, silhouettes, or bespoke atelier service..."
+                              placeholder="Describe the collection, fabric details, or custom order options..."
                               className="w-full px-3 py-2 bg-neutral-50/50 border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2] focus:bg-white resize-none"
                             />
+                          </div>
+
+                          {/* Visual Styling: Text Color & Position */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-neutral-50/80 border border-neutral-200/80 rounded-xs">
+                            <div>
+                              <label className="block text-[10px] uppercase tracking-wider text-neutral-600 font-semibold mb-1">
+                                Text Contrast Color
+                              </label>
+                              <select
+                                value={currentHeroSlide.text_color || 'light'}
+                                onChange={(e) => updateCurrentSlide({ text_color: e.target.value as 'light' | 'dark' })}
+                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2]"
+                              >
+                                <option value="light">Light Text (For Darker / Vibrant Photos)</option>
+                                <option value="dark">Dark Text (For Bright / Light Photos)</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] uppercase tracking-wider text-neutral-600 font-semibold mb-1">
+                                Content Alignment
+                              </label>
+                              <select
+                                value={currentHeroSlide.text_position || 'left'}
+                                onChange={(e) => updateCurrentSlide({ text_position: e.target.value as 'left' | 'center' | 'right' })}
+                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 text-xs rounded-xs focus:outline-none focus:border-[#FF55D2]"
+                              >
+                                <option value="left">Left Aligned</option>
+                                <option value="center">Center Aligned</option>
+                                <option value="right">Right Aligned</option>
+                              </select>
+                            </div>
                           </div>
 
                           {/* CTA Buttons */}

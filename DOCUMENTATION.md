@@ -561,4 +561,105 @@ The SEO dashboard ([`SeoManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds
 6. **SEO & WhatsApp Sharing**: Page-by-page meta titles, WhatsApp preview cards, Google Search Console indexing requests, and Kerala fashion keyword bank.
 7. **Troubleshooting & FAQs**: WhatsApp number formatting, image upload best practices, and emergency support hotline.
 
+---
+
+## 16. Size Charts Management System
+
+### 16.1 Architecture & Data Model
+- Storefront garments support assigned measurement charts via `size_chart_id` on the `Product` entity.
+- Admin route: [`app/admin/size-charts/page.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/size-charts/page.tsx) with [`SizeChartsManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/SizeChartsManagerClient.tsx).
+- Model definition in [`lib/types.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/lib/types.ts):
+  ```ts
+  export interface SizeChartRow {
+    size: string;
+    [key: string]: string;
+  }
+  export interface SizeChart {
+    id: string;
+    name: string;
+    description?: string;
+    unit: 'inches' | 'cm';
+    columns: string[]; // e.g. ['Bust', 'Waist', 'Hips', 'Length']
+    rows: SizeChartRow[];
+    notes?: string;
+    created_at?: string;
+    updated_at?: string;
+  }
+  ```
+
+### 16.2 Storefront Presentation
+- Embedded in [`ProductDetailClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/product/ProductDetailClient.tsx).
+- Automatically renders dynamic column headers and rows matching the assigned size chart (or boutique default fallback).
+- Includes measuring guidance notes and support hotline for custom sizing.
+
+---
+
+## 17. Per-Product Delivery Fee Architecture
+
+### 17.1 Product Field & Admin Editing
+- Each product supports an optional `delivery_fee?: number` (defaults to free delivery / Rs. 0).
+- Admin field in [`ProductFormClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/ProductFormClient.tsx).
+- Visual delivery status badges displayed on [`ProductCard.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/ui/ProductCard.tsx) and [`ProductDetailClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/product/ProductDetailClient.tsx).
+
+### 17.2 Cart Context & WhatsApp Order Itemization
+- [`CartContext.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/context/CartContext.tsx) aggregates itemized subtotal and delivery fees:
+  ```ts
+  const deliveryFee = items.reduce((sum, item) => sum + (item.product.delivery_fee || 0) * item.quantity, 0);
+  const total = subtotal + deliveryFee;
+  ```
+- Subtotal, Delivery Fee, and Final Total clearly rendered in [`CartDrawer.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/cart/CartDrawer.tsx) and [`CheckoutClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/cart/CheckoutClient.tsx).
+- Formatted WhatsApp messages in [`lib/whatsapp.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/lib/whatsapp.ts):
+  ```
+  *Order Summary:*
+  • Subtotal: Rs. 15,000
+  • Delivery Fee: Rs. 350
+  • Total: Rs. 15,350
+  ```
+
+---
+
+## 18. Custom Designs Showcase
+
+### 18.1 Management & Presentation
+- Admin route: [`app/admin/custom-designs/page.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/custom-designs/page.tsx) with [`CustomDesignsManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/CustomDesignsManagerClient.tsx).
+- Storefront component: [`CustomDesignsShowcase.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/custom/CustomDesignsShowcase.tsx).
+- Features photo lightbox zoom, Instagram Reels/video direct link, and one-tap WhatsApp "Inquire About This Design" action.
+- Featured on both the Homepage ([`app/page.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/page.tsx)) and Custom Outfits page ([`app/custom/page.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/custom/page.tsx)).
+
+---
+
+## 19. Hero Carousel Modernization & Motion Framework
+
+### 19.1 Photography-Led Visuals
+- Component: [`HeroCarousel.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/home/HeroCarousel.tsx).
+- Completely eliminated dark full-screen overlay (`bg-black/35`) and heavy gradients to preserve vibrant dress photography.
+- Localized subtle gradient behind text ensures readability without obscuring garment colors.
+- Slide text color toggle (`text_color: 'light' | 'dark'`) and position alignment (`text_position: 'left' | 'center' | 'right'`) configurable via `/admin/homepage`.
+
+### 19.2 Motion Framework Integration
+- Library: `motion@13` (`import { motion, AnimatePresence, useReducedMotion } from 'motion/react'`).
+- Respects accessibility settings via `useReducedMotion()`.
+- Smooth crossfade transitions with gentle scale effects.
+
+---
+
+## 20. Mobile UI & Admin Experience Enhancements
+
+### 20.1 Touch Targets & Deletion Safety
+- Replaced native `window.confirm()` in [`ProductListClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/ProductListClient.tsx) with an accessible modal sheet.
+- Minimum touch target sizing of 44px+ for mobile tap reliability.
+- Immediate optimistic removal from local state upon confirmation.
+
+### 20.2 Price Input Field Fix
+- Fixed price field snapping to `0` when backspacing in [`ProductFormClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/ProductFormClient.tsx) by decoupling internal editing state (`string | number`) from form submission casting.
+
+### 20.3 Admin Navigation Speed
+- Added `prefetch={true}` across all navigation links.
+- Instant visual tab feedback with `useTransition` and `pendingPath` in [`AdminNavClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/AdminNavClient.tsx).
+- Slim top loading progress bar in [`app/admin/loading.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/app/admin/loading.tsx).
+
+### 20.4 Floating WhatsApp Hotline
+- [`WhatsAppFloatingButton.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/layout/WhatsAppFloatingButton.tsx) provides a 48px pulsing button on all storefront pages linking directly to the store WhatsApp hotline (`6282629144`).
+
+
 

@@ -60,13 +60,11 @@ export default function Footer({ settings, collections }: FooterProps) {
               </div>
             </Link>
             <p className="text-neutral-400 text-xs leading-relaxed max-w-sm">
-              A modern, feminine fashion boutique based in Neendoor, Kottayam, Kerala, offering curated ready-to-wear silhouettes alongside bespoke made-to-measure couture.
+              A modern, feminine fashion boutique based in Neendoor, Kottayam, Kerala, offering ready-to-wear dresses and sarees alongside custom tailored outfits made to your measurements.
             </p>
-            {settings?.address && (
-              <p className="text-neutral-500 text-[11px] leading-relaxed max-w-sm pt-1">
-                📍 {settings.address}
-              </p>
-            )}
+            <p className="text-neutral-500 text-[11px] leading-relaxed max-w-sm pt-1">
+              📍 {settings?.address || 'Neendoor, Kottayam, Kerala, India'}
+            </p>
             <div className="flex items-center space-x-4 pt-2">
               <a
                 href={instagramUrl}
@@ -82,7 +80,7 @@ export default function Footer({ settings, collections }: FooterProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full border border-neutral-700 flex items-center justify-center text-neutral-400 hover:text-[#FF55D2] hover:border-[#FF55D2] transition-colors"
-                aria-label="Chat with stylist on WhatsApp"
+                aria-label="Chat with us on WhatsApp"
               >
                 <MessageCircle className="w-4 h-4" />
               </a>
@@ -92,12 +90,12 @@ export default function Footer({ settings, collections }: FooterProps) {
           {/* Quick Shop Links */}
           <div className="space-y-3">
             <h3 className="font-sans text-xs uppercase tracking-widest text-neutral-200 font-semibold">
-              Collections & Shop
+              Shop Collections
             </h3>
             <ul className="space-y-2 text-xs text-neutral-400">
               <li>
                 <Link href="/shop" className="hover:text-[#FF55D2] transition-colors">
-                  All Ready-to-Wear
+                  All Outfits
                 </Link>
               </li>
               {displayCollections.map((col) => (
@@ -109,12 +107,12 @@ export default function Footer({ settings, collections }: FooterProps) {
               ))}
               <li>
                 <Link href="/shop?category=dresses" className="hover:text-[#FF55D2] transition-colors">
-                  Modern Dresses
+                  Dresses
                 </Link>
               </li>
               <li>
                 <Link href="/shop?category=blouses" className="hover:text-[#FF55D2] transition-colors">
-                  Artisanal Blouses
+                  Blouses
                 </Link>
               </li>
             </ul>
@@ -123,28 +121,28 @@ export default function Footer({ settings, collections }: FooterProps) {
           {/* Custom & Client Care */}
           <div className="space-y-3">
             <h3 className="font-sans text-xs uppercase tracking-widest text-neutral-200 font-semibold">
-              Client Care & Bespoke
+              Customer Care
             </h3>
             <ul className="space-y-2 text-xs text-neutral-400">
               <li>
                 <Link href="/custom" className="text-[#FF55D2] hover:underline transition-colors flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#FF55D2]" />
-                  Custom Made Orders
+                  Custom Orders
                 </Link>
               </li>
               <li>
                 <Link href="/about" className="hover:text-[#FF55D2] transition-colors">
-                  Our Story & Heritage
+                  About Us
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="hover:text-[#FF55D2] transition-colors">
-                  Contact & Location
+                  Contact Us
                 </Link>
               </li>
               <li>
                 <Link href="/cart" className="hover:text-[#FF55D2] transition-colors">
-                  View Bag & WhatsApp Order
+                  View Bag & Checkout
                 </Link>
               </li>
               <li>
@@ -163,10 +161,10 @@ export default function Footer({ settings, collections }: FooterProps) {
           <div className="space-y-3 bg-neutral-900/60 p-5 rounded-sm border border-neutral-800">
             <h3 className="font-sans text-xs uppercase tracking-widest text-neutral-200 font-semibold flex items-center gap-2">
               <MessageCircle className="w-4 h-4 text-[#FF55D2]" />
-              Frictionless Ordering
+              Easy WhatsApp Ordering
             </h3>
             <p className="text-xs text-neutral-400 leading-relaxed">
-              We provide personal, boutique-level care. Once you submit your order, your details open directly in WhatsApp with our stylist to confirm sizing, tailoring, and delivery.
+              We provide personal, friendly service. Once you place an order or inquiry, your details open in WhatsApp with our team to confirm your size, fit, and delivery.
             </p>
             {settings?.whatsapp_number && (
               <a
@@ -195,7 +193,7 @@ export default function Footer({ settings, collections }: FooterProps) {
             </Link>
           </div>
           <p className="mt-2 sm:mt-0 flex items-center gap-1">
-            Crafted with <Heart className="w-3 h-3 text-[#FF55D2] fill-[#FF55D2]" /> for fashion connoisseurs
+            Made with <Heart className="w-3 h-3 text-[#FF55D2] fill-[#FF55D2]" /> in Neendoor, Kottayam, Kerala
           </p>
         </div>
       </div>

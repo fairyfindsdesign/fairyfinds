@@ -303,3 +303,34 @@ VALUES
 )
 ON CONFLICT (id) DO NOTHING;
 
+-- 8. Size Charts Table
+CREATE TABLE IF NOT EXISTS size_charts (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  name TEXT NOT NULL,
+  description TEXT,
+  unit TEXT DEFAULT 'inches',
+  columns JSONB DEFAULT '[]'::jsonb,
+  rows JSONB DEFAULT '[]'::jsonb,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 9. Custom Designs Table
+CREATE TABLE IF NOT EXISTS custom_designs (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  title TEXT NOT NULL,
+  description TEXT,
+  images JSONB DEFAULT '[]'::jsonb,
+  video_url TEXT,
+  display_order INT DEFAULT 0,
+  is_published BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Ensure delivery_fee and size_chart_id exist on products table
+ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_fee DECIMAL(10, 2) DEFAULT 0;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS size_chart_id TEXT REFERENCES size_charts(id) ON DELETE SET NULL;
+
+

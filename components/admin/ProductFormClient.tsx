@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Product, Category, Collection, ProductVariant } from '@/lib/types';
+import { Product, Category, Collection, ProductVariant, SizeChart } from '@/lib/types';
 import { saveProductAction, saveCategoryAction } from '@/app/actions/store';
 import { ArrowLeft, Save, Plus, Trash2, CheckCircle2, Sparkles, AlertCircle, Tag, X } from 'lucide-react';
 import ImageUpload from './ImageUpload';
@@ -13,6 +13,7 @@ interface ProductFormClientProps {
   existingProducts?: Product[];
   categories: Category[];
   collections: Collection[];
+  sizeCharts?: SizeChart[];
 }
 
 import { generateUniqueProductCode } from '@/lib/utils/product-code';
@@ -22,6 +23,7 @@ export default function ProductFormClient({
   existingProducts = [],
   categories,
   collections,
+  sizeCharts = [],
 }: ProductFormClientProps) {
   const router = useRouter();
   const isEditing = !!initialProduct;
@@ -153,7 +155,13 @@ export default function ProductFormClient({
       setIsSavingQuickCat(false);
     }
   };
-  const [price, setPrice] = useState(initialProduct?.price || 15000);
+  const [price, setPrice] = useState<string | number>(
+    initialProduct?.price !== undefined ? initialProduct.price : 15000
+  );
+  const [deliveryFee, setDeliveryFee] = useState<string | number>(
+    initialProduct?.delivery_fee !== undefined ? initialProduct.delivery_fee : 0
+  );
+  const [sizeChartId, setSizeChartId] = useState(initialProduct?.size_chart_id || '');
   const [collectionId, setCollectionId] = useState(initialProduct?.collection_id || '');
   const [description, setDescription] = useState(initialProduct?.description || '');
   const [fabric, setFabric] = useState(initialProduct?.fabric || '');
@@ -165,6 +173,29 @@ export default function ProductFormClient({
     }
     return [];
   });
+
+  // Keep state synchronized whenever initialProduct prop changes
+  useEffect(() => {
+    if (initialProduct) {
+      setName(initialProduct.name || '');
+      setProductCode(initialProduct.product_code || '');
+      setPrice(initialProduct.price !== undefined ? initialProduct.price : 15000);
+      setDeliveryFee(initialProduct.delivery_fee !== undefined ? initialProduct.delivery_fee : 0);
+      setSizeChartId(initialProduct.size_chart_id || '');
+      setCategoryId(initialProduct.category_id || categories[0]?.id || '');
+      setCollectionId(initialProduct.collection_id || '');
+      setDescription(initialProduct.description || '');
+      setFabric(initialProduct.fabric || '');
+      setCareInstructions(initialProduct.care_instructions || '');
+      setIsPublished(initialProduct.is_published ?? true);
+      if (initialProduct.images && Array.isArray(initialProduct.images) && initialProduct.images.length > 0) {
+        setImages(initialProduct.images);
+      }
+      if (initialProduct.variants && initialProduct.variants.length > 0) {
+        setVariants(initialProduct.variants);
+      }
+    }
+  }, [initialProduct, categories]);
 
   // Variants management
   const [variants, setVariants] = useState<ProductVariant[]>(
@@ -226,11 +257,16 @@ export default function ProductFormClient({
       sku: v.sku || (productCode ? `${productCode}-${v.size.replace(/\s+/g, '')}` : undefined),
     }));
 
+    const parsedPrice = typeof price === 'string' ? parseFloat(price) || 0 : (price ?? 0);
+    const parsedDeliveryFee = typeof deliveryFee === 'string' ? parseFloat(deliveryFee) || 0 : (deliveryFee ?? 0);
+
     const payload: Partial<Product> = {
       id: initialProduct?.id,
       name,
       product_code: productCode.trim(),
-      price: Number(price),
+      price: parsedPrice,
+      delivery_fee: parsedDeliveryFee,
+      size_chart_id: sizeChartId || undefined,
       category_id: categoryId || undefined,
       category_name: category?.name,
       collection_id: collectionId || undefined,
@@ -278,10 +314,10 @@ export default function ProductFormClient({
           </Link>
           <div className="min-w-0">
             <h1 className="font-serif text-2xl sm:text-3xl text-[#1A1A1A] font-light truncate">
-              {isEditing ? `Edit: ${initialProduct.name}` : 'Add Ready-to-Wear Piece'}
+              {isEditing ? `Edit: ${initialProduct.name}` : 'Add New Product'}
             </h1>
             <p className="text-xs text-neutral-500 font-light mt-0.5">
-              Fill in product information and configure stock per size.
+              Fill in product details, price, delivery, and size stock.
             </p>
           </div>
         </div>
@@ -299,7 +335,7 @@ export default function ProductFormClient({
           ) : (
             <>
               <Save className="w-4 h-4" />
-              <span>{isSaving ? 'Saving...' : 'Save Garment'}</span>
+              <span>{isSaving ? 'Saving...' : 'Save Product'}</span>
             </>
           )}
         </button>
@@ -311,12 +347,12 @@ export default function ProductFormClient({
           {/* Name */}
           <div>
             <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800 mb-1.5">
-              Garment Title *
+              Product Name *
             </label>
             <input
               type="text"
               required
-              placeholder="e.g. Crimson Heritage Kanjivaram Saree"
+              placeholder="e.g. Crimson Silk Saree"
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
@@ -387,19 +423,37 @@ export default function ProductFormClient({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Price */}
           <div>
             <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800 mb-1.5">
-              Price (LKR / Rs.) *
+              Product Price (Rs.) *
             </label>
             <input
               type="number"
               required
               min={0}
+              step="any"
               value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
-              className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
+              onChange={(e) => setPrice(e.target.value)}
+              className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs font-medium"
+              placeholder="e.g. 15000"
+            />
+          </div>
+
+          {/* Delivery Fee */}
+          <div>
+            <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800 mb-1.5">
+              Delivery Fee (Rs.)
+            </label>
+            <input
+              type="number"
+              min={0}
+              step="any"
+              value={deliveryFee}
+              onChange={(e) => setDeliveryFee(e.target.value)}
+              className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs font-medium"
+              placeholder="0 for free delivery"
             />
           </div>
 
@@ -451,13 +505,44 @@ export default function ProductFormClient({
           </div>
         </div>
 
-        {/* Photography & Lookbook Gallery */}
+        {/* Size Chart Selector */}
+        <div className="pt-2 border-t border-neutral-100">
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800">
+              Size Chart Guide
+            </label>
+            <Link
+              href="/admin/size-charts"
+              target="_blank"
+              className="text-[11px] text-[#FF55D2] hover:underline font-semibold"
+            >
+              Manage Size Charts →
+            </Link>
+          </div>
+          <select
+            value={sizeChartId}
+            onChange={(e) => setSizeChartId(e.target.value)}
+            className="w-full sm:max-w-md px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
+          >
+            <option value="">Standard Boutique Size Chart (Default)</option>
+            {sizeCharts.map((chart) => (
+              <option key={chart.id} value={chart.id}>
+                {chart.name} ({chart.unit})
+              </option>
+            ))}
+          </select>
+          <p className="text-[11px] text-neutral-400 mt-1">
+            Customers viewing this product will see this measurement table when they click "Size Guide".
+          </p>
+        </div>
+
+        {/* Product Photos */}
         <ImageUpload
           multiple={true}
           values={images}
           onMultiChange={setImages}
-          label="Piece Photography & Lookbook Gallery"
-          helperText="Upload photos directly from your phone camera or device. Images over 1MB are automatically compressed to 80% size (WebP) before uploading. The first photo acts as the primary catalog cover."
+          label="Product Photos"
+          helperText="Upload photos from your phone or computer. The first photo will be used as the main cover."
           aspectRatio="aspect-[3/4]"
           maxWidth={1600}
           maxHeight={2000}
@@ -470,7 +555,7 @@ export default function ProductFormClient({
           </label>
           <textarea
             rows={3}
-            placeholder="Artisanal details, weave specifications, silhouette characteristics..."
+            placeholder="Describe the fabric, fit, design, and styling tips..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
@@ -481,11 +566,11 @@ export default function ProductFormClient({
           {/* Fabric */}
           <div>
             <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800 mb-1.5">
-              Fabric Composition
+              Fabric
             </label>
             <input
               type="text"
-              placeholder="e.g. 100% Pure Mulberry Silk with Gold Zari"
+              placeholder="e.g. Pure Silk, Georgette, Cotton"
               value={fabric}
               onChange={(e) => setFabric(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"

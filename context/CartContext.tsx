@@ -11,6 +11,8 @@ interface CartContextType {
   clearCart: () => void;
   totalCount: number;
   subtotal: number;
+  deliveryFee: number;
+  total: number;
   isCartDrawerOpen: boolean;
   setIsCartDrawerOpen: (open: boolean) => void;
 }
@@ -109,6 +111,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const totalCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const deliveryFee = items.reduce((acc, item) => acc + (Number(item.product.delivery_fee) || 0) * item.quantity, 0);
+  const total = subtotal + deliveryFee;
 
   return (
     <CartContext.Provider
@@ -120,6 +124,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         totalCount,
         subtotal,
+        deliveryFee,
+        total,
         isCartDrawerOpen,
         setIsCartDrawerOpen,
       }}

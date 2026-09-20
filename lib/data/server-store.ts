@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, SeoConfig, StoreSettings } from '../types';
-import { initialCategories, initialCollections, initialNavigation, initialProducts, initialReviews, initialSections, initialSeoConfig, initialSettings } from './initial-data';
+import { Category, Collection, CustomerReview, CustomDesign, HomepageSection, NavItem, Product, SeoConfig, SizeChart, StoreSettings } from '../types';
+import { initialCategories, initialCollections, initialCustomDesigns, initialNavigation, initialProducts, initialReviews, initialSections, initialSeoConfig, initialSettings, initialSizeCharts } from './initial-data';
 import { getAdminSupabase } from '../supabase/admin';
 import { generateUniqueProductCode } from '../utils/product-code';
 
@@ -16,6 +16,8 @@ interface StoreData {
   products: Product[];
   sections: HomepageSection[];
   reviews: CustomerReview[];
+  size_charts?: SizeChart[];
+  custom_designs?: CustomDesign[];
 }
 
 // Global in-memory cache for serverless environments (Vercel) where the filesystem is read-only
@@ -43,6 +45,8 @@ export function getLocalData(): StoreData {
         products: parsed.products || initialProducts,
         sections: parsed.sections || initialSections,
         reviews: parsed.reviews || initialReviews,
+        size_charts: parsed.size_charts || initialSizeCharts,
+        custom_designs: parsed.custom_designs || initialCustomDesigns,
       };
       globalStore.__fairyStoreData = data;
       return data;
@@ -59,6 +63,8 @@ export function getLocalData(): StoreData {
     products: initialProducts,
     sections: initialSections,
     reviews: initialReviews,
+    size_charts: initialSizeCharts,
+    custom_designs: initialCustomDesigns,
   };
   globalStore.__fairyStoreData = defaultData;
   return defaultData;
@@ -413,6 +419,9 @@ export async function getServerProducts(): Promise<Product[]> {
       if (!error && data) {
         return data.map((item: any) => ({
           ...item,
+          price: Number(item.price) || 0,
+          delivery_fee: Number(item.delivery_fee) || 0,
+          size_chart_id: item.size_chart_id || undefined,
           category_name: item.categories?.name,
           collection_name: item.collections?.name,
           variants: item.variants || [],
@@ -422,7 +431,11 @@ export async function getServerProducts(): Promise<Product[]> {
       console.error('Error fetching products from Supabase:', err);
     }
   }
-  return getLocalData().products;
+  return getLocalData().products.map((p) => ({
+    ...p,
+    price: Number(p.price) || 0,
+    delivery_fee: Number(p.delivery_fee) || 0,
+  }));
 }
 
 export async function getServerProductBySlug(slug: string): Promise<Product | null> {
@@ -449,13 +462,17 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
 
   const cleanSlug = product.slug?.trim() || (product.name ? product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : id);
 
+  const parsedPrice = typeof product.price === 'string' ? parseFloat(product.price) || 0 : (product.price ?? 0);
+  const parsedDeliveryFee = typeof product.delivery_fee === 'string' ? parseFloat(product.delivery_fee) || 0 : (product.delivery_fee ?? 0);
+
   const newProduct: Product = {
     id,
     product_code: assignedCode,
     name: product.name || 'Untitled Product',
     slug: cleanSlug,
     description: product.description || '',
-    price: product.price || 0,
+    price: parsedPrice,
+    delivery_fee: parsedDeliveryFee,
     product_type: 'READY_MADE',
     category_id: product.category_id || undefined,
     category_name: product.category_name,
@@ -464,6 +481,7 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
     images: product.images && product.images.length > 0 ? product.images : [
       'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=1000'
     ],
+    size_chart_id: product.size_chart_id || undefined,
     fabric: product.fabric,
     care_instructions: product.care_instructions,
     is_published: product.is_published ?? true,
@@ -472,7 +490,7 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
       id: v.id || crypto.randomUUID(),
       product_id: id,
       size: v.size,
-      stock_quantity: v.stock_quantity,
+      stock_quantity: Number(v.stock_quantity) || 0,
       sku: v.sku,
     })) || [
       { id: crypto.randomUUID(), product_id: id, size: 'S', stock_quantity: 2 },
@@ -491,7 +509,7 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
-      const { error: prodErr } = await supabase.from('products').upsert({
+      const upsertPayload: Record<string, any> = {
         id: newProduct.id,
         name: newProduct.name,
         slug: newProduct.slug,
@@ -506,7 +524,23 @@ export async function saveServerProduct(product: Partial<Product>): Promise<Prod
         is_published: newProduct.is_published,
         is_featured: newProduct.is_featured,
         updated_at: new Date().toISOString(),
-      });
+      };
+
+      if (newProduct.delivery_fee !== undefined) {
+        upsertPayload.delivery_fee = newProduct.delivery_fee;
+      }
+      if (newProduct.size_chart_id !== undefined) {
+        upsertPayload.size_chart_id = newProduct.size_chart_id;
+      }
+
+      let { error: prodErr } = await supabase.from('products').upsert(upsertPayload);
+      if (prodErr && (prodErr.message?.includes('delivery_fee') || prodErr.message?.includes('size_chart_id'))) {
+        delete upsertPayload.delivery_fee;
+        delete upsertPayload.size_chart_id;
+        const res = await supabase.from('products').upsert(upsertPayload);
+        prodErr = res.error;
+      }
+
       if (prodErr) {
         console.error('Supabase product upsert error:', prodErr);
         throw new Error(`Database error saving product: ${prodErr.message || prodErr.details || 'Check table schema'}`);
@@ -992,4 +1026,110 @@ export async function updateServerReviews(reviews: CustomerReview[]): Promise<Cu
   }
   return data.reviews;
 }
+
+// --- Size Charts ---
+export async function getServerSizeCharts(): Promise<SizeChart[]> {
+  const data = getLocalData();
+  return data.size_charts || initialSizeCharts;
+}
+
+export async function getServerSizeChartById(id: string): Promise<SizeChart | null> {
+  const charts = await getServerSizeCharts();
+  return charts.find((c) => c.id === id) || charts.find((c) => c.is_default) || charts[0] || null;
+}
+
+export async function saveServerSizeChart(chart: Partial<SizeChart>): Promise<SizeChart> {
+  const isNew = !chart.id;
+  const id = chart.id || crypto.randomUUID();
+  const data = getLocalData();
+  if (!data.size_charts) {
+    data.size_charts = [...initialSizeCharts];
+  }
+
+  const newChart: SizeChart = {
+    id,
+    name: chart.name || 'Custom Size Chart',
+    unit: chart.unit || 'Inches',
+    columns: chart.columns && chart.columns.length > 0 ? chart.columns : ['Size', 'Bust', 'Waist', 'Hips'],
+    rows: chart.rows && chart.rows.length > 0 ? chart.rows : [
+      { size: 'S', bust: '34"', waist: '26"', hips: '36"' },
+      { size: 'M', bust: '36"', waist: '28"', hips: '38"' },
+      { size: 'L', bust: '38"', waist: '30"', hips: '40"' },
+      { size: 'XL', bust: '40"', waist: '32"', hips: '42"' },
+    ],
+    notes: chart.notes || '',
+    is_default: Boolean(chart.is_default),
+    created_at: chart.created_at || new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  if (newChart.is_default) {
+    data.size_charts = data.size_charts.map((c) => ({ ...c, is_default: c.id === id }));
+  }
+
+  if (isNew) {
+    data.size_charts.push(newChart);
+  } else {
+    data.size_charts = data.size_charts.map((c) => (c.id === id ? newChart : c));
+  }
+
+  saveLocalData(data);
+  return newChart;
+}
+
+export async function deleteServerSizeChart(id: string): Promise<boolean> {
+  const data = getLocalData();
+  if (!data.size_charts) return true;
+  data.size_charts = data.size_charts.filter((c) => c.id !== id);
+  saveLocalData(data);
+  return true;
+}
+
+// --- Custom Designs ---
+export async function getServerCustomDesigns(): Promise<CustomDesign[]> {
+  const data = getLocalData();
+  return (data.custom_designs || initialCustomDesigns).sort((a, b) => a.display_order - b.display_order);
+}
+
+export async function saveServerCustomDesign(design: Partial<CustomDesign>): Promise<CustomDesign> {
+  const isNew = !design.id;
+  const id = design.id || crypto.randomUUID();
+  const data = getLocalData();
+  if (!data.custom_designs) {
+    data.custom_designs = [...initialCustomDesigns];
+  }
+
+  const newDesign: CustomDesign = {
+    id,
+    title: design.title || 'Completed Custom Design',
+    description: design.description || '',
+    images: design.images && design.images.length > 0 ? design.images : [
+      'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800'
+    ],
+    video_url: design.video_url || '',
+    category: design.category || 'Custom Work',
+    display_order: design.display_order ?? (data.custom_designs.length + 1),
+    is_published: design.is_published ?? true,
+    created_at: design.created_at || new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  if (isNew) {
+    data.custom_designs.push(newDesign);
+  } else {
+    data.custom_designs = data.custom_designs.map((d) => (d.id === id ? newDesign : d));
+  }
+
+  saveLocalData(data);
+  return newDesign;
+}
+
+export async function deleteServerCustomDesign(id: string): Promise<boolean> {
+  const data = getLocalData();
+  if (!data.custom_designs) return true;
+  data.custom_designs = data.custom_designs.filter((d) => d.id !== id);
+  saveLocalData(data);
+  return true;
+}
+
 

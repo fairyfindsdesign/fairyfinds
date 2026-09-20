@@ -25,10 +25,10 @@ export default function NotFound() {
             Error 404 • Page Not Found
           </p>
           <h1 className="font-serif text-3xl sm:text-4xl text-[#1A1A1A] font-light">
-            A Moment Lost in Grace
+            Page Not Found
           </h1>
           <p className="text-xs sm:text-sm text-neutral-600 font-light leading-relaxed">
-            The page you are looking for may have moved, been renamed, or is temporarily unavailable. Let us guide you back to our curated boutique collections.
+            The page you are looking for may have moved, been renamed, or is temporarily unavailable. Let us guide you back to our boutique collections.
           </p>
         </div>
 
@@ -37,7 +37,7 @@ export default function NotFound() {
             href="/shop"
             className="w-full sm:w-auto px-7 py-3 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-widest font-semibold transition-colors flex items-center justify-center gap-2"
           >
-            <span>Explore Collection</span>
+            <span>Shop Outfits</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <Link

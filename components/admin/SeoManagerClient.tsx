@@ -70,7 +70,7 @@ export default function SeoManagerClient({
       ],
     },
     {
-      category: 'Bridal & Bespoke Couture',
+      category: 'Bridal & Custom Tailoring',
       badge: 'High-Ticket',
       keywords: [
         'christian bridal wear kottayam',
@@ -288,7 +288,7 @@ export default function SeoManagerClient({
   const serpTitle = config.global.site_title || 'Fairy Finds Boutique';
   const serpDescription =
     config.global.meta_description ||
-    'Shop ready-to-wear dresses, sarees, and custom-made bespoke fashion from Fairy Finds Boutique in Kottayam, Kerala.';
+    'Shop ready-to-wear dresses, sarees, and custom-made outfits from Fairy Finds Boutique in Kottayam, Kerala.';
   const serpUrl = config.global.canonical_base || 'https://fairyfindsboutique.store';
 
   return (
@@ -667,7 +667,7 @@ export default function SeoManagerClient({
                   value={config.global.meta_description}
                   onChange={(e) => handleGlobalChange('meta_description', e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-[#FF55D2] bg-white text-neutral-900"
-                  placeholder="Shop ready-to-wear designer sarees, bridal lehengas, kurtis, and bespoke couture from Fairy Finds Boutique in Neendoor, Kottayam, Kerala..."
+                  placeholder="Shop ready-to-wear designer sarees, bridal lehengas, kurtis, and custom tailored outfits from Fairy Finds Boutique in Neendoor, Kottayam, Kerala..."
                 />
                 <div className="flex justify-between items-center mt-1 text-[11px] text-neutral-400">
                   <span>Recommended: 140–160 characters for maximum Google visibility</span>
@@ -1013,7 +1013,7 @@ export default function SeoManagerClient({
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-[#FF55D2]" />
                 <h2 className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]">
-                  Curated Kerala & Kottayam High-Intent Keyword Bank
+                  Selected Kerala & Kottayam High-Intent Keyword Bank
                 </h2>
               </div>
               <p className="text-xs text-neutral-500 mt-1">
@@ -1148,7 +1148,7 @@ export default function SeoManagerClient({
                   value={config.social.og_title}
                   onChange={(e) => handleSocialChange('og_title', e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-[#FF55D2] bg-white text-neutral-900"
-                  placeholder="Fairy Finds Boutique | Artisanal Ready-to-Wear & Bespoke Couture"
+                  placeholder="Fairy Finds Boutique | Ready-to-Wear Fashion & Custom Tailoring"
                 />
               </div>
 
@@ -1161,7 +1161,7 @@ export default function SeoManagerClient({
                   value={config.social.og_description}
                   onChange={(e) => handleSocialChange('og_description', e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-[#FF55D2] bg-white text-neutral-900"
-                  placeholder="Curated luxury fashion, artisanal ready-to-wear garments, and bespoke couture commissions from Neendoor, Kottayam, Kerala."
+                  placeholder="Quality fashion, ready-to-wear dresses, and custom tailored outfits from Neendoor, Kottayam, Kerala."
                 />
               </div>
 

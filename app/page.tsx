@@ -1,12 +1,21 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Sparkles, Scissors, ShieldCheck, Heart } from 'lucide-react';
-import { getHomepageSections, getProducts, getCategories, getReviews, getCollections, getSettings } from '@/lib/data/store';
+import { ArrowRight, Sparkles, Scissors } from 'lucide-react';
+import {
+  getHomepageSections,
+  getProducts,
+  getCategories,
+  getReviews,
+  getCollections,
+  getSettings,
+  getCustomDesigns,
+} from '@/lib/data/store';
 import ProductCard from '@/components/ui/ProductCard';
 import ReviewsMarquee from '@/components/storefront/ReviewsMarquee';
 import HeroCarousel from '@/components/home/HeroCarousel';
 import HorizontalScrollSection from '@/components/ui/HorizontalScrollSection';
+import CustomDesignsShowcase from '@/components/custom/CustomDesignsShowcase';
 
 import { Metadata } from 'next';
 import { SITE_URL, DEFAULT_SEO } from '@/lib/seo/constants';
@@ -59,21 +68,23 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0; // Dynamic for CMS updates
+export const revalidate = 0;
 
 export default async function HomePage() {
-  const [sections, products, categories, reviews, collections] = await Promise.all([
+  const [sections, products, categories, reviews, collections, settings, customDesigns] = await Promise.all([
     getHomepageSections(),
     getProducts(),
     getCategories(),
     getReviews(),
     getCollections(),
+    getSettings(),
+    getCustomDesigns(),
   ]);
 
   const visibleSections = sections.filter((s) => s.is_visible);
-  const newArrivals = products.slice(0, 8);
   const featuredCollections = collections.filter((c) => c.is_published && c.show_on_home);
   const featuredProducts = products.filter((p) => p.is_published && p.is_featured);
+  const hasCustomDesignsSection = visibleSections.some((s) => s.section_type === 'CUSTOM_DESIGNS');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -83,31 +94,37 @@ export default async function HomePage() {
             return <HeroCarousel key={section.id} section={section} />;
 
           case 'PRODUCT_COLLECTION':
+            const signatureArrivals = products.slice(0, 4);
             return (
-              <HorizontalScrollSection
-                key={section.id}
-                id="new-arrivals"
-                eyebrow={section.subtitle || 'THE LATEST EDIT'}
-                title={section.content.heading || 'Fresh Additions to the Boutique'}
-                description={
-                  section.content.description ||
-                  'Handcrafted garments in limited batches, available for immediate WhatsApp ordering.'
-                }
-                actionLink={{
-                  href: section.content.button_link || '/shop',
-                  label: section.content.button_text || 'View Entire Collection',
-                }}
-                className="py-16 sm:py-20 bg-white border-b border-neutral-100"
-              >
-                {newArrivals.map((product) => (
-                  <div
-                    key={product.id}
-                    className="w-[250px] sm:w-[280px] lg:w-[310px] shrink-0 snap-start flex flex-col"
-                  >
-                    <ProductCard product={product} />
+              <section key={section.id} id="new-season" className="py-16 sm:py-24 bg-white border-b border-neutral-100 scroll-mt-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  {/* Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 sm:mb-12 gap-4">
+                    <div className="space-y-2">
+                      <span className="text-[11px] uppercase tracking-[0.25em] text-[#FF55D2] font-semibold block">
+                        {section.subtitle || 'NEW SEASON 2026'}
+                      </span>
+                      <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#1A1A1A] font-light">
+                        {section.content.heading || 'Signature Arrivals'}
+                      </h2>
+                    </div>
+                    <Link
+                      href={section.content.button_link || '/shop'}
+                      className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#1A1A1A] hover:text-[#FF55D2] font-semibold transition-colors pb-1 border-b border-neutral-300 hover:border-[#FF55D2] self-start sm:self-auto"
+                    >
+                      <span>{section.content.button_text || 'View All Outfits'}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
                   </div>
-                ))}
-              </HorizontalScrollSection>
+
+                  {/* 3–4 Signature Products with Large Photography & Minimal Text */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                    {signatureArrivals.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                </div>
+              </section>
             );
 
           case 'FEATURED_COLLECTIONS':
@@ -121,13 +138,13 @@ export default async function HomePage() {
                   badge={
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-neutral-200 text-[11px] uppercase tracking-widest text-[#FF55D2] font-semibold">
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>{section.subtitle || 'FEATURED BOUTIQUE EDITS'}</span>
+                      <span>{section.subtitle || 'SIGNATURE COLLECTION'}</span>
                     </div>
                   }
                   title={section.content.heading || 'Featured Collections & Highlights'}
                   description={
                     section.content.description ||
-                    'Hand-curated capsule edits crafted for celebratory grace. Explore our signature ready-to-wear silhouettes and bespoke couture.'
+                    'Handpicked styles for weddings and celebrations. Explore our signature dresses and festive sarees.'
                   }
                   actionLink={{
                     href: '/shop',
@@ -239,8 +256,6 @@ export default async function HomePage() {
 
           case 'FEATURED_PRODUCTS':
             if (featuredProducts.length === 0) return null;
-          case 'FEATURED_PRODUCTS':
-            if (featuredProducts.length === 0) return null;
             return (
               <HorizontalScrollSection
                 key={section.id}
@@ -248,13 +263,13 @@ export default async function HomePage() {
                 badge={
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FAF9F6] border border-neutral-200 text-[11px] uppercase tracking-widest text-[#FF55D2] font-semibold mb-2">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>{section.subtitle || 'HANDPICKED BY DESIGNER'}</span>
+                    <span>{section.subtitle || 'FEATURED FAVORITES'}</span>
                   </div>
                 }
                 title={section.content.heading || 'Featured Boutique Pieces'}
                 description={
                   section.content.description ||
-                  'Curated ready-to-wear highlights and couture masterpieces hand-selected for the season.'
+                  'Signature styles and favorites selected for this season.'
                 }
                 actionLink={{
                   href: section.content.button_link || '/shop',
@@ -278,10 +293,10 @@ export default async function HomePage() {
               <HorizontalScrollSection
                 key={section.id}
                 id="categories"
-                eyebrow={section.subtitle || 'CURATED STYLES'}
+                eyebrow={section.subtitle || 'POPULAR STYLES'}
                 title={section.content.heading || 'Shop by Category'}
                 description={
-                  section.content.description || 'Browse our artisanal garments by style category.'
+                  section.content.description || 'Browse our garments by style category.'
                 }
                 className="py-16 sm:py-20 bg-[#FAF9F6] border-b border-neutral-200"
               >
@@ -323,77 +338,100 @@ export default async function HomePage() {
 
           case 'CUSTOM_MADE':
             return (
-              <section key={section.id} className="py-20 bg-white gsap-fade-up">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="bg-[#FAF9F6] border border-neutral-200 p-8 sm:p-12 lg:p-16 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center gsap-scale-in">
-                    <div className="lg:col-span-7 space-y-6">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-neutral-200 text-[11px] uppercase tracking-widest text-[#FF55D2] font-semibold">
-                        <Scissors className="w-3.5 h-3.5" />
-                        <span>Bespoke Tailoring Studio</span>
+              <React.Fragment key={section.id}>
+                <section className="py-20 bg-white gsap-fade-up">
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="bg-[#FAF9F6] border border-neutral-200 p-8 sm:p-12 lg:p-16 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center gsap-scale-in">
+                      <div className="lg:col-span-7 space-y-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-neutral-200 text-[11px] uppercase tracking-widest text-[#FF55D2] font-semibold">
+                          <Scissors className="w-3.5 h-3.5" />
+                          <span>Custom Tailoring Studio</span>
+                        </div>
+
+                        <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#1A1A1A] font-light leading-tight">
+                          {section.content.heading || 'Bring Your Dream Outfit to Life'}
+                        </h2>
+
+                        <p className="text-sm sm:text-base text-neutral-600 leading-relaxed font-light">
+                          {section.content.description ||
+                            'Looking for a custom cut, specific fabric, or made-to-measure outfit? Work directly with our designer through WhatsApp to create your perfect piece.'}
+                        </p>
+
+                        <div className="space-y-3 pt-2">
+                          <div className="flex items-start gap-3">
+                            <span className="w-5 h-5 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                              1
+                            </span>
+                            <p className="text-xs text-neutral-700">
+                              <strong>Choose Your Style & Fabric:</strong> Sarees, bridal lehengas, evening gowns, or blouses.
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <span className="w-5 h-5 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                              2
+                            </span>
+                            <p className="text-xs text-neutral-700">
+                              <strong>Chat Directly on WhatsApp:</strong> Discuss styling, share reference photos, and agree on fittings.
+                            </p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <span className="w-5 h-5 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                              3
+                            </span>
+                            <p className="text-xs text-neutral-700">
+                              <strong>Handmade & Delivered:</strong> Tailored with care and delivered to your doorstep.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="pt-4">
+                          <Link
+                            href={section.content.button_link || '/custom'}
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-[#1A1A1A] hover:bg-[#FF55D2] text-white text-xs uppercase tracking-widest font-medium transition-colors shadow-sm"
+                          >
+                            <span>{section.content.button_text || 'Start Your Custom Order'}</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        </div>
                       </div>
 
-                      <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#1A1A1A] font-light leading-tight">
-                        {section.content.heading || 'Bring Your Dream Outfit to Life'}
-                      </h2>
-
-                      <p className="text-sm sm:text-base text-neutral-600 leading-relaxed font-light">
-                        {section.content.description ||
-                          'Looking for a custom cut, specific fabric, or made-to-measure bridal drape? Work directly with our designer through WhatsApp to create a one-of-a-kind garment.'}
-                      </p>
-
-                      <div className="space-y-3 pt-2">
-                        <div className="flex items-start gap-3">
-                          <span className="w-5 h-5 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                            1
-                          </span>
-                          <p className="text-xs text-neutral-700">
-                            <strong>Choose Your Style & Fabric:</strong> Sarees, bridal lehengas, bespoke evening gowns, or blouses.
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <span className="w-5 h-5 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                            2
-                          </span>
-                          <p className="text-xs text-neutral-700">
-                            <strong>Chat Directly on WhatsApp:</strong> Discuss styling, share reference photos, and agree on fittings.
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-3">
-                          <span className="w-5 h-5 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                            3
-                          </span>
-                          <p className="text-xs text-neutral-700">
-                            <strong>Handcrafted & Delivered:</strong> Tailored with meticulous care and delivered to your doorstep.
-                          </p>
-                        </div>
+                      <div className="lg:col-span-5 relative aspect-[4/5] overflow-hidden bg-neutral-200 border border-neutral-200 shadow-md">
+                        <Image
+                          src={
+                            section.content.image_url ||
+                            'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=800'
+                          }
+                          alt="Custom Tailoring and Bridal Outfits - Fairy Finds Boutique"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 100vw, 400px"
+                        />
                       </div>
-
-                      <div className="pt-4">
-                        <Link
-                          href={section.content.button_link || '/custom'}
-                          className="inline-flex items-center gap-2 px-8 py-4 bg-[#1A1A1A] hover:bg-[#FF55D2] text-white text-xs uppercase tracking-widest font-medium transition-colors shadow-sm"
-                        >
-                          <span>{section.content.button_text || 'Start Your Custom Order'}</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </div>
-
-                    <div className="lg:col-span-5 relative aspect-[4/5] overflow-hidden bg-neutral-200 border border-neutral-200 shadow-md">
-                      <Image
-                        src={
-                          section.content.image_url ||
-                          'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=800'
-                        }
-                        alt="Bespoke Tailoring and Bridal Couture - Fairy Finds Boutique"
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 1024px) 100vw, 400px"
-                      />
                     </div>
                   </div>
-                </div>
-              </section>
+                </section>
+
+                {/* If there isn't an explicit CUSTOM_DESIGNS section in visibleSections, showcase designs here */}
+                {!hasCustomDesignsSection && customDesigns.length > 0 && (
+                  <CustomDesignsShowcase
+                    designs={customDesigns}
+                    title="Our Custom Work"
+                    subtitle="COMPLETED CREATIONS"
+                    whatsappNumber={settings.whatsapp_number}
+                  />
+                )}
+              </React.Fragment>
+            );
+
+          case 'CUSTOM_DESIGNS':
+            return (
+              <CustomDesignsShowcase
+                key={section.id}
+                designs={customDesigns}
+                title={section.content?.heading || 'Our Custom Work'}
+                subtitle={section.subtitle || 'COMPLETED CREATIONS'}
+                whatsappNumber={settings.whatsapp_number}
+              />
             );
 
           case 'REVIEWS':

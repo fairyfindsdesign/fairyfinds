@@ -52,7 +52,7 @@ const PRESET_CATEGORY_IMAGES = [
     url: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&q=80&w=800',
   },
   {
-    label: 'Artisanal Gold Jewellery',
+    label: 'Handcrafted Gold Jewellery',
     url: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=800',
   },
 ];
@@ -508,7 +508,7 @@ export default function CategoryManagerClient({
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Artisanal silhouettes crafted with bespoke embroidery and timeless cuts..."
+                  placeholder="Handmade styles crafted with quality fabrics and elegant cuts..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-300 text-xs text-[#1A1A1A] focus:bg-white focus:outline-none focus:border-[#FF55D2] rounded-xs"
@@ -524,7 +524,7 @@ export default function CategoryManagerClient({
                 {/* Preset Suggestions */}
                 <div className="mb-2">
                   <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold block mb-1">
-                    Or select a curated atelier texture:
+                    Or select a sample texture:
                   </span>
                   <div className="grid grid-cols-3 gap-1.5">
                     {PRESET_CATEGORY_IMAGES.map((preset, idx) => (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { getProductBySlug, getCategories, getCollections, getProducts } from '@/lib/data/store';
+import { getProductBySlug, getCategories, getCollections, getProducts, getSizeCharts } from '@/lib/data/store';
 import ProductFormClient from '@/components/admin/ProductFormClient';
 
 export const dynamic = 'force-dynamic';
@@ -14,11 +14,12 @@ interface EditProductPageProps {
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
   const { id } = await params;
-  const [product, allProducts, categories, collections] = await Promise.all([
+  const [product, allProducts, categories, collections, sizeCharts] = await Promise.all([
     getProductBySlug(id),
     getProducts(),
     getCategories(),
     getCollections(),
+    getSizeCharts(),
   ]);
 
   if (!product) {
@@ -31,6 +32,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
       existingProducts={allProducts}
       categories={categories}
       collections={collections}
+      sizeCharts={sizeCharts}
     />
   );
 }

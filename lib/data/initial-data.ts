@@ -1,11 +1,11 @@
-import { Category, Collection, CustomerReview, HomepageSection, NavItem, Product, SeoConfig, StoreSettings } from '../types';
+import { Category, Collection, CustomerReview, CustomDesign, HomepageSection, NavItem, Product, SeoConfig, SizeChart, StoreSettings } from '../types';
 
 export const initialCategories: Category[] = [
   {
     id: 'cat-sarees',
     name: 'Sarees',
     slug: 'sarees',
-    description: 'Timeless drape and artisanal craftsmanship in pure silk, georgette, and organza.',
+    description: 'Timeless styles and fine craftsmanship in pure silk, georgette, and organza.',
     image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800',
     display_order: 1,
   },
@@ -13,7 +13,7 @@ export const initialCategories: Category[] = [
     id: 'cat-dresses',
     name: 'Dresses',
     slug: 'dresses',
-    description: 'Modern silhouettes cut from fluid fabrics for effortless, contemporary elegance.',
+    description: 'Modern dresses cut from comfortable fabrics for effortless, everyday elegance.',
     image_url: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=800',
     display_order: 2,
   },
@@ -21,7 +21,7 @@ export const initialCategories: Category[] = [
     id: 'cat-blouses',
     name: 'Tops & Blouses',
     slug: 'blouses',
-    description: 'Intricately tailored blouses and structured tops designed to elevate any ensemble.',
+    description: 'Well-tailored blouses and stylish tops designed to complement your sarees and skirts.',
     image_url: 'https://images.unsplash.com/photo-1564257631407-4deb129f044b?auto=format&fit=crop&q=80&w=800',
     display_order: 3,
   },
@@ -29,7 +29,7 @@ export const initialCategories: Category[] = [
     id: 'cat-other',
     name: 'Other Fashion',
     slug: 'other',
-    description: 'Curated statement pieces and bespoke festive wear for special celebrations.',
+    description: 'Special pieces and custom festive wear for celebrations.',
     image_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=800',
     display_order: 4,
   },
@@ -51,7 +51,7 @@ export const initialCollections: Collection[] = [
     id: 'col-green-lehenga',
     name: 'Green Lehenga',
     slug: 'green-lehenga',
-    description: 'Rich emerald hues, hand-embellished sequins, and voluminous silhouettes crafted for celebrations.',
+    description: 'Rich emerald hues, hand-embellished sequins, and graceful cuts crafted for celebrations.',
     image_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=1200',
     show_on_home: true,
     has_dedicated_page: true,
@@ -262,13 +262,54 @@ export const initialSections: HomepageSection[] = [
     section_type: 'HERO',
     title: 'Hero Section',
     content: {
-      heading: 'Artisanal Elegance, Crafted for the Modern Muse',
+      heading: 'Dress For Your Moment',
       subtitle: 'FAIRY FINDS BOUTIQUE • NEENDOOR, KOTTAYAM',
-      description: 'Fairy Finds Boutique in Neendoor, Kottayam: Discover curated ready-to-wear silhouettes and bespoke bridal couture crafted with celebratory grace.',
-      button_text: 'Explore Collection',
+      description: 'Handmade dresses and sarees tailored for everyday elegance and celebrations in Kottayam, Kerala.',
+      button_text: 'Shop the Collection',
       button_link: '/shop',
       image_url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1600',
       badge: 'New Season 2026',
+      slides: [
+        {
+          id: 'slide-1',
+          heading: 'Dress For Your Moment',
+          badge: 'New Season 2026',
+          description: 'Handmade dresses and sarees tailored for everyday elegance and celebrations.',
+          button_text: 'Shop the Collection',
+          button_link: '/shop',
+          secondary_button_text: 'Custom Orders',
+          secondary_button_link: '/custom',
+          image_url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1600',
+          text_color: 'light',
+          text_position: 'left',
+        },
+        {
+          id: 'slide-2',
+          heading: 'Festive Silks & Sarees',
+          badge: 'Signature Pieces',
+          description: 'Quality fabrics and rich colors designed to make your special moments memorable.',
+          button_text: 'View Sarees',
+          button_link: '/shop?category=sarees',
+          secondary_button_text: 'Chat With Us',
+          secondary_button_link: 'https://wa.me/916282629144',
+          image_url: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1600',
+          text_color: 'light',
+          text_position: 'right',
+        },
+        {
+          id: 'slide-3',
+          heading: 'Made Just For You',
+          badge: 'Custom Fitting',
+          description: 'Share your ideas with us on WhatsApp and get an outfit made to your exact measurements.',
+          button_text: 'Start Custom Order',
+          button_link: '/custom',
+          secondary_button_text: 'View Showcase',
+          secondary_button_link: '/custom#showcase',
+          image_url: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=1600',
+          text_color: 'light',
+          text_position: 'center',
+        },
+      ],
     },
     display_order: 1,
     is_visible: true,
@@ -280,7 +321,7 @@ export const initialSections: HomepageSection[] = [
     subtitle: 'THE LATEST EDIT',
     content: {
       heading: 'Fresh Additions to the Boutique',
-      description: 'Handcrafted garments in limited batches, available for immediate WhatsApp ordering.',
+      description: 'Handmade garments in limited batches, available for immediate WhatsApp ordering.',
       product_limit: 4,
       button_text: 'View All Products',
       button_link: '/shop',
@@ -307,7 +348,7 @@ export const initialSections: HomepageSection[] = [
     id: 'sec-categories',
     section_type: 'CATEGORY_CARDS',
     title: 'Shop by Category',
-    subtitle: 'CURATED PIECES',
+    subtitle: 'POPULAR CHOICES',
     content: {
       heading: 'Explore Our Categories',
       description: 'Select your preferred style from sarees, dresses, blouses, and festive sets.',
@@ -319,10 +360,10 @@ export const initialSections: HomepageSection[] = [
     id: 'sec-custom-made',
     section_type: 'CUSTOM_MADE',
     title: 'Custom-Made Orders',
-    subtitle: 'BESPOKE TAILORING',
+    subtitle: 'CUSTOM ORDERS',
     content: {
       heading: 'Bring Your Dream Outfit to Life',
-      description: 'Looking for a custom cut, specific fabric, or made-to-measure bridal drape? Work directly with our designer through WhatsApp to create a one-of-a-kind garment.',
+      description: 'Looking for a custom cut, specific fabric, or made-to-measure outfit? Work directly with our designer through WhatsApp to create your perfect piece.',
       button_text: 'Start Your Custom Order',
       button_link: '/custom',
       image_url: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=1200',
@@ -337,7 +378,7 @@ export const initialSeoConfig: SeoConfig = {
     site_title: "Fairy Finds Boutique | Luxury Women's Fashion & Bridal Boutique Kottayam, Kerala",
     title_template: '%s | Fairy Finds Boutique',
     meta_description:
-      "Shop ready-to-wear designer sarees, bridal lehengas, kurtis, and bespoke couture from Fairy Finds Boutique in Neendoor, Kottayam, Kerala. Worldwide & All-India express shipping with direct WhatsApp consultations.",
+      "Shop ready-to-wear designer sarees, bridal lehengas, kurtis, and custom tailored outfits from Fairy Finds Boutique in Neendoor, Kottayam, Kerala. Worldwide & All-India express shipping with direct WhatsApp consultations.",
     keywords: [
       'Fairy Finds Boutique',
       'Fairy Finds Kottayam',
@@ -375,9 +416,9 @@ export const initialSeoConfig: SeoConfig = {
   },
   pages: {
     home: {
-      title: "Fairy Finds Boutique | Women's Fashion & Bridal Couture in Neendoor, Kottayam",
+      title: "Fairy Finds Boutique | Women's Fashion & Bridal Boutique in Neendoor, Kottayam",
       description:
-        "Official online storefront for Fairy Finds Boutique located in Neendoor, Kottayam, Kerala. Shop ready-to-wear sarees, dresses, and bespoke bridal tailoring with express shipping.",
+        "Official online storefront for Fairy Finds Boutique located in Neendoor, Kottayam, Kerala. Shop ready-to-wear sarees, dresses, and custom tailoring with express shipping.",
       keywords: [
         'Fairy Finds',
         'Fairy Finds Boutique',
@@ -392,19 +433,19 @@ export const initialSeoConfig: SeoConfig = {
     shop: {
       title: 'Ready-to-Wear Fashion & Designer Outfits | Fairy Finds Boutique',
       description:
-        'Browse curated ready-to-wear sarees, lehengas, dresses, and designer blouses from Fairy Finds Boutique in Kottayam, Kerala. Express delivery across India and worldwide.',
+        'Browse ready-to-wear sarees, lehengas, dresses, and designer blouses from Fairy Finds Boutique in Kottayam, Kerala. Express delivery across India and worldwide.',
       keywords: ['ready to wear sarees kerala', 'dresses kottayam', 'designer kurthis kerala', 'party wear lehenga kottayam'],
     },
     custom: {
-      title: 'Custom-Made Dresses & Bespoke Bridal Wear | Fairy Finds Boutique',
+      title: 'Custom-Made Dresses & Tailoring | Fairy Finds Boutique',
       description:
-        'Commission custom-made bridal sarees, lehengas, and bespoke tailored outfits with Fairy Finds Boutique in Kottayam, Kerala. 1-on-1 WhatsApp consultations with worldwide delivery.',
-      keywords: ['custom stitching kottayam', 'bridal blouse embroidery kottayam', 'bespoke bridal couture kerala', 'custom gowns kottayam'],
+        'Order custom-made bridal sarees, lehengas, and tailored outfits with Fairy Finds Boutique in Kottayam, Kerala. 1-on-1 WhatsApp consultations with delivery across India.',
+      keywords: ['custom stitching kottayam', 'bridal blouse embroidery kottayam', 'bridal couture kerala', 'custom gowns kottayam'],
     },
     about: {
       title: 'Our Story | Fairy Finds Boutique Kottayam',
       description:
-        "Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Artisanal textile craftsmanship, ready-to-wear grace, and bespoke women's fashion shipping across India.",
+        "Discover the story of Fairy Finds Boutique based in Neendoor, Kottayam, Kerala. Quality craftsmanship, ready-to-wear dresses, and custom women's fashion shipping across India.",
       keywords: ['about fairy finds boutique', 'kottayam designer boutique', 'kerala boutique heritage'],
     },
     contact: {
@@ -415,9 +456,9 @@ export const initialSeoConfig: SeoConfig = {
     },
   },
   social: {
-    og_title: 'Fairy Finds Boutique | Artisanal Ready-to-Wear & Bespoke Couture',
+    og_title: 'Fairy Finds Boutique | Ready-to-Wear Fashion & Custom Tailoring',
     og_description:
-      'Curated luxury fashion, artisanal ready-to-wear garments, and bespoke couture commissions from Neendoor, Kottayam, Kerala.',
+      'Quality fashion, ready-to-wear dresses, and custom tailored outfits from Neendoor, Kottayam, Kerala.',
     og_image: '/og-image.jpg',
     twitter_card: 'summary_large_image',
   },
@@ -460,25 +501,25 @@ export const initialNavigation: NavItem[] = [
         id: 'feat-all',
         label: 'All Ready-to-Wear',
         href: '/shop',
-        description: 'Browse our complete capsule collection of artisanal designs',
+        description: 'Browse our complete collection of ready-to-wear designs',
       },
       {
         id: 'feat-red-saree',
         label: 'Red Saree Collection',
         href: '/collections/red-saree',
-        description: 'Artisanal crimson silk drapes with pure gold zari accents',
+        description: 'Crimson silk sarees with pure gold zari accents',
       },
       {
         id: 'feat-green-lehenga',
         label: 'Green Lehenga Edit',
         href: '/collections/green-lehenga',
-        description: 'Regal micro-velvet & celebratory festive silhouettes',
+        description: 'Festive green lehengas designed for celebrations',
       },
       {
         id: 'feat-custom',
         label: 'Custom Tailoring',
         href: '/custom',
-        description: 'One-of-a-kind bespoke commissions made to your measurements',
+        description: 'Outfits made to your exact measurements and style preferences',
       },
     ],
   },
@@ -518,9 +559,9 @@ export const initialReviews: CustomerReview[] = [
     avatar_url: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=800',
     product_name: 'Emerald Velvet Lehenga',
     rating: 5,
-    comment: 'Ordered custom sizing for the emerald velvet lehenga. Working directly with the stylist on WhatsApp was effortless — the blouse fit like haute couture without needing any alterations!',
+    comment: 'Ordered custom sizing for the emerald velvet lehenga. Working directly with the team on WhatsApp was effortless — the blouse fit perfectly without needing any alterations!',
     location: 'Kochi, Kerala',
-    tag: 'Custom Bespoke Client',
+    tag: 'Custom Order Client',
     is_visible: true,
     display_order: 2,
     created_at: '2026-08-20T14:30:00Z',
@@ -532,7 +573,7 @@ export const initialReviews: CustomerReview[] = [
     avatar_url: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=800',
     product_name: 'Blush Tiered Midi Dress',
     rating: 5,
-    comment: 'The blush georgette tiered dress is pure poetry. Breathable fabric, exquisite stitching, and delivered in sustainable boutique packaging. I received so many compliments.',
+    comment: 'The blush georgette tiered dress is beautiful. Breathable fabric, neat stitching, and delivered in lovely boutique packaging. I received so many compliments.',
     location: 'Bengaluru, India',
     tag: 'Verified Purchase',
     is_visible: true,
@@ -566,6 +607,77 @@ export const initialReviews: CustomerReview[] = [
     is_visible: true,
     display_order: 5,
     created_at: '2026-09-03T11:45:00Z',
+  },
+];
+
+export const initialSizeCharts: SizeChart[] = [
+  {
+    id: 'sc-default',
+    name: 'Boutique Standard Sizing',
+    unit: 'Inches',
+    columns: ['Size', 'Bust', 'Waist', 'Hips'],
+    rows: [
+      { size: 'S', bust: '34"', waist: '26"', hips: '36"' },
+      { size: 'M', bust: '36"', waist: '28"', hips: '38"' },
+      { size: 'L', bust: '38"', waist: '30"', hips: '40"' },
+      { size: 'XL', bust: '40"', waist: '32"', hips: '42"' },
+    ],
+    notes: 'Need a custom fit? Contact us on WhatsApp for made-to-measure sizing.',
+    is_default: true,
+  },
+  {
+    id: 'sc-dresses',
+    name: 'Dresses & Gowns',
+    unit: 'Inches',
+    columns: ['Size', 'Bust', 'Waist', 'Hips', 'Length'],
+    rows: [
+      { size: 'S', bust: '34"', waist: '26"', hips: '36"', length: '48"' },
+      { size: 'M', bust: '36"', waist: '28"', hips: '38"', length: '49"' },
+      { size: 'L', bust: '38"', waist: '30"', hips: '40"', length: '50"' },
+      { size: 'XL', bust: '40"', waist: '32"', hips: '42"', length: '50"' },
+    ],
+    notes: 'Dress lengths are measured from the high shoulder point to the hem.',
+    is_default: false,
+  },
+];
+
+export const initialCustomDesigns: CustomDesign[] = [
+  {
+    id: 'cd-01',
+    title: 'Crimson Silk Bridal Set',
+    description: 'A completed wedding outfit created with pure silk, hand embroidery, and tailored to the bride\'s exact measurements.',
+    images: [
+      'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=800',
+    ],
+    video_url: 'https://instagram.com/fairyfinds.boutique',
+    category: 'Bridal',
+    display_order: 1,
+    is_published: true,
+  },
+  {
+    id: 'cd-02',
+    title: 'Emerald Evening Gown',
+    description: 'Custom layered gown in bottle green georgette with delicate hand-stitched detailing on the neckline.',
+    images: [
+      'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=800',
+    ],
+    video_url: 'https://instagram.com/fairyfinds.boutique',
+    category: 'Evening Wear',
+    display_order: 2,
+    is_published: true,
+  },
+  {
+    id: 'cd-03',
+    title: 'Pastel Floral Festive Outfit',
+    description: 'Made for an intimate engagement ceremony with soft organza dupatta and matching custom blouse.',
+    images: [
+      'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=800',
+    ],
+    video_url: 'https://instagram.com/fairyfinds.boutique',
+    category: 'Festive',
+    display_order: 3,
+    is_published: true,
   },
 ];
 

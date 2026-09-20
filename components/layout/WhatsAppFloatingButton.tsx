@@ -20,7 +20,7 @@ export default function WhatsAppFloatingButton({ settings }: WhatsAppFloatingBut
   const href = `https://wa.me/${finalNumber}?text=${encodeURIComponent(defaultMessage)}`;
 
   return (
-    <div className="fixed bottom-22 sm:bottom-6 left-4 sm:left-6 z-40 flex items-center gap-2 group select-none">
+    <div className="fixed bottom-22 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-row-reverse items-center gap-2 group select-none">
       <a
         href={href}
         target="_blank"
@@ -43,7 +43,7 @@ export default function WhatsAppFloatingButton({ settings }: WhatsAppFloatingBut
         className={`hidden sm:inline-block px-3 py-1.5 bg-[#1A1A1A] text-white text-xs font-medium rounded-full shadow-md tracking-wide transition-all duration-300 pointer-events-none ${
           isHovered
             ? 'opacity-100 translate-x-0'
-            : 'opacity-0 -translate-x-2'
+            : 'opacity-0 translate-x-2'
         }`}
       >
         Chat with Us

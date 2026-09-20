@@ -21,15 +21,26 @@ interface StoreData {
 }
 
 // Global in-memory cache for serverless environments (Vercel) where the filesystem is read-only
-const globalStore = globalThis as unknown as { __fairyStoreData?: StoreData };
+const globalStore = globalThis as unknown as { __fairyStoreData?: StoreData; __fairyStoreMtime?: number };
+
+export function clearStoreMemoryCache(): void {
+  globalStore.__fairyStoreData = undefined;
+  globalStore.__fairyStoreMtime = 0;
+}
 
 export function getLocalData(): StoreData {
-  if (globalStore.__fairyStoreData) {
-    return globalStore.__fairyStoreData;
-  }
-
   try {
     if (fs.existsSync(DATA_FILE)) {
+      const stat = fs.statSync(DATA_FILE);
+      // Return memory cache only if data exists AND file on disk hasn't been modified since
+      if (
+        globalStore.__fairyStoreData &&
+        globalStore.__fairyStoreMtime &&
+        stat.mtimeMs <= globalStore.__fairyStoreMtime
+      ) {
+        return globalStore.__fairyStoreData;
+      }
+
       const content = fs.readFileSync(DATA_FILE, 'utf-8');
       const parsed = JSON.parse(content);
       const parsedSettings = parsed.settings || initialSettings;
@@ -49,10 +60,15 @@ export function getLocalData(): StoreData {
         custom_designs: parsed.custom_designs || initialCustomDesigns,
       };
       globalStore.__fairyStoreData = data;
+      globalStore.__fairyStoreMtime = stat.mtimeMs;
       return data;
     }
   } catch (err) {
     console.error('Error reading data/store.json:', err);
+  }
+
+  if (globalStore.__fairyStoreData) {
+    return globalStore.__fairyStoreData;
   }
 
   const defaultData: StoreData = {
@@ -67,6 +83,7 @@ export function getLocalData(): StoreData {
     custom_designs: initialCustomDesigns,
   };
   globalStore.__fairyStoreData = defaultData;
+  globalStore.__fairyStoreMtime = Date.now();
   return defaultData;
 }
 
@@ -81,8 +98,11 @@ export function saveLocalData(data: StoreData): void {
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    const stat = fs.statSync(DATA_FILE);
+    globalStore.__fairyStoreMtime = stat.mtimeMs;
   } catch (err) {
     // Read-only filesystem is normal on Vercel lambdas
+    globalStore.__fairyStoreMtime = Date.now();
   }
 }
 

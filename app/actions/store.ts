@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import {
+  clearStoreMemoryCache,
   updateServerSettings,
   saveServerProduct,
   deleteServerProduct,
@@ -36,6 +37,7 @@ async function assertAdmin() {
  */
 function purgeStorefrontCache() {
   try {
+    clearStoreMemoryCache();
     revalidatePath('/', 'layout');
     revalidatePath('/', 'page');
     revalidatePath('/shop', 'page');

@@ -66,7 +66,13 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
 
     const orderedIds = newSections.map((s) => s.id);
     setSections(newSections);
-    await reorderSectionsAction(orderedIds);
+    const res = await reorderSectionsAction(orderedIds);
+    if (!res.success) {
+      alert(`Could not reorder sections: ${res.error}`);
+      setSections(initialSections);
+    } else if (res.sections) {
+      setSections(res.sections);
+    }
     router.refresh();
   };
 
@@ -79,7 +85,13 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
 
     const orderedIds = newSections.map((s) => s.id);
     setSections(newSections);
-    await reorderSectionsAction(orderedIds);
+    const res = await reorderSectionsAction(orderedIds);
+    if (!res.success) {
+      alert(`Could not reorder sections: ${res.error}`);
+      setSections(initialSections);
+    } else if (res.sections) {
+      setSections(res.sections);
+    }
     router.refresh();
   };
 
@@ -87,6 +99,8 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
     const res = await toggleSectionVisibilityAction(id, !currentVisibility);
     if (res.success && res.sections) {
       setSections(res.sections);
+    } else {
+      alert(`Could not toggle visibility: ${res.error}`);
     }
     router.refresh();
   };
@@ -224,13 +238,16 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
       const res = await updateSectionContentAction(section.id, payload);
       if (res.success && res.sections) {
         setSections(res.sections);
+        router.refresh();
+        setEditingId(null);
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 2500);
+      } else {
+        alert(`Could not save section: ${res.error || 'Database error'}`);
       }
-      router.refresh();
-      setEditingId(null);
-      setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 2500);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save homepage section:', err);
+      alert(`Could not save section: ${err?.message || 'Network error'}`);
     } finally {
       setIsSaving(false);
     }

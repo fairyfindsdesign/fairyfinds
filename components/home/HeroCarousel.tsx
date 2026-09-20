@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { HomepageSection, HeroSlide } from '@/lib/types';
-import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { ArrowRight, Pause, Play } from 'lucide-react';
 
 interface HeroCarouselProps {
   section: HomepageSection;
@@ -118,11 +118,13 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
 
   const currentSlide = slides[activeIndex];
   const position = currentSlide.text_position || 'left';
+  // If text_color is 'dark', background image is bright/light -> invert font to black and filler to light
+  const isLightBg = currentSlide.text_color === 'dark';
 
   return (
-    <div className="w-full bg-neutral-100 overflow-hidden -mt-16 sm:-mt-20">
+    <div className="w-full bg-neutral-900 overflow-hidden -mt-16 sm:-mt-20">
       <section
-        className="relative w-full max-w-[1920px] mx-auto h-[82vh] min-h-[580px] max-h-[860px] flex items-center overflow-hidden bg-neutral-100 select-none"
+        className="relative w-full h-[100dvh] min-h-[100dvh] flex items-center overflow-hidden bg-neutral-900 select-none"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}
@@ -142,7 +144,7 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
             }}
             className="absolute inset-0"
           >
-            {/* Natural, Vibrant Background Image - Pure, Zero Black Overlay */}
+            {/* Natural, Vibrant Background Image - Adapting to Screen Size */}
             <motion.div
               initial={shouldReduceMotion ? {} : { scale: 1.04 }}
               animate={shouldReduceMotion ? {} : { scale: 1.0 }}
@@ -157,15 +159,15 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                 alt={currentSlide.heading || 'Fairy Finds Boutique'}
                 fill
                 priority
-                sizes="(max-width: 1920px) 100vw, 1920px"
-                className="object-cover object-center"
+                sizes="100vw"
+                className="object-cover object-center w-full h-full"
               />
             </motion.div>
           </motion.div>
         </AnimatePresence>
 
-        {/* Content Container - Only CTA Button */}
-        <div className="absolute inset-x-0 bottom-20 sm:bottom-24 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pointer-events-none">
+        {/* Content Container - Only CTA Buttons with Inverted Font & Filler */}
+        <div className="absolute inset-x-0 bottom-20 sm:bottom-28 z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pointer-events-none">
           <div
             className={`flex w-full ${
               position === 'left'
@@ -187,7 +189,11 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                 {currentSlide.button_text && (
                   <Link
                     href={currentSlide.button_link || '/shop'}
-                    className="min-h-[48px] px-8 py-3.5 bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white text-xs uppercase tracking-widest font-semibold transition-all duration-500 shadow-xl flex items-center justify-center gap-2 rounded-xs active:scale-95 hover:shadow-2xl hover:scale-105"
+                    className={`min-h-[48px] px-8 py-3.5 text-xs uppercase tracking-widest font-semibold transition-all duration-500 shadow-2xl flex items-center justify-center gap-2 rounded-xs active:scale-95 hover:scale-105 backdrop-blur-md ${
+                      isLightBg
+                        ? 'bg-white/95 hover:bg-neutral-950 text-neutral-950 hover:text-white border border-neutral-300/90'
+                        : 'bg-neutral-950/85 hover:bg-white text-white hover:text-neutral-950 border border-white/25'
+                    }`}
                   >
                     <span>{currentSlide.button_text}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -197,7 +203,11 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                 {currentSlide.secondary_button_text && (
                   <Link
                     href={currentSlide.secondary_button_link || '/custom'}
-                    className="min-h-[48px] px-7 py-3.5 text-xs uppercase tracking-widest font-semibold transition-all duration-500 bg-white/95 hover:bg-white text-neutral-900 border border-neutral-200 shadow-xl backdrop-blur-xs rounded-xs active:scale-95 hover:shadow-2xl hover:scale-105"
+                    className={`min-h-[48px] px-7 py-3.5 text-xs uppercase tracking-widest font-semibold transition-all duration-500 shadow-xl backdrop-blur-md rounded-xs active:scale-95 hover:scale-105 ${
+                      isLightBg
+                        ? 'bg-neutral-950 hover:bg-white text-white hover:text-neutral-950 border border-neutral-950'
+                        : 'bg-white/90 hover:bg-neutral-950 text-neutral-950 hover:text-white border border-white/40'
+                    }`}
                   >
                     <span>{currentSlide.secondary_button_text}</span>
                   </Link>
@@ -207,33 +217,17 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
           </div>
         </div>
 
-        {/* Navigation Arrows (Touch friendly, 44px+) */}
-        {slides.length > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={prevSlide}
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/80 hover:bg-white text-neutral-900 border border-neutral-200/80 backdrop-blur-md flex items-center justify-center active:scale-90 transition-all duration-500 cursor-pointer shadow-lg hover:border-[#FF55D2]"
-              aria-label="Previous slide"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={nextSlide}
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/80 hover:bg-white text-neutral-900 border border-neutral-200/80 backdrop-blur-md flex items-center justify-center active:scale-90 transition-all duration-500 cursor-pointer shadow-lg hover:border-[#FF55D2]"
-              aria-label="Next slide"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </>
-        )}
-
-        {/* Bottom Controls Bar: Slide Indicators & Numbers */}
+        {/* Bottom Controls Bar: Slide Indicators & Numbers (Inverted Font & Filler based on image) */}
         {slides.length > 1 && (
           <div className="absolute bottom-6 sm:bottom-8 inset-x-0 z-30 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pointer-events-none">
             {/* Slide Indicator Dashes */}
-            <div className="flex items-center gap-2 pointer-events-auto bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+            <div
+              className={`flex items-center gap-2 pointer-events-auto backdrop-blur-md px-3.5 py-1.5 rounded-full border shadow-md transition-colors duration-500 ${
+                isLightBg
+                  ? 'bg-white/80 border-neutral-300/80 text-neutral-900'
+                  : 'bg-black/40 border-white/20 text-white'
+              }`}
+            >
               {slides.map((_, idx) => (
                 <button
                   key={idx}
@@ -241,8 +235,12 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                   onClick={() => goToSlide(idx)}
                   className={`h-1.5 transition-all duration-500 rounded-full cursor-pointer ${
                     idx === activeIndex
-                      ? 'w-8 bg-[#FF55D2] shadow-xs'
-                      : 'w-2.5 bg-white/70 hover:bg-white'
+                      ? isLightBg
+                        ? 'w-8 bg-neutral-950 shadow-xs'
+                        : 'w-8 bg-white shadow-xs'
+                      : isLightBg
+                      ? 'w-2.5 bg-neutral-950/30 hover:bg-neutral-950/70'
+                      : 'w-2.5 bg-white/40 hover:bg-white/80'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
@@ -250,7 +248,13 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
             </div>
 
             {/* Slide Numbers & Pause/Play Indicator */}
-            <div className="flex items-center gap-3 text-neutral-800 font-mono text-xs tracking-widest pointer-events-auto bg-white/85 backdrop-blur-md px-3 py-1.5 rounded-full border border-neutral-200/80 shadow-md">
+            <div
+              className={`flex items-center gap-3 font-mono text-xs tracking-widest pointer-events-auto backdrop-blur-md px-3.5 py-1.5 rounded-full border shadow-md transition-colors duration-500 ${
+                isLightBg
+                  ? 'bg-white/90 text-neutral-950 border-neutral-300/80'
+                  : 'bg-black/60 text-white border-white/20'
+              }`}
+            >
               <button
                 type="button"
                 onClick={() => setIsPaused(!isPaused)}
@@ -260,7 +264,7 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
               >
                 {isPaused ? <Play className="w-3 h-3 text-[#FF55D2]" /> : <Pause className="w-3 h-3" />}
               </button>
-              <span>
+              <span className="font-semibold">
                 {String(activeIndex + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
               </span>
             </div>

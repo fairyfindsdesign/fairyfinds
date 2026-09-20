@@ -45,25 +45,99 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+const MIGRATION_SQL = `-- 1. Create orders table
+CREATE TABLE IF NOT EXISTS orders (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  order_number TEXT UNIQUE NOT NULL,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  delivery_address TEXT NOT NULL,
+  items JSONB NOT NULL DEFAULT '[]'::jsonb,
+  subtotal DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  delivery_fee DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  total DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  notes TEXT,
+  status TEXT CHECK (status IN ('new','confirmed','preparing','ready','shipped','delivered','cancelled')) DEFAULT 'new',
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 2. Indexes
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_is_read ON orders(is_read);
+
+-- 3. Row Level Security
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admin All Orders" ON orders;
+CREATE POLICY "Admin All Orders" ON orders FOR ALL USING (true) WITH CHECK (true);
+
+-- 4. Enable Realtime broadcast
+ALTER TABLE orders REPLICA IDENTITY FULL;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'orders'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+  END IF;
+END $$;`;
+
 interface Props {
   initialOrders: Order[];
   initialUnreadCount: number;
   currencySymbol: string;
+  migrationNeeded?: boolean;
+  isSupabaseConnected?: boolean;
 }
 
-export default function OrdersClient({ initialOrders, initialUnreadCount, currencySymbol }: Props) {
+export default function OrdersClient({
+  initialOrders,
+  initialUnreadCount,
+  currencySymbol,
+  migrationNeeded = false,
+  isSupabaseConnected = true,
+}: Props) {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<OrderStatus | ''>('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [copiedSql, setCopiedSql] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const { decrementUnread, setUnreadCount } = useOrderNotifications();
+  const { decrementUnread, setUnreadCount, latestOrder } = useOrderNotifications();
+
+  // Sync orders with server whenever initialOrders updates
+  useEffect(() => {
+    setOrders(initialOrders);
+  }, [initialOrders]);
+
+  // Prepend live incoming orders from WebSocket broadcast
+  useEffect(() => {
+    if (latestOrder) {
+      setOrders((prev) => {
+        if (prev.some((o) => o.id === latestOrder.id)) return prev;
+        return [latestOrder, ...prev];
+      });
+    }
+  }, [latestOrder]);
 
   // Keep local unread count in sync with server
   useEffect(() => {
     setUnreadCount(initialUnreadCount);
   }, [initialUnreadCount, setUnreadCount]);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    startTransition(() => {
+      router.refresh();
+      setTimeout(() => setIsRefreshing(false), 800);
+    });
+  };
 
   const filtered = useMemo(() => {
     let result = orders;
@@ -107,6 +181,41 @@ export default function OrdersClient({ initialOrders, initialUnreadCount, curren
 
   return (
     <div className="space-y-6">
+      {/* Supabase Migration Notice Banner */}
+      {migrationNeeded && (
+        <div className="bg-amber-50 border border-amber-300 p-4 rounded-xs text-amber-900 space-y-3">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-semibold text-amber-950">Action Required: Supabase "orders" Table Missing</h3>
+              <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                The <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-[11px] font-semibold">orders</code> table has not been created in your Supabase project yet. Because of this, incoming customer orders cannot be registered or alerted in real time.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 pt-1 pl-7">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(MIGRATION_SQL);
+                setCopiedSql(true);
+                setTimeout(() => setCopiedSql(false), 3000);
+              }}
+              className="px-3.5 py-1.5 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs font-semibold rounded-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              {copiedSql ? '✓ Copied SQL to Clipboard!' : 'Copy Migration SQL'}
+            </button>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="px-3 py-1.5 bg-white border border-amber-300 hover:bg-amber-100 text-amber-900 text-xs font-medium rounded-xs transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh After Running SQL
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -116,10 +225,12 @@ export default function OrdersClient({ initialOrders, initialUnreadCount, curren
           </p>
         </div>
         <button
-          onClick={() => router.refresh()}
-          className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-800 px-3 py-2 border border-neutral-200 hover:border-neutral-400 rounded-xs transition-colors cursor-pointer"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-800 px-3 py-2 border border-neutral-200 hover:border-neutral-400 rounded-xs transition-colors cursor-pointer disabled:opacity-50"
         >
-          <RefreshCw className="w-3.5 h-3.5" /> Refresh
+          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 

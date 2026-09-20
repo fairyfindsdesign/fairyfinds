@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -16,6 +16,7 @@ export interface OrderNotification {
 interface OrderNotificationContextValue {
   unreadCount: number;
   notifications: OrderNotification[];
+  latestOrder: Order | null;
   dismissNotification: (id: string) => void;
   setUnreadCount: (n: number) => void;
   decrementUnread: () => void;
@@ -24,6 +25,7 @@ interface OrderNotificationContextValue {
 const OrderNotificationContext = createContext<OrderNotificationContextValue>({
   unreadCount: 0,
   notifications: [],
+  latestOrder: null,
   dismissNotification: () => {},
   setUnreadCount: () => {},
   decrementUnread: () => {},
@@ -41,6 +43,7 @@ interface Props {
 export default function OrderNotificationProvider({ children, initialUnreadCount = 0 }: Props) {
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
   const [notifications, setNotifications] = useState<OrderNotification[]>([]);
+  const [latestOrder, setLatestOrder] = useState<Order | null>(null);
   const channelRef = useRef<any>(null);
 
   const dismissNotification = useCallback((id: string) => {
@@ -120,6 +123,7 @@ export default function OrderNotificationProvider({ children, initialUnreadCount
             created_at: row.created_at,
           };
           setNotifications((prev) => [notif, ...prev].slice(0, 5));
+          setLatestOrder(row as Order);
           setUnreadCount((c) => c + 1);
           playPing();
           fireDesktopNotification(notif);
@@ -135,7 +139,7 @@ export default function OrderNotificationProvider({ children, initialUnreadCount
   }, [playPing, fireDesktopNotification]);
 
   return (
-    <OrderNotificationContext.Provider value={{ unreadCount, notifications, dismissNotification, setUnreadCount, decrementUnread }}>
+    <OrderNotificationContext.Provider value={{ unreadCount, notifications, latestOrder, dismissNotification, setUnreadCount, decrementUnread }}>
       {children}
     </OrderNotificationContext.Provider>
   );

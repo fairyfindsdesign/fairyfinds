@@ -164,7 +164,7 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS care_instructions TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
 
--- 1b. Create orders table if it doesn't exist (safe incremental add)
+-- 1b. Create orders table, indexes, RLS and Realtime (Safe Incremental Add)
 CREATE TABLE IF NOT EXISTS orders (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   order_number TEXT UNIQUE NOT NULL,
@@ -181,6 +181,26 @@ CREATE TABLE IF NOT EXISTS orders (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_is_read ON orders(is_read);
+
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Admin All Orders" ON orders;
+CREATE POLICY "Admin All Orders" ON orders FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE orders REPLICA IDENTITY FULL;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' AND tablename = 'orders'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+  END IF;
+END $$;
 
 
 -- 2. Ensure columns exist on store_settings

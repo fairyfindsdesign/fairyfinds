@@ -76,13 +76,23 @@ export async function saveOrder(order: Omit<Order, 'id' | 'created_at' | 'update
   return newOrder;
 }
 
-export async function getOrders(filters?: {
+export interface OrdersFetchResult {
+  orders: Order[];
+  isSupabaseConnected: boolean;
+  migrationNeeded: boolean;
+  error?: string;
+}
+
+export async function getOrdersWithStatus(filters?: {
   status?: OrderStatus;
   is_read?: boolean;
   search?: string;
   limit?: number;
-}): Promise<Order[]> {
+}): Promise<OrdersFetchResult> {
   const supabase = getAdminSupabase();
+  let migrationNeeded = false;
+  let errorMsg: string | undefined;
+
   if (supabase) {
     try {
       let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
@@ -90,9 +100,23 @@ export async function getOrders(filters?: {
       if (filters?.is_read !== undefined) query = query.eq('is_read', filters.is_read);
       if (filters?.limit) query = query.limit(filters.limit);
       const { data, error } = await query;
-      if (!error && data) return data as Order[];
-    } catch (err) {
-      console.error('[orders] Supabase getOrders failed:', err);
+      if (!error && data) {
+        return {
+          orders: data as Order[],
+          isSupabaseConnected: true,
+          migrationNeeded: false,
+        };
+      }
+      if (error) {
+        console.error('[orders] Supabase getOrders failed:', error.message, error.code);
+        errorMsg = error.message;
+        if (error.code === '42P01' || error.message.toLowerCase().includes('relation "orders" does not exist')) {
+          migrationNeeded = true;
+        }
+      }
+    } catch (err: any) {
+      console.error('[orders] Supabase getOrders exception:', err);
+      errorMsg = err?.message;
     }
   }
 
@@ -108,7 +132,22 @@ export async function getOrders(filters?: {
         o.order_number.toLowerCase().includes(q)
     );
   }
-  return orders;
+  return {
+    orders,
+    isSupabaseConnected: !!supabase,
+    migrationNeeded,
+    error: errorMsg,
+  };
+}
+
+export async function getOrders(filters?: {
+  status?: OrderStatus;
+  is_read?: boolean;
+  search?: string;
+  limit?: number;
+}): Promise<Order[]> {
+  const res = await getOrdersWithStatus(filters);
+  return res.orders;
 }
 
 export async function getOrderById(id: string): Promise<Order | null> {

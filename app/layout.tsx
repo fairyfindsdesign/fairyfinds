@@ -140,7 +140,7 @@ export default async function RootLayout({
     getCollections(),
   ]);
 
-  const gaId = settings?.seo_config?.verification?.google_analytics_id;
+  const gaId = settings?.seo_config?.verification?.google_analytics_id || process.env.NEXT_PUBLIC_GA_ID || 'G-YMMYVBT1YE';
   const gtmId = settings?.seo_config?.verification?.google_tag_manager_id || process.env.NEXT_PUBLIC_GTM_ID || 'GTM-PW8ZZHG7';
 
   return (

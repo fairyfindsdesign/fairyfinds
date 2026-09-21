@@ -464,7 +464,7 @@ export const initialSeoConfig: SeoConfig = {
   },
   verification: {
     google_site_verification: '',
-    google_analytics_id: '',
+    google_analytics_id: 'G-YMMYVBT1YE',
     google_tag_manager_id: 'GTM-PW8ZZHG7',
     meta_pixel_id: '',
     bing_verification: '',

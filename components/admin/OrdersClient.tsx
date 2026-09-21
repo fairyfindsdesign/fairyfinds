@@ -3,12 +3,13 @@
 import React, { useState, useMemo, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Order, OrderStatus } from '@/lib/types';
-import { updateOrderStatusAction, markOrderReadAction, resendOrderEmailAction, sendTestEmailAction } from '@/app/actions/orders';
+import { updateOrderStatusAction, markOrderReadAction, resendOrderEmailAction, sendTestEmailAction, deleteOrderAction } from '@/app/actions/orders';
 import { useOrderNotifications } from './OrderNotificationProvider';
+import OrderReceiptModal from './OrderReceiptModal';
 import {
   Search, Filter, ShoppingBag, Clock, CheckCircle2, Truck, Package,
   XCircle, AlertCircle, ChevronDown, ChevronRight, Phone, MapPin,
-  Calendar, Tag, Eye, MoreVertical, RefreshCw, Mail,
+  Calendar, Tag, Eye, MoreVertical, RefreshCw, Mail, Printer, Trash2, AlertTriangle,
 } from 'lucide-react';
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
@@ -126,6 +127,9 @@ export default function OrdersClient({
   const [resendingId, setResendingId] = useState<string | null>(null);
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [testResult, setTestResult] = useState<{ message: string; isError: boolean } | null>(null);
+  const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
+  const [deletingOrder, setDeletingOrder] = useState<Order | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const { decrementUnread, setUnreadCount, latestOrder } = useOrderNotifications();
 
@@ -195,6 +199,28 @@ export default function OrdersClient({
     } finally {
       setIsSendingTest(false);
       setTimeout(() => setTestResult(null), 8000);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingOrder) return;
+    setIsDeleting(true);
+    try {
+      const res = await deleteOrderAction(deletingOrder.id);
+      if (res.success) {
+        if (!deletingOrder.is_read) {
+          decrementUnread();
+        }
+        setOrders((prev) => prev.filter((o) => o.id !== deletingOrder.id));
+        setDeletingOrder(null);
+        router.refresh();
+      } else {
+        alert(`Failed to delete order: ${res.error || 'Unknown error'}`);
+      }
+    } catch (err: any) {
+      alert(`Error deleting order: ${err?.message || 'Unexpected error'}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -399,6 +425,19 @@ export default function OrdersClient({
                     <p className="text-[11px] text-neutral-400">{timeAgo(order.created_at)}</p>
                   </div>
 
+                  {/* Quick Receipt trigger */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setReceiptOrder(order);
+                    }}
+                    className="p-1.5 text-neutral-400 hover:text-neutral-900 rounded-xs hover:bg-neutral-100 transition-colors cursor-pointer"
+                    title="View / Print Receipt"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                  </button>
+
                   <ChevronDown className={`w-4 h-4 text-neutral-400 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                 </div>
 
@@ -496,27 +535,49 @@ export default function OrdersClient({
                       </div>
                     </div>
 
-                    {/* Status Changer */}
-                    <div className="flex flex-wrap items-center gap-3">
-                      <label className="text-[11px] uppercase tracking-wider font-semibold text-neutral-500">Update Status:</label>
-                      <select
-                        value={order.status}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
-                        disabled={isPending}
-                        className="px-3 py-1.5 bg-white border border-neutral-200 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#FF55D2] rounded-xs disabled:opacity-60"
-                      >
-                        {(Object.keys(STATUS_LABELS) as OrderStatus[]).map((s) => (
-                          <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-                        ))}
-                      </select>
-                      <a
-                        href={`https://wa.me/${order.customer_phone.replace(/[^0-9]/g, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#25D366] text-white text-xs font-semibold rounded-xs hover:bg-[#128C7E] transition-colors"
-                      >
-                        <Phone className="w-3 h-3" /> WhatsApp Customer
-                      </a>
+                    {/* Status Changer & Order Actions */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-neutral-200/80">
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <label className="text-[11px] uppercase tracking-wider font-semibold text-neutral-500">Update Status:</label>
+                        <select
+                          value={order.status}
+                          onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                          disabled={isPending}
+                          className="px-3 py-1.5 bg-white border border-neutral-200 text-xs text-[#1A1A1A] focus:outline-none focus:border-[#FF55D2] rounded-xs disabled:opacity-60"
+                        >
+                          {(Object.keys(STATUS_LABELS) as OrderStatus[]).map((s) => (
+                            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                          ))}
+                        </select>
+                        <a
+                          href={`https://wa.me/${order.customer_phone.replace(/[^0-9]/g, '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#25D366] text-white text-xs font-semibold rounded-xs hover:bg-[#128C7E] transition-colors"
+                        >
+                          <Phone className="w-3 h-3" /> WhatsApp Customer
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => setReceiptOrder(order)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 text-white text-xs font-semibold rounded-xs hover:bg-black transition-colors cursor-pointer"
+                          title="View, print, or share official order receipt"
+                        >
+                          <Printer className="w-3 h-3 text-[#FF55D2]" /> Receipt
+                        </button>
+                      </div>
+
+                      {/* Danger: Delete Order */}
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => setDeletingOrder(order)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-rose-600 hover:text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 hover:border-rose-300 text-xs font-semibold rounded-xs transition-colors cursor-pointer"
+                          title="Delete this order permanently"
+                        >
+                          <Trash2 className="w-3 h-3" /> Delete Order
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -525,6 +586,75 @@ export default function OrdersClient({
           })
         )}
       </div>
+
+      {/* Boutique Order Receipt Modal */}
+      {receiptOrder && (
+        <OrderReceiptModal
+          order={receiptOrder}
+          currencySymbol={currencySymbol}
+          onClose={() => setReceiptOrder(null)}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div
+            className="bg-white w-full max-w-md p-6 rounded-sm shadow-2xl border border-neutral-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-neutral-900">Delete Order?</h3>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  Are you sure you want to permanently delete order{' '}
+                  <span className="font-semibold text-neutral-900">#{deletingOrder.order_number}</span>?
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-neutral-50 border border-neutral-200 rounded-xs p-3 text-xs text-neutral-700 mb-4 space-y-1">
+              <p><span className="text-neutral-500">Customer:</span> <span className="font-semibold">{deletingOrder.customer_name}</span> ({deletingOrder.customer_phone})</p>
+              <p><span className="text-neutral-500">Items:</span> {deletingOrder.items.length} item{deletingOrder.items.length !== 1 ? 's' : ''}</p>
+              <p><span className="text-neutral-500">Total:</span> <span className="font-bold text-neutral-900">{currencySymbol} {Number(deletingOrder.total).toLocaleString()}</span></p>
+            </div>
+
+            <p className="text-[11px] text-rose-600 bg-rose-50 border border-rose-100 p-2.5 rounded-xs mb-5">
+              Warning: This action is permanent and cannot be undone. The order will be removed from Supabase and local records.
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setDeletingOrder(null)}
+                disabled={isDeleting}
+                className="px-4 py-2 text-xs font-semibold text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-xs transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xs transition-colors disabled:opacity-60 cursor-pointer"
+              >
+                {isDeleting ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" /> Delete Permanently
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,6 +10,7 @@ import {
   getUnreadOrderCount,
   generateOrderNumber,
   updateOrderEmailStatus,
+  deleteOrder,
 } from '@/lib/data/orders';
 import { CartItem, CustomerOrderDetails, Order, OrderStatus } from '@/lib/types';
 import { generateOrderWhatsAppUrl } from '@/lib/whatsapp';
@@ -205,4 +206,22 @@ export async function sendTestEmailAction(): Promise<{
     return { success: false, error: err?.message || 'Unauthorized or unexpected error' };
   }
 }
+
+export async function deleteOrderAction(id: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    await assertAdmin();
+    const ok = await deleteOrder(id);
+    if (!ok) {
+      return { success: false, error: 'Failed to delete order from database' };
+    }
+    revalidatePath('/admin/orders', 'page');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Unauthorized or unexpected error' };
+  }
+}
+
 

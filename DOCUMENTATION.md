@@ -863,6 +863,27 @@ The SEO dashboard ([`SeoManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds
 - **Mark as Read**:
   - One-click button to acknowledge new orders and clear unread badges.
 
+### 21.7 Printable Boutique Receipts & Invoices (`OrderReceiptModal.tsx`)
+- **Dedicated Receipt Modal**: Accessible directly from both the order list row and the expanded order details drawer.
+- **Boutique Aesthetics**: Formatted with Cormorant Garamond luxury typography, signature pink accent stripe (`#FF55D2`), official atelier address in Neendoor, Kottayam, and full customer/garment itemization.
+- **Print & PDF Optimization (`@media print`)**:
+  - Triggers native browser print dialog with `@media print` rules.
+  - Hides all admin UI, navigation headers, backdrop overlays, and buttons.
+  - Automatically isolates `#fairy-finds-receipt-printable` on a clean, high-contrast white page suitable for A4 or Letter printing or direct saving as PDF.
+- **WhatsApp Receipt Sharing**:
+  - Generates a pre-formatted, polite WhatsApp message breakdown containing the complete receipt details, customer address, line items, and financial summary, allowing the store owner to send it to the customer with one click.
+- **Clipboard Text Copy**: One-click button to copy full receipt summary for external record-keeping or emails.
+
+### 21.8 Order Deletion with Safety Safeguards
+- **Protected Action**: `deleteOrderAction` validates the active admin session (`assertAdmin()`) before executing.
+- **Dual-Store Deletion**: Completely removes the row from the PostgreSQL `orders` table in Supabase and the local `data/orders.json` store.
+- **Confirmation Safeguards**:
+  - Clicking "Delete Order" opens a safety dialog specifying the order number (`#FFYYMMDD-XXX`), customer name, phone, and total amount.
+  - Clearly communicates the permanent nature of the deletion.
+- **Optimistic State & Counter Synchronization**:
+  - Removes the item from state immediately upon confirmation.
+  - Automatically decrements the unread order counter if an unread order is deleted, keeping the navigation badge in exact sync.
+
 ---
 
 ## 22. Order Email Alerts via Resend (₹0/Month Free Tier)

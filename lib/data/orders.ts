@@ -243,3 +243,28 @@ export async function updateOrderEmailStatus(id: string, status: EmailNotificati
   }
 }
 
+export async function deleteOrder(id: string): Promise<boolean> {
+  const supabase = getAdminSupabase();
+  let supabaseSuccess = true;
+
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('orders').delete().eq('id', id);
+      if (error) {
+        console.error('[orders] Supabase deleteOrder failed:', error.message);
+        supabaseSuccess = false;
+      }
+    } catch (err: any) {
+      console.error('[orders] Supabase deleteOrder exception:', err);
+      supabaseSuccess = false;
+    }
+  }
+
+  // Also remove from local store fallback
+  const orders = readLocalOrders();
+  const nextOrders = orders.filter((o) => o.id !== id);
+  writeLocalOrders(nextOrders);
+
+  return supabaseSuccess;
+}
+

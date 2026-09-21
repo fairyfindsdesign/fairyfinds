@@ -63,6 +63,7 @@ export default async function CustomMadePage() {
           title="Recent Custom Work"
           subtitle="COMPLETED DESIGNS"
           whatsappNumber={settings.whatsapp_number}
+          showCta={false}
         />
       </div>
     </>

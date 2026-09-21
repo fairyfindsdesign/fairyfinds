@@ -5,13 +5,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CustomDesign } from '@/lib/types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Video, X, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import { Sparkles, Video, X, ChevronLeft, ChevronRight, MessageCircle, ArrowRight, Scissors } from 'lucide-react';
 
 interface CustomDesignsShowcaseProps {
   designs: CustomDesign[];
   title?: string;
   subtitle?: string;
   whatsappNumber?: string;
+  showCta?: boolean;
+  ctaButtonText?: string;
+  ctaButtonLink?: string;
+  ctaHeading?: string;
+  ctaDescription?: string;
 }
 
 export default function CustomDesignsShowcase({
@@ -19,6 +24,11 @@ export default function CustomDesignsShowcase({
   title = 'Our Custom Work',
   subtitle = 'COMPLETED CREATIONS',
   whatsappNumber = '6282629144',
+  showCta = true,
+  ctaButtonText = 'Start Your Custom Order',
+  ctaButtonLink = '/custom',
+  ctaHeading = 'Have a Dream Outfit in Mind?',
+  ctaDescription = 'Looking for a custom bridal ensemble, specific fabric drape, or made-to-measure festive wear? Work directly with our designer to bring your vision to life.',
 }: CustomDesignsShowcaseProps) {
   const publishedDesigns = designs.filter((d) => d.is_published);
   const [selectedDesign, setSelectedDesign] = useState<CustomDesign | null>(null);
@@ -123,6 +133,77 @@ export default function CustomDesignsShowcase({
             );
           })}
         </div>
+
+        {/* CTA below Our Custom Work */}
+        {showCta && (
+          <div className="pt-4 sm:pt-8">
+            <div className="relative overflow-hidden bg-[#1A1A1A] text-white p-8 sm:p-12 lg:p-14 border border-neutral-800 shadow-xl">
+              {/* Subtle ambient luxury glows */}
+              <div
+                className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-[#FF55D2]/15 blur-3xl pointer-events-none"
+                aria-hidden="true"
+              />
+              <div
+                className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-[#FF55D2]/10 blur-3xl pointer-events-none"
+                aria-hidden="true"
+              />
+
+              <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+                <div className="space-y-4 text-center lg:text-left max-w-2xl">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-xs border border-white/15 text-[11px] uppercase tracking-[0.25em] text-[#FF55D2] font-semibold">
+                    <Scissors className="w-3.5 h-3.5" />
+                    <span>Custom Tailoring Studio</span>
+                  </div>
+
+                  <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white font-light tracking-wide leading-tight">
+                    {ctaHeading}
+                  </h3>
+
+                  <p className="text-xs sm:text-sm text-neutral-300 font-light leading-relaxed">
+                    {ctaDescription}
+                  </p>
+
+                  <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 pt-1 text-[11px] text-neutral-400">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#FF55D2]" />
+                      Made to Measure
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#FF55D2]" />
+                      Direct WhatsApp Styling
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#FF55D2]" />
+                      All-India &amp; Global Delivery
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto shrink-0">
+                  <Link
+                    href={ctaButtonLink}
+                    className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-lg shadow-[#FF55D2]/25 group"
+                  >
+                    <span>{ctaButtonText}</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <a
+                    href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(
+                      'Hello Fairy Finds, I would like to inquire about a custom-made outfit.'
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2.5 px-7 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300"
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-400" />
+                    <span>Chat on WhatsApp</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Lightbox / Gallery Modal with 0.5s Transition */}

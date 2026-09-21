@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Sparkles, Scissors } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import {
   getHomepageSections,
   getProducts,
@@ -86,6 +86,8 @@ export default async function HomePage() {
   const featuredCollections = collections.filter((c) => c.is_published && c.show_on_home);
   const featuredProducts = products.filter((p) => p.is_published && p.is_featured);
   const hasCustomDesignsSection = visibleSections.some((s) => s.section_type === 'CUSTOM_DESIGNS');
+
+  let customDesignsRendered = false;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -340,102 +342,23 @@ export default async function HomePage() {
             );
 
           case 'CUSTOM_MADE':
+          case 'CUSTOM_DESIGNS': {
+            if (customDesignsRendered) return null;
+            customDesignsRendered = true;
             return (
-              <React.Fragment key={section.id}>
-                <section className="py-20 bg-white gsap-fade-up">
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-[#FAF9F6] border border-neutral-200 p-8 sm:p-12 lg:p-16 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center gsap-scale-in">
-                      <div className="lg:col-span-7 space-y-6">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-neutral-200 text-[11px] uppercase tracking-widest text-[#FF55D2] font-semibold">
-                          <Scissors className="w-3.5 h-3.5" />
-                          <span>Custom Tailoring Studio</span>
-                        </div>
-
-                        <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#1A1A1A] font-light leading-tight">
-                          {section.content.heading || 'Bring Your Dream Outfit to Life'}
-                        </h2>
-
-                        <p className="text-sm sm:text-base text-neutral-600 leading-relaxed font-light">
-                          {section.content.description ||
-                            'Looking for a custom cut, specific fabric, or made-to-measure outfit? Work directly with our designer through WhatsApp to create your perfect piece.'}
-                        </p>
-
-                        <div className="space-y-3 pt-2">
-                          <div className="flex items-start gap-3">
-                            <span className="w-5 h-5 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                              1
-                            </span>
-                            <p className="text-xs text-neutral-700">
-                              <strong>Choose Your Style & Fabric:</strong> Sarees, bridal lehengas, evening gowns, or blouses.
-                            </p>
-                          </div>
-                          <div className="flex items-start gap-3">
-                            <span className="w-5 h-5 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                              2
-                            </span>
-                            <p className="text-xs text-neutral-700">
-                              <strong>Chat Directly on WhatsApp:</strong> Discuss styling, share reference photos, and agree on fittings.
-                            </p>
-                          </div>
-                          <div className="flex items-start gap-3">
-                            <span className="w-5 h-5 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                              3
-                            </span>
-                            <p className="text-xs text-neutral-700">
-                              <strong>Handmade & Delivered:</strong> Tailored with care and delivered to your doorstep.
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="pt-4">
-                          <Link
-                            href={section.content.button_link || '/custom'}
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-[#1A1A1A] hover:bg-[#FF55D2] text-white text-xs uppercase tracking-widest font-medium transition-colors shadow-sm"
-                          >
-                            <span>{section.content.button_text || 'Start Your Custom Order'}</span>
-                            <ArrowRight className="w-4 h-4" />
-                          </Link>
-                        </div>
-                      </div>
-
-                      <div className="lg:col-span-5 relative aspect-[4/5] overflow-hidden bg-neutral-200 border border-neutral-200 shadow-md">
-                        <Image
-                          src={
-                            section.content.image_url ||
-                            'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=800'
-                          }
-                          alt="Custom Tailoring and Bridal Outfits - Fairy Finds Boutique"
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 1024px) 100vw, 400px"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* If there isn't an explicit CUSTOM_DESIGNS section in visibleSections, showcase designs here */}
-                {!hasCustomDesignsSection && customDesigns.length > 0 && (
-                  <CustomDesignsShowcase
-                    designs={customDesigns}
-                    title="Our Custom Work"
-                    subtitle="COMPLETED CREATIONS"
-                    whatsappNumber={settings.whatsapp_number}
-                  />
-                )}
-              </React.Fragment>
+              <div key={section.id} className="gsap-fade-up">
+                <CustomDesignsShowcase
+                  designs={customDesigns}
+                  title="Our Custom Work"
+                  subtitle={section.subtitle || 'COMPLETED CREATIONS'}
+                  whatsappNumber={settings.whatsapp_number}
+                  ctaButtonText={section.content?.button_text || 'Start Your Custom Order'}
+                  ctaButtonLink={section.content?.button_link || '/custom'}
+                  showCta={true}
+                />
+              </div>
             );
-
-          case 'CUSTOM_DESIGNS':
-            return (
-              <CustomDesignsShowcase
-                key={section.id}
-                designs={customDesigns}
-                title={section.content?.heading || 'Our Custom Work'}
-                subtitle={section.subtitle || 'COMPLETED CREATIONS'}
-                whatsappNumber={settings.whatsapp_number}
-              />
-            );
+          }
 
           case 'REVIEWS':
             return (

@@ -426,8 +426,8 @@
       },
       "verification": {
         "google_site_verification": "",
-        "google_analytics_id": "G-YMMYVBT1YE",
-        "google_tag_manager_id": "GTM-PW8ZZHG7",
+        "google_analytics_id": "",
+        "google_tag_manager_id": "",
         "meta_pixel_id": "",
         "bing_verification": ""
       },
@@ -1020,14 +1020,13 @@
     {
       "id": "sec-custom-made",
       "section_type": "CUSTOM_MADE",
-      "title": "Custom-Made Orders",
-      "subtitle": "BESPOKE TAILORING",
+      "title": "Our Custom Work",
+      "subtitle": "COMPLETED CREATIONS",
       "content": {
-        "heading": "Bring Your Dream Outfit to Life",
-        "description": "Looking for a custom cut, specific fabric, or made-to-measure bridal drape? Work directly with our designer through WhatsApp to create a one-of-a-kind garment.",
+        "heading": "Our Custom Work",
+        "description": "Explore outfits made specifically for our clients, from bridal sets to festive evening wear.",
         "button_text": "Start Your Custom Order",
-        "button_link": "/custom",
-        "image_url": "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&q=80&w=1200"
+        "button_link": "/custom"
       },
       "display_order": 7,
       "is_visible": true
@@ -1069,6 +1068,45 @@
       "is_visible": true,
       "display_order": 5,
       "created_at": "2026-09-03T11:45:00Z"
+    }
+  ],
+  "custom_designs": [
+    {
+      "id": "cd-01",
+      "title": "Crimson Silk Bridal Set",
+      "description": "A completed wedding outfit created with pure silk, hand embroidery, and tailored to the bride's exact measurements.",
+      "images": [
+        "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=800"
+      ],
+      "video_url": "https://instagram.com/fairyfinds.boutique",
+      "category": "Bridal",
+      "display_order": 1,
+      "is_published": true
+    },
+    {
+      "id": "cd-02",
+      "title": "Emerald Evening Gown",
+      "description": "Custom layered gown in bottle green georgette with delicate hand-stitched detailing on the neckline.",
+      "images": [
+        "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=800"
+      ],
+      "video_url": "https://instagram.com/fairyfinds.boutique",
+      "category": "Evening Wear",
+      "display_order": 2,
+      "is_published": true
+    },
+    {
+      "id": "cd-03",
+      "title": "Pastel Floral Festive Outfit",
+      "description": "Made for an intimate engagement ceremony with soft organza dupatta and matching custom blouse.",
+      "images": [
+        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=800"
+      ],
+      "video_url": "https://instagram.com/fairyfinds.boutique",
+      "category": "Festive",
+      "display_order": 3,
+      "is_published": true
     }
   ]
 }

@@ -1241,10 +1241,26 @@ export default function SeoManagerClient({
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-neutral-700 mb-1">
-                    Google Analytics 4 (GA4) Measurement ID
+                    Google Tag Manager (GTM) ID
+                  </label>
+                  <input
+                    type="text"
+                    value={config.verification.google_tag_manager_id || ''}
+                    onChange={(e) => handleVerificationChange('google_tag_manager_id', e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-neutral-200 rounded-xs focus:outline-none focus:border-[#FF55D2] bg-white text-neutral-900 font-mono text-xs"
+                    placeholder="GTM-XXXXXXX"
+                  />
+                  <span className="text-[11px] text-neutral-400 mt-1 block">
+                    Container script in <code>&lt;head&gt;</code> &amp; noscript in <code>&lt;body&gt;</code>.
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">
+                    Google Analytics 4 (GA4) ID
                   </label>
                   <input
                     type="text"
@@ -1260,7 +1276,7 @@ export default function SeoManagerClient({
 
                 <div>
                   <label className="block text-xs font-semibold text-neutral-700 mb-1">
-                    Meta (Facebook / Instagram) Pixel ID
+                    Meta (Facebook / IG) Pixel ID
                   </label>
                   <input
                     type="text"

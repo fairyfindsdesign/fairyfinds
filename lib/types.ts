@@ -239,6 +239,7 @@ export interface SeoConfig {
   verification: {
     google_site_verification?: string;
     google_analytics_id?: string;
+    google_tag_manager_id?: string;
     meta_pixel_id?: string;
     bing_verification?: string;
   };

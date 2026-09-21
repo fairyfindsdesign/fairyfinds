@@ -3,12 +3,12 @@
 import React, { useState, useMemo, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Order, OrderStatus } from '@/lib/types';
-import { updateOrderStatusAction, markOrderReadAction } from '@/app/actions/orders';
+import { updateOrderStatusAction, markOrderReadAction, resendOrderEmailAction, sendTestEmailAction } from '@/app/actions/orders';
 import { useOrderNotifications } from './OrderNotificationProvider';
 import {
   Search, Filter, ShoppingBag, Clock, CheckCircle2, Truck, Package,
   XCircle, AlertCircle, ChevronDown, ChevronRight, Phone, MapPin,
-  Calendar, Tag, Eye, MoreVertical, RefreshCw,
+  Calendar, Tag, Eye, MoreVertical, RefreshCw, Mail,
 } from 'lucide-react';
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
@@ -71,6 +71,7 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS total DECIMAL(12, 2) NOT NULL DEFAUL
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS notes TEXT;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'new';
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT false;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS email_notification_status TEXT DEFAULT 'pending';
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 
@@ -122,6 +123,9 @@ export default function OrdersClient({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [testResult, setTestResult] = useState<{ message: string; isError: boolean } | null>(null);
   const router = useRouter();
   const { decrementUnread, setUnreadCount, latestOrder } = useOrderNotifications();
 
@@ -151,6 +155,47 @@ export default function OrdersClient({
       router.refresh();
       setTimeout(() => setIsRefreshing(false), 800);
     });
+  };
+
+  const handleResendEmail = async (orderId: string) => {
+    setResendingId(orderId);
+    try {
+      const res = await resendOrderEmailAction(orderId);
+      if (res.success) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, email_notification_status: 'sent' } : o))
+        );
+        alert('Order notification email re-sent successfully!');
+      } else {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, email_notification_status: 'failed' } : o))
+        );
+        alert(`Email dispatch failed: ${res.error}`);
+      }
+    } catch (err: any) {
+      alert(`Error: ${err?.message || 'Could not resend email'}`);
+    } finally {
+      setResendingId(null);
+      router.refresh();
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    setIsSendingTest(true);
+    setTestResult(null);
+    try {
+      const res = await sendTestEmailAction();
+      if (res.success) {
+        setTestResult({ message: '✓ Test order email sent! Check your store owner inbox.', isError: false });
+      } else {
+        setTestResult({ message: `⚠ ${res.error || 'Failed to send test email. Verify RESEND_API_KEY.'}`, isError: true });
+      }
+    } catch (err: any) {
+      setTestResult({ message: `⚠ ${err?.message || 'Could not dispatch test email.'}`, isError: true });
+    } finally {
+      setIsSendingTest(false);
+      setTimeout(() => setTestResult(null), 8000);
+    }
   };
 
   const filtered = useMemo(() => {
@@ -238,15 +283,34 @@ export default function OrdersClient({
             {orders.length} total · {newCount} new · {unreadFiltered} unread
           </p>
         </div>
-        <button
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-800 px-3 py-2 border border-neutral-200 hover:border-neutral-400 rounded-xs transition-colors cursor-pointer disabled:opacity-50"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSendTestEmail}
+            disabled={isSendingTest}
+            className="inline-flex items-center gap-1.5 text-xs text-neutral-700 hover:text-black px-3 py-2 border border-neutral-200 hover:border-neutral-400 bg-white rounded-xs transition-colors cursor-pointer disabled:opacity-50"
+            title="Sends a mock boutique order notification to verify Resend connectivity"
+          >
+            <Mail className="w-3.5 h-3.5 text-[#FF55D2]" />
+            {isSendingTest ? 'Sending Test...' : 'Send Test Email'}
+          </button>
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-800 px-3 py-2 border border-neutral-200 hover:border-neutral-400 rounded-xs transition-colors cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
       </div>
+
+      {testResult && (
+        <div className={`p-3 rounded-xs text-xs font-medium border transition-all ${
+          testResult.isError ? 'bg-amber-50 text-amber-900 border-amber-300' : 'bg-emerald-50 text-emerald-900 border-emerald-300'
+        }`}>
+          {testResult.message}
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -314,6 +378,16 @@ export default function OrdersClient({
                       {!order.is_read && (
                         <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-[#FF55D2]/10 text-[#FF55D2] border border-[#FF55D2]/30 rounded-full uppercase tracking-wide">Unread</span>
                       )}
+                      {order.email_notification_status === 'sent' && (
+                        <span className="px-1.5 py-0.5 text-[9px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full flex items-center gap-0.5" title="Owner email notification sent">
+                          <Mail className="w-2.5 h-2.5" /> Email
+                        </span>
+                      )}
+                      {order.email_notification_status === 'failed' && (
+                        <span className="px-1.5 py-0.5 text-[9px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 rounded-full flex items-center gap-0.5" title="Owner email alert failed">
+                          <Mail className="w-2.5 h-2.5" /> Failed
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs font-semibold text-neutral-800">{order.customer_name}</p>
                     <p className="text-[11px] text-neutral-500">{order.customer_phone} · {order.items.length} item{order.items.length !== 1 ? 's' : ''}</p>
@@ -346,6 +420,35 @@ export default function OrdersClient({
                         <p className="text-[10px] uppercase tracking-wider font-semibold text-neutral-500">Order Info</p>
                         <p className="flex items-center gap-1 text-neutral-600"><Calendar className="w-3 h-3" />{formatDate(order.created_at)}</p>
                         <p className="flex items-center gap-1 text-neutral-600"><Tag className="w-3 h-3" />Order #{order.order_number}</p>
+                        
+                        {/* Owner Email Alert Status */}
+                        <div className="pt-1.5 flex flex-wrap items-center gap-2">
+                          <span className="text-[11px] text-neutral-500 flex items-center gap-1">
+                            <Mail className="w-3 h-3 text-neutral-400" /> Owner Email:
+                          </span>
+                          {order.email_notification_status === 'sent' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              ✓ Sent
+                            </span>
+                          ) : order.email_notification_status === 'failed' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                              ⚠ Failed
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-100 text-neutral-600 border border-neutral-200">
+                              Pending
+                            </span>
+                          )}
+                          <button
+                            onClick={() => handleResendEmail(order.id)}
+                            disabled={resendingId === order.id}
+                            className="text-[11px] text-[#FF55D2] hover:text-[#FD00B9] font-semibold hover:underline disabled:opacity-50 ml-1 inline-flex items-center gap-1 cursor-pointer"
+                            title="Resend owner notification email via Resend"
+                          >
+                            <RefreshCw className={`w-2.5 h-2.5 ${resendingId === order.id ? 'animate-spin' : ''}`} />
+                            {resendingId === order.id ? 'Sending...' : 'Resend'}
+                          </button>
+                        </div>
                       </div>
                     </div>
 

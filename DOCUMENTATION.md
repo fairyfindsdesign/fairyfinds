@@ -214,10 +214,11 @@ The complete SQL migration script is located at [`fairy-finds/supabase/schema.sq
    - `delivery_fee DECIMAL(12, 2) NOT NULL DEFAULT 0`
    - `total DECIMAL(12, 2) NOT NULL DEFAULT 0`
    - `notes TEXT` (Special delivery or custom fitting instructions)
-   - `status TEXT CHECK (status IN ('new','confirmed','preparing','ready','shipped','delivered','cancelled')) DEFAULT 'new'`
-   - `is_read BOOLEAN DEFAULT false` (Drives the unread notification badge in Admin)
-   - `created_at TIMESTAMPTZ DEFAULT now()`
-   - `updated_at TIMESTAMPTZ DEFAULT now()`
+   - `status` TEXT CHECK (status IN ('new','confirmed','preparing','ready','shipped','delivered','cancelled')) DEFAULT 'new'
+   - `is_read` BOOLEAN DEFAULT false (Drives the unread notification badge in Admin)
+   - `email_notification_status` TEXT CHECK (email_notification_status IN ('pending', 'sent', 'failed')) DEFAULT 'pending' (Tracks Resend email alert status)
+   - `created_at` TIMESTAMPTZ DEFAULT now()
+   - `updated_at` TIMESTAMPTZ DEFAULT now()
 
 ### Realtime Database Replication & RLS
 - **Row Level Security**: Enabled on `orders`. Public users submit orders exclusively through Next.js Server Action (`saveOrderAction`) which uses the Supabase service role key, preventing unauthenticated direct database reads or tampering from browser consoles.
@@ -248,7 +249,11 @@ The complete SQL migration script is located at [`fairy-finds/supabase/schema.sq
    - Supabase Realtime immediately broadcasts the new order to all open owner admin sessions.
    - The owner hears an audio chime and sees a top-right floating alert toast with order amount and customer name.
    - The unread badge counter in the admin navigation bar updates in real time.
-8. **WhatsApp Launch**: The customer's browser launches WhatsApp with a pre-filled, itemized message linked to the official boutique hotline (`6282629144`), complete with order reference number for instant cross-referencing.
+8. **Automatic Resend Email Dispatch (Non-Blocking)**:
+   - Immediately after persisting the order, `saveOrderAction` asynchronously dispatches a formatted order alert email to the boutique owner's inbox via Resend (`sendOrderEmailAlert()`).
+   - Checkout is non-blocking: network latency with the email provider never delays the customer's transition.
+   - Email status is tracked as `'sent'` or `'failed'` in the database, viewable directly in `/admin/orders`.
+9. **WhatsApp Launch**: The customer's browser launches WhatsApp with a pre-filled, itemized message linked to the official boutique hotline (`6282629144`), complete with order reference number for instant cross-referencing.
 
 ### 5.2 Custom-Made Atelier Consultation Flow
 1. **Bespoke Landing**: User visits [`/custom`](http://localhost:3000/custom) explaining the 4-step tailored process: Design Consultation → Measurements & Fabric → Artisanal Tailoring → Delivery & Fitting.
@@ -857,6 +862,81 @@ The SEO dashboard ([`SeoManagerClient.tsx`](file:///d:/works/Asme/Fairy%20findds
   - Dropdown enabling instant status updates (`new` → `confirmed` → `preparing` → `ready` → `shipped` → `delivered` → `cancelled`) with immediate database write and Next.js cache revalidation.
 - **Mark as Read**:
   - One-click button to acknowledge new orders and clear unread badges.
+
+---
+
+## 22. Order Email Alerts via Resend (₹0/Month Free Tier)
+
+### 22.1 Architecture & ₹0/Month Economics
+- **Provider**: [Resend](https://resend.com/) — Modern developer-first transactional email API.
+- **Cost**: **₹0/month** (Free Tier includes 3,000 emails/month, 100 emails/day, which easily accommodates boutique order volume).
+- **Zero Risk Architecture**:
+  - **Non-blocking Server Action Execution**: Email dispatch is triggered asynchronously via an unawaited background promise in `saveOrderAction` (`app/actions/orders.ts`). The customer's WhatsApp checkout redirect and order confirmation screen are never blocked by Resend API response latency.
+  - **Zero Checkout Disruption**: If Resend has a temporary network timeout, invalid key, or reaches daily limits, the customer order is **never lost, cancelled, or rolled back**. The order is safely stored in Supabase and the customer continues to WhatsApp.
+  - **Non-destructive Supabase Schema**: If the remote Supabase table has not run the latest migration yet, `saveOrder()` automatically falls back to insert without `email_notification_status`, preventing any database error.
+
+### 22.2 Email Template Aesthetics & Content
+- **Layout**: Clean luxury editorial layout built with responsive, email-client-safe tables and inline CSS.
+- **Brand Palette**: Clean ivory background (`#FAF9F6`), crisp white order card (`#FFFFFF`), dark typography (`#1A1A1A`), subtle dividers (`#E5E5E5`), and subtle boutique pink badge accent (`#FF55D2`).
+- **Data Displayed**:
+  - **Store Header**: "Fairy Finds Boutique — New Ready-to-Wear Order Alert".
+  - **Order Reference & Time**: Bold order ID (`#FFYYMMDD-XXX`) with human-readable timestamp formatted in Indian Standard Time (`Asia/Kolkata`, e.g., `21 Sep 2026, 11:30 AM IST`).
+  - **Customer Details**: Full customer name, phone number, delivery address, and customer notes (or "None provided").
+  - **Itemized Garments Table**: Item title, selected size, quantity, unit price, delivery fee, and line total.
+  - **Financial Summary**: Subtotal, Total Delivery Fee, and Grand Total matching the exact database snapshot.
+  - **Admin Action Button**: Deep link CTA button "View Order in Admin Dashboard" pointing to `https://fairyfindsboutique.store/admin/orders`.
+  - **Plain Text Alternative**: Clean ASCII plain-text fallback generated automatically for text-only email clients.
+
+### 22.3 Environment Variables
+Configure these in Vercel Project Settings → **Environment Variables** (and locally in `.env.local`):
+
+| Variable | Description | Example / Recommended Value |
+|---|---|---|
+| `RESEND_API_KEY` | Resend secret API key (starts with `re_`) | `re_123456789_abcdef...` |
+| `ORDER_NOTIFICATION_EMAIL` | Destination email where store owner receives alerts | `aswathymenon18@gmail.com` |
+| `RESEND_FROM_EMAIL` | Sender address (must match verified domain, or onboarding) | `Fairy Finds <orders@fairyfindsboutique.store>` |
+| `EMAIL_NOTIFICATIONS_ENABLED` | Master switch to enable/disable alerts | `true` |
+| `NEXT_PUBLIC_SITE_URL` | Base URL used for Admin deep links | `https://fairyfindsboutique.store` |
+
+> [!NOTE]
+> During initial testing before domain verification is completed in Resend, you can use `RESEND_FROM_EMAIL="Fairy Finds <onboarding@resend.dev>"`. Note that with `onboarding@resend.dev`, Resend only allows sending to the email address registered on the Resend account. Once your custom domain is verified, you can send to any recipient.
+
+### 22.4 Custom Domain Verification in Namecheap
+To send emails from `orders@fairyfindsboutique.store` to any destination email address:
+
+1. **Log in to Resend**: Navigate to **Domains** → **Add Domain** → enter `fairyfindsboutique.store`.
+2. **Log in to Namecheap**: Go to **Domain List** → click **Manage** next to `fairyfindsboutique.store` → **Advanced DNS**.
+3. **Add DNS Records from Resend**:
+   - **DKIM (CNAME or TXT)**:
+     - Type: `TXT` (or `CNAME` as specified by Resend)
+     - Host: `resend._domainkey`
+     - Value: Copied from Resend dashboard
+     - TTL: `Automatic` (or `5 min`)
+   - **SPF (TXT)**:
+     - If you don't have an existing SPF record:
+       - Type: `TXT`
+       - Host: `@` (or `bounces`)
+       - Value: `v=spf1 include:amazonses.com ~all` (as provided by Resend)
+   - **Custom Mail From / MX (if Resend requests a subdomain like `bounces.fairyfindsboutique.store`)**:
+     - Type: `MX`
+     - Host: `bounces`
+     - Value: `feedback-smtp.us-east-1.amazonses.com`
+     - Priority: `10`
+4. **DO NOT MODIFY**: Existing `@` A records, Vercel CNAME records, or root MX records for your business email.
+5. **Verify**: Click **Verify Records** in Resend. Verification typically completes within 2 to 10 minutes.
+
+### 22.5 Admin Portal Email Features
+- **Visual Status Badges**:
+  - `✓ Sent` (Green pill): Alert email successfully accepted by Resend.
+  - `⚠ Email Failed` (Amber/red pill): Delivery error or API key missing, displayed on both row and detail view.
+  - `Pending` (Gray pill): Awaiting processing.
+- **One-Click Resend Button**:
+  - Located on the order details drawer in `/admin/orders`.
+  - Re-triggers email dispatch for any order with real-time feedback toast (`"Alert email sent successfully"`).
+- **"Send Test Email" Button**:
+  - Located in the top header action bar of `/admin/orders`.
+  - Dispatches a sample order notification to `ORDER_NOTIFICATION_EMAIL` using mock data, without creating or modifying any database records. Allows immediate verification of API keys and email aesthetics.
+
 
 
 

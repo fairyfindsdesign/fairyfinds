@@ -1,4 +1,4 @@
-import { Order, OrderItem, OrderStatus } from '../types';
+import { Order, OrderItem, OrderStatus, EmailNotificationStatus } from '../types';
 import { getAdminSupabase } from '../supabase/admin';
 import fs from 'fs';
 import path from 'path';
@@ -37,29 +37,46 @@ export function generateOrderNumber(): string {
 export async function saveOrder(order: Omit<Order, 'id' | 'created_at' | 'updated_at'>): Promise<Order> {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
-  const newOrder: Order = { ...order, id, created_at: now, updated_at: now };
+  const newOrder: Order = {
+    ...order,
+    id,
+    email_notification_status: order.email_notification_status || 'pending',
+    created_at: now,
+    updated_at: now,
+  };
 
   const supabase = getAdminSupabase();
   if (supabase) {
     try {
-      const { data, error } = await supabase
+      const insertPayload: Record<string, any> = {
+        id: newOrder.id,
+        order_number: newOrder.order_number,
+        customer_name: newOrder.customer_name,
+        customer_phone: newOrder.customer_phone,
+        delivery_address: newOrder.delivery_address,
+        items: newOrder.items,
+        subtotal: newOrder.subtotal,
+        delivery_fee: newOrder.delivery_fee,
+        total: newOrder.total,
+        notes: newOrder.notes || null,
+        status: newOrder.status,
+        is_read: false,
+        email_notification_status: newOrder.email_notification_status || 'pending',
+      };
+      let { data, error } = await supabase
         .from('orders')
-        .insert({
-          id: newOrder.id,
-          order_number: newOrder.order_number,
-          customer_name: newOrder.customer_name,
-          customer_phone: newOrder.customer_phone,
-          delivery_address: newOrder.delivery_address,
-          items: newOrder.items,
-          subtotal: newOrder.subtotal,
-          delivery_fee: newOrder.delivery_fee,
-          total: newOrder.total,
-          notes: newOrder.notes || null,
-          status: newOrder.status,
-          is_read: false,
-        })
+        .insert(insertPayload)
         .select()
         .single();
+
+      // If the column does not exist yet on Supabase, retry insert without it
+      if (error && error.message && error.message.toLowerCase().includes('email_notification_status')) {
+        delete insertPayload.email_notification_status;
+        const retry = await supabase.from('orders').insert(insertPayload).select().single();
+        data = retry.data;
+        error = retry.error;
+      }
+
       if (error) throw new Error(error.message);
       const local = readLocalOrders();
       local.unshift(newOrder);
@@ -201,3 +218,28 @@ export async function getUnreadOrderCount(): Promise<number> {
   }
   return readLocalOrders().filter((o) => !o.is_read).length;
 }
+
+export async function updateOrderEmailStatus(id: string, status: EmailNotificationStatus): Promise<void> {
+  const supabase = getAdminSupabase();
+  const now = new Date().toISOString();
+  if (supabase) {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ email_notification_status: status, updated_at: now })
+        .eq('id', id);
+      if (error) {
+        console.error('[orders] Supabase updateOrderEmailStatus failed:', error.message);
+      }
+    } catch (err) {
+      console.error('[orders] Supabase updateOrderEmailStatus exception:', err);
+    }
+  }
+  const orders = readLocalOrders();
+  const idx = orders.findIndex((o) => o.id === id);
+  if (idx !== -1) {
+    orders[idx] = { ...orders[idx], email_notification_status: status, updated_at: now };
+    writeLocalOrders(orders);
+  }
+}
+

@@ -23,6 +23,8 @@ export interface OrderItem {
   line_total: number;
 }
 
+export type EmailNotificationStatus = 'pending' | 'sent' | 'failed';
+
 export interface Order {
   id: string;
   order_number: string;
@@ -36,6 +38,7 @@ export interface Order {
   notes?: string;
   status: OrderStatus;
   is_read: boolean;
+  email_notification_status?: EmailNotificationStatus;
   created_at: string;
   updated_at?: string;
 }

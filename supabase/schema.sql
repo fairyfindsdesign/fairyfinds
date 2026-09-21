@@ -144,6 +144,7 @@ CREATE TABLE IF NOT EXISTS orders (
   notes TEXT,
   status TEXT CHECK (status IN ('new','confirmed','preparing','ready','shipped','delivered','cancelled')) DEFAULT 'new',
   is_read BOOLEAN DEFAULT false,
+  email_notification_status TEXT DEFAULT 'pending',
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -190,6 +191,7 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS total DECIMAL(12, 2) NOT NULL DEFAUL
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS notes TEXT;
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'new';
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT false;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS email_notification_status TEXT DEFAULT 'pending';
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
 ALTER TABLE orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 

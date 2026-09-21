@@ -1,4 +1,4 @@
-﻿'use server';
+'use server';
 
 import { revalidatePath } from 'next/cache';
 import {
@@ -9,9 +9,11 @@ import {
   markOrderRead,
   getUnreadOrderCount,
   generateOrderNumber,
+  updateOrderEmailStatus,
 } from '@/lib/data/orders';
 import { CartItem, CustomerOrderDetails, Order, OrderStatus } from '@/lib/types';
 import { generateOrderWhatsAppUrl } from '@/lib/whatsapp';
+import { sendOrderEmailAlert, sendTestOrderEmail } from '@/lib/email/order-notification';
 import { checkAdminSession } from './auth';
 
 async function assertAdmin() {
@@ -85,6 +87,20 @@ export async function saveOrderAction(
       orderNumber
     );
 
+    // Non-blocking, safe dispatch of order alert email to store owner
+    sendOrderEmailAlert(saved, settings.currency_symbol || 'Rs.')
+      .then(async (res) => {
+        if (res.success) {
+          await updateOrderEmailStatus(saved.id, 'sent');
+        } else if (!res.skipped) {
+          await updateOrderEmailStatus(saved.id, 'failed');
+        }
+      })
+      .catch((err) => {
+        console.error('[saveOrderAction] Email alert error:', err);
+        updateOrderEmailStatus(saved.id, 'failed').catch(() => {});
+      });
+
     revalidatePath('/admin/orders', 'page');
     revalidatePath('/admin', 'layout');
 
@@ -148,3 +164,45 @@ export async function getUnreadCountAction(): Promise<{
     return { success: false, error: err?.message };
   }
 }
+
+export async function resendOrderEmailAction(orderId: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    await assertAdmin();
+    const order = await getOrderById(orderId);
+    if (!order) return { success: false, error: 'Order not found' };
+
+    const res = await sendOrderEmailAlert(order);
+    if (res.success) {
+      await updateOrderEmailStatus(order.id, 'sent');
+      revalidatePath('/admin/orders', 'page');
+      return { success: true };
+    } else {
+      await updateOrderEmailStatus(order.id, 'failed');
+      revalidatePath('/admin/orders', 'page');
+      return { success: false, error: res.error || 'Failed to send email notification' };
+    }
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Unauthorized or unexpected error' };
+  }
+}
+
+export async function sendTestEmailAction(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    await assertAdmin();
+    const res = await sendTestOrderEmail();
+    if (res.success) {
+      return { success: true };
+    } else {
+      return { success: false, error: res.error || 'Failed to send test email' };
+    }
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Unauthorized or unexpected error' };
+  }
+}
+

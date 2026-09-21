@@ -268,9 +268,17 @@ export async function sendOrderEmailAlert(
     };
   }
 
-  const fromEmail =
-    process.env.RESEND_FROM_EMAIL ||
+  const replyToEmail = (process.env.ORDER_REPLY_TO_EMAIL || 'fairyfindsdesign@gmail.com').trim();
+  let fromEmail =
+    process.env.RESEND_FROM_EMAIL?.trim() ||
     'Fairy Finds <orders@fairyfindsboutique.store>';
+
+  // Resend API disallows personal webmail domains (@gmail.com, @yahoo.com, etc.) in the 'from' header.
+  // Fall back to onboarding@resend.dev while preserving reply_to if a webmail address is specified.
+  if (/@(gmail|yahoo|outlook|hotmail|icloud)\.com/i.test(fromEmail)) {
+    console.warn(`[order-email] Note: Resend requires a custom verified domain or onboarding@resend.dev in 'from'. Falling back to onboarding@resend.dev with reply-to=${replyToEmail}`);
+    fromEmail = 'Fairy Finds <onboarding@resend.dev>';
+  }
 
   try {
     const resend = new Resend(apiKey);
@@ -280,6 +288,7 @@ export async function sendOrderEmailAlert(
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: [toEmail.trim()],
+      replyTo: replyToEmail,
       subject: subject,
       html: html,
     });

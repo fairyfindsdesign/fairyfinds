@@ -305,17 +305,17 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
       </section>
 
       {/* =========================================================================
-          2. MOBILE HERO (< sm:): Natural Image Size & Direct Clickable Slide Link
+          2. MOBILE HERO (< sm:): 16:9 Locked Aspect Ratio & Fill Image
           ========================================================================= */}
       <div className="block sm:hidden w-full bg-neutral-900">
         <section
-          className="relative w-full overflow-hidden bg-neutral-900 select-none"
+          className="relative w-full aspect-[16/9] overflow-hidden bg-neutral-900 select-none"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           aria-label="Featured Fashion Collection (Mobile)"
         >
-          {/* Natural Image Container with Direct Slide Link */}
+          {/* 16:9 Image Container with Direct Slide Link */}
           <AnimatePresence initial={false} mode="wait">
             <motion.div
               key={currentSlide.id || activeIndex}
@@ -326,19 +326,21 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
                 duration: shouldReduceMotion ? 0.2 : 0.4,
                 ease: 'easeInOut',
               }}
-              className="relative w-full"
+              className="absolute inset-0 w-full h-full"
             >
               <Link
                 href={currentSlide.button_link || '/shop'}
                 onClick={handleSlideClick}
-                className="block relative w-full cursor-pointer focus:outline-hidden"
+                className="block relative w-full h-full cursor-pointer focus:outline-hidden"
                 aria-label={currentSlide.heading || 'View Collection'}
               >
-                <img
+                <Image
                   src={currentSlide.image_url}
                   alt={currentSlide.heading || 'Fairy Finds Boutique'}
-                  className="w-full h-auto max-h-[75vh] object-cover block"
-                  loading="eager"
+                  fill
+                  priority={activeIndex === 0}
+                  sizes="100vw"
+                  className="object-cover object-center w-full h-full"
                 />
               </Link>
             </motion.div>

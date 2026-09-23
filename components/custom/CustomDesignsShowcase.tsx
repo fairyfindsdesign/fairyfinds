@@ -4,8 +4,24 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CustomDesign } from '@/lib/types';
+import { parseInstagramUrl } from '@/lib/utils/instagram';
+import InstagramEmbed from '@/components/ui/InstagramEmbed';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Video, X, ChevronLeft, ChevronRight, MessageCircle, ArrowRight, Scissors } from 'lucide-react';
+import { InstagramIcon } from '@/components/ui/Icons';
+import {
+  Sparkles,
+  Video,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  MessageCircle,
+  ArrowRight,
+  Scissors,
+  ExternalLink,
+  Film,
+  Camera,
+  Maximize2,
+} from 'lucide-react';
 
 interface CustomDesignsShowcaseProps {
   designs: CustomDesign[];
@@ -21,8 +37,8 @@ interface CustomDesignsShowcaseProps {
 
 export default function CustomDesignsShowcase({
   designs,
-  title = 'Our Custom Work',
-  subtitle = 'COMPLETED CREATIONS',
+  title = 'Our Custom Work & Reels',
+  subtitle = 'FROM OUR INSTAGRAM ATELIER',
   whatsappNumber = '6282629144',
   showCta = true,
   ctaButtonText = 'Start Your Custom Order',
@@ -33,15 +49,22 @@ export default function CustomDesignsShowcase({
   const publishedDesigns = designs.filter((d) => d.is_published);
   const [selectedDesign, setSelectedDesign] = useState<CustomDesign | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [modalActiveTab, setModalActiveTab] = useState<'reel' | 'photos'>('reel');
+
+  // Track active media tab (reel vs photo) per card when both exist
+  const [cardActiveTabs, setCardActiveTabs] = useState<Record<string, 'reel' | 'photos'>>({});
 
   if (publishedDesigns.length === 0) return null;
 
-  const openGallery = (design: CustomDesign) => {
+  const openModal = (design: CustomDesign) => {
     setSelectedDesign(design);
     setActiveImageIndex(0);
+    const ig = parseInstagramUrl(design.video_url || design.instagram_url);
+    // If it has an Instagram reel/post, default to reel tab, else photos
+    setModalActiveTab(ig ? 'reel' : 'photos');
   };
 
-  const closeGallery = () => {
+  const closeModal = () => {
     setSelectedDesign(null);
     setActiveImageIndex(0);
   };
@@ -52,78 +75,168 @@ export default function CustomDesignsShowcase({
     <section className="py-16 sm:py-24 bg-[#FAF9F6] border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-2 border-b border-neutral-200/80">
           <div className="space-y-2 max-w-xl">
-            <span className="text-[11px] uppercase tracking-[0.25em] text-[#FF55D2] font-semibold block">
-              {subtitle}
+            <span className="text-[11px] uppercase tracking-[0.25em] text-[#FF55D2] font-semibold block flex items-center gap-1.5">
+              <InstagramIcon className="w-3.5 h-3.5 text-[#FD00B9]" />
+              <span>{subtitle}</span>
             </span>
             <h2 className="font-serif text-2xl sm:text-4xl text-[#1A1A1A] font-light">
               {title}
             </h2>
           </div>
 
-          <Link
-            href="/custom"
-            className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#FF55D2] hover:text-[#FD00B9] font-semibold transition-colors"
-          >
-            <span>Create Your Own Outfit →</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href="https://instagram.com/fairyfinds.boutique"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#FD00B9] via-[#FF55D2] to-[#FF90E8] text-white text-xs uppercase tracking-wider font-semibold rounded-xs shadow-xs hover:opacity-95 transition-opacity"
+            >
+              <InstagramIcon className="w-4 h-4" />
+              <span>@fairyfinds.boutique</span>
+              <ExternalLink className="w-3 h-3 opacity-80" />
+            </a>
+
+            <Link
+              href="/custom"
+              className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-[#FF55D2] hover:text-[#FD00B9] font-semibold transition-colors px-2 py-2"
+            >
+              <span>Custom Order Form →</span>
+            </Link>
+          </div>
         </div>
 
-        {/* Designs Grid - Horizontally Scrollable on Mobile */}
-        <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
+        {/* Designs Grid - Embedded Reels & Custom Outfits */}
+        <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar items-start">
           {publishedDesigns.map((design) => {
-            const hasMultiple = design.images && design.images.length > 1;
+            const igInfo = parseInstagramUrl(design.video_url || design.instagram_url);
+            const hasImages = design.images && design.images.length > 0;
+            const hasBoth = Boolean(igInfo && hasImages);
+            const activeTab = cardActiveTabs[design.id] || (igInfo ? 'reel' : 'photos');
 
             return (
               <div
                 key={design.id}
-                onClick={() => openGallery(design)}
-                className="w-[280px] sm:w-auto shrink-0 snap-start group cursor-pointer bg-white border border-neutral-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-[#FF55D2]/50 transition-all duration-500 flex flex-col"
+                className="w-[300px] sm:w-auto shrink-0 snap-start bg-white border border-neutral-200 overflow-hidden shadow-xs hover:shadow-xl hover:border-[#FF55D2]/50 transition-all duration-500 flex flex-col rounded-xs group"
               >
-                <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden">
-                  <Image
-                    src={design.images?.[0] || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800'}
-                    alt={design.title}
-                    fill
-                    sizes="(max-width: 640px) 280px, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  {/* Badges */}
-                  <div className="absolute top-3 left-3 flex items-center gap-2">
-                    {design.category && (
+                {/* Media Container */}
+                <div className="relative bg-neutral-900 overflow-hidden">
+                  {/* Media Switcher Tab (if both Reel and Photos exist) */}
+                  {hasBoth && (
+                    <div className="absolute top-2.5 right-2.5 z-30 flex items-center bg-black/75 backdrop-blur-md rounded-full p-0.5 border border-white/20 shadow-md">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCardActiveTabs((prev) => ({ ...prev, [design.id]: 'reel' }));
+                        }}
+                        className={`px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full transition-colors flex items-center gap-1 ${
+                          activeTab === 'reel'
+                            ? 'bg-[#FF55D2] text-white shadow-xs'
+                            : 'text-neutral-300 hover:text-white'
+                        }`}
+                      >
+                        <Film className="w-3 h-3" />
+                        <span>Reel</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCardActiveTabs((prev) => ({ ...prev, [design.id]: 'photos' }));
+                        }}
+                        className={`px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full transition-colors flex items-center gap-1 ${
+                          activeTab === 'photos'
+                            ? 'bg-[#FF55D2] text-white shadow-xs'
+                            : 'text-neutral-300 hover:text-white'
+                        }`}
+                      >
+                        <Camera className="w-3 h-3" />
+                        <span>Photos ({design.images.length})</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Top Left Category Badge */}
+                  {design.category && (
+                    <div className="absolute top-2.5 left-2.5 z-20">
                       <span className="px-2.5 py-1 bg-white/95 backdrop-blur-xs text-[10px] uppercase tracking-wider font-semibold text-neutral-900 rounded-xs shadow-xs">
                         {design.category}
                       </span>
-                    )}
-                  </div>
-                  <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                    {design.video_url && (
-                      <span className="p-1.5 bg-black/60 backdrop-blur-xs rounded-full text-white" title="Has Video/Reel">
-                        <Video className="w-3.5 h-3.5 text-[#FF55D2]" />
-                      </span>
-                    )}
-                    {hasMultiple && (
-                      <span className="px-2 py-1 bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium rounded-xs">
-                        {design.images.length} photos
-                      </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
+
+                  {/* Render based on Active Media */}
+                  {activeTab === 'reel' && igInfo ? (
+                    <div className="w-full">
+                      <InstagramEmbed
+                        url={igInfo.permalink}
+                        title={design.title}
+                        aspectRatio={igInfo.isReel ? 'reel' : 'post'}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => openModal(design)}
+                      className="relative aspect-[3/4] bg-neutral-100 cursor-pointer overflow-hidden group"
+                    >
+                      <Image
+                        src={
+                          design.images?.[0] ||
+                          'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800'
+                        }
+                        alt={design.title}
+                        fill
+                        sizes="(max-width: 640px) 300px, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span className="p-3 bg-black/60 backdrop-blur-xs rounded-full text-white">
+                          <Maximize2 className="w-5 h-5" />
+                        </span>
+                      </div>
+                      {hasImages && design.images.length > 1 && (
+                        <div className="absolute bottom-2.5 right-2.5 px-2 py-1 bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium rounded-xs flex items-center gap-1">
+                          <Camera className="w-3 h-3" />
+                          <span>{design.images.length} photos</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                <div className="p-5 space-y-2 flex-1 flex flex-col justify-between bg-white">
+                {/* Details Footer */}
+                <div className="p-5 space-y-3 flex-1 flex flex-col justify-between bg-white border-t border-neutral-100">
                   <div>
-                    <h3 className="font-serif text-lg text-neutral-900 group-hover:text-[#FF55D2] transition-colors duration-500 font-medium">
+                    <h3 className="font-serif text-lg text-neutral-900 group-hover:text-[#FF55D2] transition-colors duration-300 font-medium">
                       {design.title}
                     </h3>
-                    <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed font-light mt-1">
+                    <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed font-light mt-1.5">
                       {design.description}
                     </p>
                   </div>
+
                   <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-xs">
-                    <span className="text-[#FF55D2] font-semibold group-hover:translate-x-1 transition-transform duration-500 inline-flex items-center gap-1">
-                      View Photos →
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => openModal(design)}
+                      className="text-[#FF55D2] font-semibold group-hover:translate-x-1 transition-transform duration-300 inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Explore Outfit Details →</span>
+                    </button>
+
+                    {igInfo && (
+                      <a
+                        href={igInfo.permalink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-neutral-400 hover:text-[#FD00B9] transition-colors inline-flex items-center gap-1 text-[11px]"
+                        title="View on Instagram"
+                      >
+                        <InstagramIcon className="w-3.5 h-3.5" />
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
@@ -131,11 +244,10 @@ export default function CustomDesignsShowcase({
           })}
         </div>
 
-        {/* CTA below Our Custom Work */}
+        {/* CTA below Showcase */}
         {showCta && (
           <div className="pt-4 sm:pt-8">
-            <div className="relative overflow-hidden bg-[#1A1A1A] text-white p-8 sm:p-12 lg:p-14 border border-neutral-800 shadow-xl">
-              {/* Subtle ambient luxury glows */}
+            <div className="relative overflow-hidden bg-[#1A1A1A] text-white p-8 sm:p-12 lg:p-14 border border-neutral-800 shadow-xl rounded-xs">
               <div
                 className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-[#FF55D2]/15 blur-3xl pointer-events-none"
                 aria-hidden="true"
@@ -147,7 +259,7 @@ export default function CustomDesignsShowcase({
 
               <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
                 <div className="space-y-4 text-center lg:text-left max-w-2xl">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-xs border border-white/15 text-[11px] uppercase tracking-[0.25em] text-[#FF55D2] font-semibold">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-xs border border-white/15 text-[11px] uppercase tracking-[0.25em] text-[#FF55D2] font-semibold rounded-xs">
                     <Scissors className="w-3.5 h-3.5" />
                     <span>Custom Tailoring Studio</span>
                   </div>
@@ -175,7 +287,7 @@ export default function CustomDesignsShowcase({
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto shrink-0">
                   <Link
                     href={ctaButtonLink}
-                    className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-lg shadow-[#FF55D2]/25 group"
+                    className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-[#FF55D2] hover:bg-[#FD00B9] text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-lg shadow-[#FF55D2]/25 group rounded-xs"
                   >
                     <span>{ctaButtonText}</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -187,7 +299,7 @@ export default function CustomDesignsShowcase({
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2.5 px-7 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300"
+                    className="inline-flex items-center justify-center gap-2.5 px-7 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 rounded-xs"
                   >
                     <MessageCircle className="w-4 h-4 text-emerald-400" />
                     <span>Chat on WhatsApp</span>
@@ -199,146 +311,197 @@ export default function CustomDesignsShowcase({
         )}
       </div>
 
-      {/* Lightbox / Gallery Modal with 0.5s Transition */}
+      {/* Enhanced Lightbox Modal */}
       <AnimatePresence>
-        {selectedDesign && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 overflow-hidden">
-            {/* Backdrop with 0.5s Fade */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              onClick={closeGallery}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
-            />
+        {selectedDesign && (() => {
+          const igInfo = parseInstagramUrl(selectedDesign.video_url || selectedDesign.instagram_url);
+          const hasImages = selectedDesign.images && selectedDesign.images.length > 0;
+          const hasBoth = Boolean(igInfo && hasImages);
 
-            {/* Modal Window with 0.5s Scale & Fade */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="relative max-w-4xl w-full bg-white rounded-xs overflow-hidden shadow-2xl z-10 max-h-[90vh] flex flex-col md:flex-row"
-            >
-              {/* Close button */}
-              <button
-                onClick={closeGallery}
-                className="absolute top-3 right-3 z-20 min-w-[44px] min-h-[44px] flex items-center justify-center bg-black/60 hover:bg-black text-white rounded-full transition-colors duration-500 cursor-pointer"
-                aria-label="Close modal"
+          return (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 overflow-hidden">
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                onClick={closeModal}
+                className="fixed inset-0 bg-black/85 backdrop-blur-md cursor-pointer"
+              />
+
+              {/* Modal Window */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="relative max-w-4xl w-full bg-white rounded-xs overflow-hidden shadow-2xl z-10 max-h-[92vh] flex flex-col md:flex-row"
               >
-                <X className="w-5 h-5" />
-              </button>
+                {/* Close button */}
+                <button
+                  onClick={closeModal}
+                  className="absolute top-3 right-3 z-30 min-w-[40px] min-h-[40px] flex items-center justify-center bg-black/60 hover:bg-black text-white rounded-full transition-colors cursor-pointer"
+                  aria-label="Close modal"
+                >
+                  <X className="w-5 h-5" />
+                </button>
 
-              {/* Left/Image Area */}
-              <div className="relative flex-1 aspect-[3/4] md:aspect-auto md:min-h-[500px] bg-neutral-900 overflow-hidden flex items-center justify-center">
-                <Image
-                  src={selectedDesign.images?.[activeImageIndex] || selectedDesign.images?.[0] || ''}
-                  alt={selectedDesign.title}
-                  fill
-                  className="object-contain"
-                />
-
-                {/* Prev / Next controls if multiple images */}
-                {selectedDesign.images && selectedDesign.images.length > 1 && (
-                  <>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : selectedDesign.images.length - 1));
-                      }}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] rounded-full bg-black/50 hover:bg-black text-white flex items-center justify-center transition-colors duration-500"
-                      aria-label="Previous photo"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveImageIndex((prev) => (prev < selectedDesign.images.length - 1 ? prev + 1 : 0));
-                      }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] rounded-full bg-black/50 hover:bg-black text-white flex items-center justify-center transition-colors duration-500"
-                      aria-label="Next photo"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  </>
-                )}
-
-                {/* Thumbnails */}
-                {selectedDesign.images && selectedDesign.images.length > 1 && (
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1 bg-black/50 rounded-xs">
-                    {selectedDesign.images.map((_, idx) => (
+                {/* Left/Media Area */}
+                <div className="relative flex-1 bg-neutral-950 overflow-hidden flex flex-col items-center justify-center min-h-[380px] md:min-h-[540px]">
+                  {/* Tab Selector if both exist */}
+                  {hasBoth && (
+                    <div className="absolute top-3 left-3 z-20 flex items-center bg-black/80 backdrop-blur-md rounded-full p-0.5 border border-white/20">
                       <button
-                        key={idx}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveImageIndex(idx);
-                        }}
-                        className={`w-2.5 h-2.5 rounded-full transition-all duration-500 cursor-pointer ${
-                          idx === activeImageIndex ? 'bg-[#FF55D2] scale-125' : 'bg-white/60'
+                        type="button"
+                        onClick={() => setModalActiveTab('reel')}
+                        className={`px-3 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full transition-colors flex items-center gap-1 ${
+                          modalActiveTab === 'reel'
+                            ? 'bg-[#FF55D2] text-white'
+                            : 'text-neutral-300 hover:text-white'
                         }`}
-                        aria-label={`Go to image ${idx + 1}`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Right/Details Area */}
-              <div className="w-full md:w-80 p-6 flex flex-col justify-between space-y-6 bg-white shrink-0">
-                <div className="space-y-3">
-                  {selectedDesign.category && (
-                    <span className="text-[10px] uppercase tracking-widest font-semibold text-[#FF55D2] block">
-                      {selectedDesign.category}
-                    </span>
-                  )}
-                  <h3 className="font-serif text-2xl text-neutral-900 font-normal">
-                    {selectedDesign.title}
-                  </h3>
-                  <p className="text-xs text-neutral-600 leading-relaxed font-light">
-                    {selectedDesign.description}
-                  </p>
-
-                  {selectedDesign.video_url && (
-                    <div className="pt-2">
-                      <a
-                        href={selectedDesign.video_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-xs font-semibold text-[#FF55D2] hover:underline"
                       >
-                        <Video className="w-4 h-4" />
-                        <span>Watch on Instagram Reel →</span>
-                      </a>
+                        <Film className="w-3 h-3" />
+                        <span>Reel</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setModalActiveTab('photos')}
+                        className={`px-3 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full transition-colors flex items-center gap-1 ${
+                          modalActiveTab === 'photos'
+                            ? 'bg-[#FF55D2] text-white'
+                            : 'text-neutral-300 hover:text-white'
+                        }`}
+                      >
+                        <Camera className="w-3 h-3" />
+                        <span>Photos ({selectedDesign.images.length})</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Media Content */}
+                  {modalActiveTab === 'reel' && igInfo ? (
+                    <div className="w-full h-full max-w-sm flex items-center justify-center p-2 sm:p-4">
+                      <InstagramEmbed
+                        url={igInfo.permalink}
+                        title={selectedDesign.title}
+                        aspectRatio={igInfo.isReel ? 'reel' : 'post'}
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative w-full h-full aspect-[3/4] md:aspect-auto flex items-center justify-center">
+                      <Image
+                        src={selectedDesign.images?.[activeImageIndex] || selectedDesign.images?.[0] || ''}
+                        alt={selectedDesign.title}
+                        fill
+                        className="object-contain"
+                      />
+
+                      {/* Prev / Next controls */}
+                      {selectedDesign.images && selectedDesign.images.length > 1 && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveImageIndex((prev) =>
+                                prev > 0 ? prev - 1 : selectedDesign.images.length - 1
+                              );
+                            }}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 min-w-[40px] min-h-[40px] rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center transition-colors"
+                            aria-label="Previous photo"
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveImageIndex((prev) =>
+                                prev < selectedDesign.images.length - 1 ? prev + 1 : 0
+                              );
+                            }}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 min-w-[40px] min-h-[40px] rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center transition-colors"
+                            aria-label="Next photo"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </button>
+
+                          {/* Thumbnails dots */}
+                          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1 bg-black/60 rounded-full">
+                            {selectedDesign.images.map((_, idx) => (
+                              <button
+                                key={idx}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveImageIndex(idx);
+                                }}
+                                className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${
+                                  idx === activeImageIndex ? 'bg-[#FF55D2] scale-125' : 'bg-white/60'
+                                }`}
+                                aria-label={`Go to photo ${idx + 1}`}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-neutral-100">
-                  <a
-                    href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(
-                      `Hello Fairy Finds, I loved your custom design "${selectedDesign.title}". Can I discuss creating something similar?`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider rounded-xs flex items-center justify-center gap-2 transition-colors duration-500 shadow-xs"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>Inquire via WhatsApp</span>
-                  </a>
-                  <Link
-                    href="/custom"
-                    onClick={closeGallery}
-                    className="w-full py-2.5 px-4 border border-neutral-300 hover:border-black text-neutral-800 text-xs font-semibold uppercase tracking-wider rounded-xs flex items-center justify-center transition-colors duration-500"
-                  >
-                    Custom Order Form
-                  </Link>
+                {/* Right/Details Area */}
+                <div className="w-full md:w-80 p-6 flex flex-col justify-between space-y-6 bg-white shrink-0 overflow-y-auto">
+                  <div className="space-y-3">
+                    {selectedDesign.category && (
+                      <span className="text-[10px] uppercase tracking-widest font-semibold text-[#FF55D2] block">
+                        {selectedDesign.category}
+                      </span>
+                    )}
+                    <h3 className="font-serif text-2xl text-neutral-900 font-normal">
+                      {selectedDesign.title}
+                    </h3>
+                    <p className="text-xs text-neutral-600 leading-relaxed font-light">
+                      {selectedDesign.description}
+                    </p>
+
+                    {igInfo && (
+                      <div className="pt-2">
+                        <a
+                          href={igInfo.permalink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-xs font-semibold text-[#FD00B9] hover:underline"
+                        >
+                          <InstagramIcon className="w-4 h-4" />
+                          <span>Watch on Instagram {igInfo.isReel ? 'Reel' : 'Post'} →</span>
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3 pt-4 border-t border-neutral-100">
+                    <a
+                      href={`https://wa.me/${cleanNumber}?text=${encodeURIComponent(
+                        `Hello Fairy Finds, I loved your custom creation "${selectedDesign.title}". Can I discuss creating something similar?`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold uppercase tracking-wider rounded-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span>Inquire via WhatsApp</span>
+                    </a>
+                    <Link
+                      href="/custom"
+                      onClick={closeModal}
+                      className="w-full py-2.5 px-4 border border-neutral-300 hover:border-black text-neutral-800 text-xs font-semibold uppercase tracking-wider rounded-xs flex items-center justify-center transition-colors"
+                    >
+                      Custom Order Form
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
+              </motion.div>
+            </div>
+          );
+        })()}
       </AnimatePresence>
     </section>
   );

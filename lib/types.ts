@@ -113,6 +113,8 @@ export interface CustomDesign {
   description: string;
   images: string[];
   video_url?: string;
+  instagram_url?: string;
+  media_type?: 'instagram_reel' | 'instagram_post' | 'image_gallery';
   category?: string;
   display_order: number;
   is_published: boolean;

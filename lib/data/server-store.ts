@@ -1249,14 +1249,15 @@ export async function saveServerCustomDesign(design: Partial<CustomDesign>): Pro
     data.custom_designs = [...initialCustomDesigns];
   }
 
+  const instagramLink = design.instagram_url || design.video_url || '';
   const newDesign: CustomDesign = {
     id,
     title: design.title || 'Completed Custom Design',
     description: design.description || '',
-    images: design.images && design.images.length > 0 ? design.images : [
-      'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=800'
-    ],
-    video_url: design.video_url || '',
+    images: Array.isArray(design.images) ? design.images : [],
+    video_url: instagramLink,
+    instagram_url: instagramLink,
+    media_type: design.media_type || (instagramLink ? (instagramLink.includes('/reel') ? 'instagram_reel' : 'instagram_post') : 'image_gallery'),
     category: design.category || 'Custom Work',
     display_order: design.display_order ?? (data.custom_designs.length + 1),
     is_published: design.is_published ?? true,

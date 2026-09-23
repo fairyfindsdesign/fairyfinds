@@ -958,7 +958,20 @@ To send emails from `orders@fairyfindsboutique.store` to any destination email a
   - Located in the top header action bar of `/admin/orders`.
   - Dispatches a sample order notification to `ORDER_NOTIFICATION_EMAIL` using mock data, without creating or modifying any database records. Allows immediate verification of API keys and email aesthetics.
 
+---
 
+## 23. Image Compression Pipeline & Carousel Quality Exception
 
+### 23.1 Core Architecture
+- Utilities: [`lib/utils/image-compression.ts`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/lib/utils/image-compression.ts)
+- Universal Uploader: [`components/admin/ImageUpload.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/ImageUpload.tsx)
+- Carousel Management: [`components/admin/HomepageCMSClient.tsx`](file:///d:/works/Asme/Fairy%20findds/Website/fairy-finds/components/admin/HomepageCMSClient.tsx)
 
+### 23.2 Compression Rules & Thresholds
+1. **Carousel Exception (`isCarousel: true`)**:
+   - **Under 4MB (`< 4 * 1024 * 1024` bytes / 4,194,304 bytes)**: Compression is **bypassed completely**. The original file is preserved with 100% pixel fidelity, colors, and resolution to guarantee ultra-sharp hero banners. Apple HEIC files under 4MB are transcoded to high-fidelity JPEG (`quality: 0.95`) without downscaling so web browsers can render them.
+   - **4MB or Larger (`>= 4MB`)**: Compressed to WebP at 80% quality, max dimensions (2560×1440), and guaranteed `<= 80%` of original file size.
+2. **All Other Uploads (`isCarousel: false` / default)**:
+   - Every other upload (products, lookbook galleries, reviews, category banners, collection covers, custom designs, and non-carousel homepage sections) is **automatically compressed** to WebP at 80% quality (max dimensions 1600×1600 or 1600×2000 for products).
+   - If an already tiny or optimized file would increase in size from re-encoding, the original file is safely kept.
 

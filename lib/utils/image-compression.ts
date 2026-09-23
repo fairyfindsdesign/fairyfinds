@@ -6,13 +6,16 @@
  * and compresses file sizes by up to 90-97% before network transmission.
  */
 
+export const CAROUSEL_COMPRESSION_THRESHOLD_BYTES = 4 * 1024 * 1024; // 4MB (4,194,304 bytes)
+
 export interface CompressionOptions {
   maxWidth?: number;
   maxHeight?: number;
   quality?: number; // 0.1 to 1.0 (default: 0.80 for 80% quality)
   outputFormat?: 'image/webp' | 'image/jpeg' | 'image/png';
-  minSizeToCompress?: number; // Minimum file size in bytes to trigger compression (default: 1MB = 1048576)
+  minSizeToCompress?: number; // Minimum file size in bytes to trigger compression
   targetMaxRatio?: number; // Max size ratio vs original (default: 0.80 for 80% of original size)
+  isCarousel?: boolean; // When true: images under 4MB preserve original quality; 4MB+ are compressed
 }
 
 export interface CompressionResult {
@@ -164,15 +167,16 @@ export async function convertHeicToJpeg(file: File, quality = 0.92): Promise<Fil
   }
 }
 
-
 /**
  * Compresses an image file in the browser using HTML5 Canvas with full HEIC/HEIF support.
  * 
- * Criteria:
- * 1. Only compresses if the file size is > 1MB (1,048,576 bytes). Files <= 1MB are kept uncompressed.
- *    - For standard web images (JPEG, PNG, WebP) <= 1MB, the original file is preserved untouched.
- *    - For Apple HEIC files <= 1MB, it is safely converted to clean JPEG so web browsers can render it.
- * 2. Compresses image at 80% quality and ensures the final file size is at most 80% of the original size.
+ * Rules:
+ * 1. Carousel Exception: If options.isCarousel is true and the image size is under 4MB (< 4,194,304 bytes),
+ *    compression is bypassed to preserve full editorial fidelity.
+ *    If it is an Apple HEIC file, it is converted to high-quality JPEG (quality: 0.95) without downscaling.
+ * 2. Carousel 4MB+ & Every Other Upload:
+ *    All non-carousel uploads (products, reviews, categories, etc.) and carousel images >= 4MB are compressed
+ *    at 80% quality to WebP and ensure file size is at most 80% of original.
  */
 export async function compressImage(
   file: File,
@@ -183,7 +187,8 @@ export async function compressImage(
     maxHeight = 1600,
     quality = 0.80, // 80% quality
     outputFormat = 'image/webp',
-    minSizeToCompress = 1024 * 1024, // 1MB threshold (1,048,576 bytes)
+    isCarousel = false,
+    minSizeToCompress = isCarousel ? CAROUSEL_COMPRESSION_THRESHOLD_BYTES : 0,
     targetMaxRatio = 0.80, // Max 80% of original size
   } = options;
 
@@ -199,11 +204,18 @@ export async function compressImage(
   // If it's a HEIC file, convert it to a standard JPEG working file first
   let workingFile: File = file;
   if (isHeic) {
-    workingFile = await convertHeicToJpeg(file, 0.92);
+    // For carousel exception, use 0.95 quality to preserve premium fidelity
+    workingFile = await convertHeicToJpeg(file, isCarousel ? 0.95 : 0.92);
   }
 
-  // CRITERIA 1: If original image size is 1MB or less, DO NOT COMPRESS.
-  if (originalSize <= minSizeToCompress) {
+  // EXCEPTION RULE:
+  // For carousel uploads: if originalSize < 4MB, skip compression!
+  // For non-carousel uploads: compress all uploads (minSizeToCompress defaults to 0).
+  const shouldSkipCompression = isCarousel
+    ? originalSize < minSizeToCompress
+    : minSizeToCompress > 0 && originalSize <= minSizeToCompress;
+
+  if (shouldSkipCompression) {
     const finalFile = workingFile;
     const previewUrl = URL.createObjectURL(finalFile);
 
@@ -245,7 +257,8 @@ export async function compressImage(
     });
   }
 
-  // CRITERIA 2: Original image is > 1MB -> Compress with 80% quality to max 80% of size
+  // COMPRESSION RULE:
+  // Carousel images >= 4MB and all other non-carousel uploads are compressed with 80% quality to WebP
   return new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(workingFile);
     const img = new Image();
@@ -352,6 +365,24 @@ export async function compressImage(
                 scaleDown -= 0.15;
               }
             }
+          }
+
+          // Safety guard: If compressed output is not smaller than original file,
+          // and it's not a HEIC conversion (which must be web readable), keep the original file.
+          if (blob.size >= originalSize && !isHeic) {
+            return resolve({
+              file: workingFile,
+              blob: workingFile,
+              previewUrl: URL.createObjectURL(workingFile),
+              originalSize,
+              compressedSize: originalSize,
+              savingsPercent: 0,
+              width: originalWidth,
+              height: originalHeight,
+              format: workingFile.type || 'image/jpeg',
+              wasCompressed: false,
+              wasHeic: false,
+            });
           }
 
           // Derive new filename with appropriate extension

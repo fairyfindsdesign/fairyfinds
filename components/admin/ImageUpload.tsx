@@ -17,34 +17,38 @@ import {
   X,
   AlertCircle,
 } from 'lucide-react';
-import { compressImage, formatBytes, isHeicFile, CompressionResult } from '@/lib/utils/image-compression';
+import {
+  compressImage,
+  formatBytes,
+  isHeicFile,
+  CompressionResult,
+  CAROUSEL_COMPRESSION_THRESHOLD_BYTES,
+} from '@/lib/utils/image-compression';
 
-interface SingleImageUploadProps {
-  multiple?: false;
-  value?: string;
-  onChange: (url: string) => void;
-  values?: never;
-  onMultiChange?: never;
+interface BaseImageUploadProps {
   label?: string;
   helperText?: string;
   aspectRatio?: string; // e.g. 'aspect-[3/4]', 'aspect-[16/9]', 'aspect-square'
   isAvatar?: boolean;
   maxWidth?: number;
   maxHeight?: number;
+  isCarousel?: boolean; // When true: images under 4MB bypass compression
 }
 
-interface MultiImageUploadProps {
+interface SingleImageUploadProps extends BaseImageUploadProps {
+  multiple?: false;
+  value?: string;
+  onChange: (url: string) => void;
+  values?: never;
+  onMultiChange?: never;
+}
+
+interface MultiImageUploadProps extends BaseImageUploadProps {
   multiple: true;
   values: string[];
   onMultiChange: (urls: string[]) => void;
   value?: never;
   onChange?: never;
-  label?: string;
-  helperText?: string;
-  aspectRatio?: string;
-  isAvatar?: boolean;
-  maxWidth?: number;
-  maxHeight?: number;
 }
 
 export type ImageUploadProps = SingleImageUploadProps | MultiImageUploadProps;
@@ -57,12 +61,18 @@ export default function ImageUpload(props: ImageUploadProps) {
     values = [],
     onMultiChange,
     label = 'Upload Photo',
-    helperText = 'Select or drag photos from your device. Supports Apple HEIC, JPEG, PNG, and WebP. Images over 1MB are automatically compressed to 80% size (WebP).',
+    helperText,
     aspectRatio = 'aspect-[3/4]',
     isAvatar = false,
     maxWidth = 1600,
     maxHeight = 1600,
+    isCarousel = false,
   } = props;
+
+  const defaultHelperText = isCarousel
+    ? 'Select or drag carousel photos. Images under 4MB preserve original full quality; images 4MB or larger are automatically compressed.'
+    : 'Select or drag photos from your device. Photos are automatically compressed to 80% size (WebP) with Apple HEIC support.';
+  const effectiveHelperText = helperText || defaultHelperText;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -89,8 +99,8 @@ export default function ImageUpload(props: ImageUploadProps) {
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const isOver1MB = file.size > 1024 * 1024;
         const isHeic = isHeicFile(file);
+        const isCarouselUnder4MB = isCarousel && file.size < CAROUSEL_COMPRESSION_THRESHOLD_BYTES;
 
         if (isHeic) {
           setProcessingStatus(
@@ -98,24 +108,34 @@ export default function ImageUpload(props: ImageUploadProps) {
               ? `Converting Apple HEIC photo ${i + 1} of ${files.length} (${formatBytes(file.size)})...`
               : `Converting Apple HEIC photo (${formatBytes(file.size)})...`
           );
+        } else if (isCarouselUnder4MB) {
+          setProcessingStatus(
+            files.length > 1
+              ? `Preparing carousel photo ${i + 1} of ${files.length} (${formatBytes(file.size)} < 4MB - original quality)...`
+              : `Preparing carousel photo (${formatBytes(file.size)} < 4MB - original quality)...`
+          );
+        } else if (isCarousel) {
+          setProcessingStatus(
+            files.length > 1
+              ? `Compressing carousel photo ${i + 1} of ${files.length} (${formatBytes(file.size)} >= 4MB to WebP)...`
+              : `Compressing carousel photo (${formatBytes(file.size)} >= 4MB to WebP)...`
+          );
         } else {
           setProcessingStatus(
-            isOver1MB
-              ? files.length > 1
-                ? `Compressing image ${i + 1} of ${files.length} (${formatBytes(file.size)} > 1MB)...`
-                : `Compressing image (${formatBytes(file.size)} > 1MB)...`
-              : files.length > 1
-                ? `Uploading image ${i + 1} of ${files.length} (${formatBytes(file.size)} <= 1MB)...`
-                : `Uploading image (${formatBytes(file.size)} <= 1MB)...`
+            files.length > 1
+              ? `Compressing photo ${i + 1} of ${files.length} (${formatBytes(file.size)} to WebP)...`
+              : `Compressing photo (${formatBytes(file.size)} to WebP)...`
           );
         }
 
-        // 1. Client-side compression / HEIC conversion (images > 1MB compressed at 80% quality to max 80% size)
+        // 1. Client-side compression / HEIC conversion:
+        // - Carousels under 4MB bypass compression (preserve 100% quality)
+        // - Carousels >= 4MB and all other uploads are compressed to WebP at 80% quality
         const compression = await compressImage(file, {
           maxWidth,
           maxHeight,
           quality: 0.80,
-          minSizeToCompress: 1024 * 1024,
+          isCarousel,
           targetMaxRatio: 0.80,
           outputFormat: 'image/webp',
         });
@@ -125,13 +145,17 @@ export default function ImageUpload(props: ImageUploadProps) {
           setProcessingStatus(
             `Uploading compressed ${compression.wasHeic ? 'HEIC➔WebP' : 'image'} (${formatBytes(compression.compressedSize)} - ${compression.savingsPercent}% saved)...`
           );
+        } else if (isCarouselUnder4MB) {
+          setProcessingStatus(
+            `Uploading original carousel image (${formatBytes(file.size)} - under 4MB, compression bypassed)...`
+          );
         } else if (compression.wasHeic) {
           setProcessingStatus(
             `Uploading converted Apple HEIC photo (${formatBytes(compression.compressedSize)})...`
           );
         } else {
           setProcessingStatus(
-            `Uploading original image (${formatBytes(file.size)} - under 1MB)...`
+            `Uploading original image (${formatBytes(file.size)})...`
           );
         }
 
@@ -255,7 +279,7 @@ export default function ImageUpload(props: ImageUploadProps) {
           <label className="block text-xs uppercase tracking-wider font-semibold text-neutral-800">
             {label}
           </label>
-          <p className="text-[11px] text-neutral-500 font-light mt-0.5">{helperText}</p>
+          <p className="text-[11px] text-neutral-500 font-light mt-0.5">{effectiveHelperText}</p>
         </div>
 
         <button
@@ -339,13 +363,18 @@ export default function ImageUpload(props: ImageUploadProps) {
                   {compressionStats.width}×{compressionStats.height} WebP (80% quality)
                   {compressionStats.wasHeic ? ' [Converted from Apple HEIC]' : ''}
                 </span>
+              ) : isCarousel && compressionStats.originalSize < CAROUSEL_COMPRESSION_THRESHOLD_BYTES ? (
+                <span>
+                  {formatBytes(compressionStats.originalSize)} • <strong className="text-emerald-700">Original quality preserved</strong> (Carousel under 4MB exception)
+                  {compressionStats.wasHeic ? ' [Converted from Apple HEIC]' : ''}
+                </span>
               ) : compressionStats.wasHeic ? (
                 <span>
-                  {formatBytes(compressionStats.originalSize)} ➔ Converted Apple HEIC to standard JPEG ({formatBytes(compressionStats.compressedSize)}) • Under 1MB
+                  {formatBytes(compressionStats.originalSize)} ➔ Converted Apple HEIC ({formatBytes(compressionStats.compressedSize)})
                 </span>
               ) : (
                 <span>
-                  {formatBytes(compressionStats.originalSize)} • Preserved original (under 1MB, compression bypassed)
+                  {formatBytes(compressionStats.originalSize)} • Preserved original
                 </span>
               )}
             </div>
@@ -380,7 +409,15 @@ export default function ImageUpload(props: ImageUploadProps) {
                 </span>
                 {compressionStats && (
                   <span className="text-[10px] font-mono text-neutral-500">
-                    {formatBytes(compressionStats.compressedSize)} ({compressionStats.wasCompressed ? (compressionStats.wasHeic ? 'HEIC➔WebP 80%' : 'WebP 80%') : compressionStats.wasHeic ? 'HEIC➔JPEG' : 'Original'})
+                    {formatBytes(compressionStats.compressedSize)} ({
+                      compressionStats.wasCompressed
+                        ? (compressionStats.wasHeic ? 'HEIC➔WebP 80%' : 'WebP 80%')
+                        : isCarousel && compressionStats.originalSize < CAROUSEL_COMPRESSION_THRESHOLD_BYTES
+                          ? 'Carousel Original'
+                          : compressionStats.wasHeic
+                            ? 'HEIC➔JPEG'
+                            : 'Original'
+                    })
                   </span>
                 )}
               </div>
@@ -533,7 +570,11 @@ export default function ImageUpload(props: ImageUploadProps) {
 
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-neutral-200 rounded-xs text-[10px] uppercase font-mono text-neutral-500 shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 text-[#FF55D2]" />
-              <span>Apple HEIC + Smart WebP (images &gt; 1MB compressed to 80% size)</span>
+              {isCarousel ? (
+                <span>Carousel Quality Exception: Under 4MB kept original • 4MB+ compressed (80% WebP)</span>
+              ) : (
+                <span>Smart WebP auto-compression (80% quality) • Apple HEIC support</span>
+              )}
             </div>
           </div>
         </div>

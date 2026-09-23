@@ -425,7 +425,7 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                               </span>
                             </div>
                             <p className="text-[11px] text-neutral-500 font-light mt-0.5">
-                              Select multiple photos from your device. Carousel images under 4MB preserve full original quality; images 4MB or larger are automatically compressed.
+                              Select multiple photos from your device. Carousel images under 4MB preserve full original quality; images 4MB or larger are compressed by at most 50%.
                             </p>
                           </div>
                         </div>
@@ -706,7 +706,7 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                               value={currentHeroSlide.image_url || ''}
                               onChange={(url) => updateCurrentSlide({ image_url: url })}
                               label="Slide Background Editorial Image"
-                              helperText="Upload an editorial photo directly from your device. Carousel images under 4MB preserve full original quality (images 4MB or larger are compressed)."
+                              helperText="Upload an editorial photo directly from your device. Carousel images under 4MB preserve full original quality (images 4MB or larger are compressed by at most 50%)."
                               aspectRatio="aspect-[16/9]"
                               isCarousel={true}
                               maxWidth={2560}
@@ -859,7 +859,7 @@ export default function HomepageCMSClient({ initialSections }: HomepageCMSClient
                             value={editFields.image_url || ''}
                             onChange={(url) => setEditFields({ ...editFields, image_url: url })}
                             label="Section Feature Imagery"
-                            helperText="Upload feature photograph from your device. Images over 1MB are compressed to 80% size (WebP)."
+                            helperText="Upload feature photograph from your device. Images are compressed by at most 50% to preserve quality (WebP)."
                             aspectRatio="aspect-[16/9]"
                             maxWidth={1600}
                             maxHeight={1000}

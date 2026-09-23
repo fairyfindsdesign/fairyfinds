@@ -969,9 +969,10 @@ To send emails from `orders@fairyfindsboutique.store` to any destination email a
 
 ### 23.2 Compression Rules & Thresholds
 1. **Carousel Exception (`isCarousel: true`)**:
-   - **Under 4MB (`< 4 * 1024 * 1024` bytes / 4,194,304 bytes)**: Compression is **bypassed completely**. The original file is preserved with 100% pixel fidelity, colors, and resolution to guarantee ultra-sharp hero banners. Apple HEIC files under 4MB are transcoded to high-fidelity JPEG (`quality: 0.95`) without downscaling so web browsers can render them.
-   - **4MB or Larger (`>= 4MB`)**: Compressed to WebP at 80% quality, max dimensions (2560×1440), and guaranteed `<= 80%` of original file size.
+   - **Under 4MB (`< 4 * 1024 * 1024` bytes / 4,194,304 bytes)**: Compression is **bypassed completely** (0% compression). The original file is preserved with 100% pixel fidelity, colors, and resolution to guarantee ultra-sharp hero banners. Apple HEIC files under 4MB are transcoded to high-fidelity JPEG (`quality: 0.95`) without downscaling so web browsers can render them.
+   - **4MB or Larger (`>= 4MB`)**: Compressed to WebP with high visual fidelity, **never exceeding 50% compression** (retains at least 50% of original file size, quality >= 0.50).
 2. **All Other Uploads (`isCarousel: false` / default)**:
-   - Every other upload (products, lookbook galleries, reviews, category banners, collection covers, custom designs, and non-carousel homepage sections) is **automatically compressed** to WebP at 80% quality (max dimensions 1600×1600 or 1600×2000 for products).
+   - Every other upload (products, lookbook galleries, reviews, category banners, collection covers, custom designs, and non-carousel homepage sections) is compressed to WebP with **at most 50% compression** (retains at least 50% of original file size, quality never falls below 50%).
+   - If an image would naturally compress to smaller than 50%, quality is automatically boosted up to near-lossless (0.90–0.98) to maximize fine fabric textures and embroidery detail.
    - If an already tiny or optimized file would increase in size from re-encoding, the original file is safely kept.
 

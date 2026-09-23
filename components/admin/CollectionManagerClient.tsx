@@ -360,7 +360,7 @@ export default function CollectionManagerClient({
                 value={imageUrl}
                 onChange={setImageUrl}
                 label="Editorial Banner Image *"
-                helperText="Upload a signature banner directly from your device or camera roll. Images over 1MB are automatically compressed to 80% size (WebP)."
+                helperText="Upload a signature banner directly from your device or camera roll. Images are compressed by at most 50% (WebP) to retain full clarity."
                 aspectRatio="aspect-[16/9]"
                 maxWidth={1920}
                 maxHeight={1080}

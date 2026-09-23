@@ -7,15 +7,16 @@
  */
 
 export const CAROUSEL_COMPRESSION_THRESHOLD_BYTES = 4 * 1024 * 1024; // 4MB (4,194,304 bytes)
+export const MAX_COMPRESSION_PERCENT = 50; // Maximum compression allowed is 50%
 
 export interface CompressionOptions {
   maxWidth?: number;
   maxHeight?: number;
-  quality?: number; // 0.1 to 1.0 (default: 0.80 for 80% quality)
+  quality?: number; // 0.50 to 1.0 (default: 0.85; never below 0.50)
   outputFormat?: 'image/webp' | 'image/jpeg' | 'image/png';
   minSizeToCompress?: number; // Minimum file size in bytes to trigger compression
-  targetMaxRatio?: number; // Max size ratio vs original (default: 0.80 for 80% of original size)
-  isCarousel?: boolean; // When true: images under 4MB preserve original quality; 4MB+ are compressed
+  targetMaxRatio?: number; // Target max ratio vs original (default: 0.50 for max 50% compression)
+  isCarousel?: boolean; // When true: images under 4MB preserve original quality; 4MB+ are compressed by at most 50%
 }
 
 export interface CompressionResult {
@@ -117,7 +118,7 @@ export function isHeicFile(file: File): boolean {
  * Includes automatic detection and fallback for photos that are already browser readable
  * (e.g. when iOS photo picker auto-transcodes to JPEG on file select).
  */
-export async function convertHeicToJpeg(file: File, quality = 0.92): Promise<File> {
+export async function convertHeicToJpeg(file: File, quality = 0.95): Promise<File> {
   if (typeof window === 'undefined') {
     throw new Error('HEIC conversion can only be performed in browser environment.');
   }
@@ -174,22 +175,22 @@ export async function convertHeicToJpeg(file: File, quality = 0.92): Promise<Fil
  * 1. Carousel Exception: If options.isCarousel is true and the image size is under 4MB (< 4,194,304 bytes),
  *    compression is bypassed to preserve full editorial fidelity.
  *    If it is an Apple HEIC file, it is converted to high-quality JPEG (quality: 0.95) without downscaling.
- * 2. Carousel 4MB+ & Every Other Upload:
- *    All non-carousel uploads (products, reviews, categories, etc.) and carousel images >= 4MB are compressed
- *    at 80% quality to WebP and ensure file size is at most 80% of original.
+ * 2. 50% Maximum Compression Rule:
+ *    No image is ever compressed more than 50% (retains at least 50% of original size, quality >= 0.50).
+ *    All non-carousel uploads and carousel images >= 4MB are compressed by at most 50% to WebP.
  */
 export async function compressImage(
   file: File,
   options: CompressionOptions = {}
 ): Promise<CompressionResult> {
   const {
-    maxWidth = 1600,
-    maxHeight = 1600,
-    quality = 0.80, // 80% quality
+    maxWidth = 2000,
+    maxHeight = 2000,
+    quality = 0.85, // High visual fidelity (never below 0.50)
     outputFormat = 'image/webp',
     isCarousel = false,
     minSizeToCompress = isCarousel ? CAROUSEL_COMPRESSION_THRESHOLD_BYTES : 0,
-    targetMaxRatio = 0.80, // Max 80% of original size
+    targetMaxRatio = 0.50, // Capped: never compress more than 50%
   } = options;
 
   const isHeic = isHeicFile(file);
@@ -204,13 +205,11 @@ export async function compressImage(
   // If it's a HEIC file, convert it to a standard JPEG working file first
   let workingFile: File = file;
   if (isHeic) {
-    // For carousel exception, use 0.95 quality to preserve premium fidelity
     workingFile = await convertHeicToJpeg(file, isCarousel ? 0.95 : 0.92);
   }
 
   // EXCEPTION RULE:
-  // For carousel uploads: if originalSize < 4MB, skip compression!
-  // For non-carousel uploads: compress all uploads (minSizeToCompress defaults to 0).
+  // For carousel uploads: if originalSize < 4MB, skip compression completely!
   const shouldSkipCompression = isCarousel
     ? originalSize < minSizeToCompress
     : minSizeToCompress > 0 && originalSize <= minSizeToCompress;
@@ -258,7 +257,7 @@ export async function compressImage(
   }
 
   // COMPRESSION RULE:
-  // Carousel images >= 4MB and all other non-carousel uploads are compressed with 80% quality to WebP
+  // Carousel images >= 4MB and all other uploads are compressed by AT MOST 50% to WebP
   return new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(workingFile);
     const img = new Image();
@@ -276,11 +275,11 @@ export async function compressImage(
       let width = originalWidth;
       let height = originalHeight;
 
-      // Calculate scaling preserving aspect ratio
+      // Calculate scaling preserving aspect ratio (never downscale below 50% of original dimensions)
       if (width > maxWidth || height > maxHeight) {
         const widthRatio = maxWidth / width;
         const heightRatio = maxHeight / height;
-        const scale = Math.min(widthRatio, heightRatio);
+        const scale = Math.max(0.50, Math.min(widthRatio, heightRatio));
 
         width = Math.round(width * scale);
         height = Math.round(height * scale);
@@ -312,7 +311,9 @@ export async function compressImage(
         targetFormat = 'image/jpeg';
       }
 
-      const maxAllowedSize = Math.floor(originalSize * targetMaxRatio);
+      // CRITICAL RULE: "Don't compress any image more than 50%"
+      // 1. Retain at least 50% of original file size (minAllowedSize = 50% of originalSize)
+      const minAllowedSize = Math.floor(originalSize * 0.50);
 
       const getBlob = (q: number): Promise<Blob | null> => {
         return new Promise((res) => {
@@ -322,47 +323,40 @@ export async function compressImage(
 
       (async () => {
         try {
-          let currentQuality = quality; // 0.80 (80% quality)
+          // Start with high visual quality (never below 0.50)
+          let currentQuality = Math.max(0.50, Math.min(0.95, quality));
           let blob = await getBlob(currentQuality);
 
           if (!blob) {
             return reject(new Error('Canvas compression returned empty blob.'));
           }
 
-          // If the blob exceeds 80% of original size, adjust quality / dimensions
-          if (blob.size > maxAllowedSize) {
-            const qualitySteps = [0.70, 0.60, 0.50];
-            for (const qStep of qualitySteps) {
-              if (blob.size <= maxAllowedSize) break;
-              const nextBlob = await getBlob(qStep);
-              if (nextBlob && nextBlob.size < blob.size) {
-                blob = nextBlob;
-                currentQuality = qStep;
+          // If blob was compressed MORE than 50% (blob.size < minAllowedSize):
+          // Automatically increase quality up to near-lossless (0.90 -> 0.95 -> 0.98)
+          // to preserve maximum fine details, silk sheen, and crisp embroidery
+          if (blob.size < minAllowedSize) {
+            const boostSteps = [0.90, 0.94, 0.98];
+            for (const bq of boostSteps) {
+              const betterBlob = await getBlob(bq);
+              if (betterBlob) {
+                blob = betterBlob;
+                currentQuality = bq;
+                if (blob.size >= minAllowedSize) break;
               }
             }
+          }
 
-            // If still over 80% of original size, downscale dimensions
-            if (blob.size > maxAllowedSize && width > 400) {
-              let scaleDown = 0.85;
-              while (blob.size > maxAllowedSize && scaleDown >= 0.5) {
-                const downCanvas = document.createElement('canvas');
-                downCanvas.width = Math.round(width * scaleDown);
-                downCanvas.height = Math.round(height * scaleDown);
-                const downCtx = downCanvas.getContext('2d');
-                if (downCtx) {
-                  downCtx.imageSmoothingEnabled = true;
-                  downCtx.imageSmoothingQuality = 'high';
-                  downCtx.drawImage(canvas, 0, 0, downCanvas.width, downCanvas.height);
-                  const scaledBlob: Blob | null = await new Promise((res) => {
-                    downCanvas.toBlob((b) => res(b), targetFormat, currentQuality);
-                  });
-                  if (scaledBlob && scaledBlob.size < blob.size) {
-                    blob = scaledBlob;
-                    width = downCanvas.width;
-                    height = downCanvas.height;
-                  }
+          // If gentle compression is needed, step down quality but NEVER below 0.50 (50%)
+          if (blob.size > originalSize * 0.85 && currentQuality > 0.50) {
+            const stepDown = [0.80, 0.75, 0.70, 0.60, 0.50];
+            for (const qStep of stepDown) {
+              if (qStep < currentQuality) {
+                const nextBlob = await getBlob(qStep);
+                if (nextBlob && nextBlob.size >= minAllowedSize) {
+                  blob = nextBlob;
+                  currentQuality = qStep;
+                  if (blob.size <= originalSize * 0.85) break;
                 }
-                scaleDown -= 0.15;
               }
             }
           }
@@ -396,10 +390,9 @@ export async function compressImage(
           });
 
           const compressedSize = blob.size;
-          const savingsPercent = Math.max(
-            0,
-            Math.round(((originalSize - compressedSize) / originalSize) * 100)
-          );
+          // Compression savings strictly capped at 50% max
+          const rawSavings = Math.round(((originalSize - compressedSize) / originalSize) * 100);
+          const savingsPercent = Math.max(0, Math.min(50, rawSavings));
 
           const previewUrl = URL.createObjectURL(blob);
 

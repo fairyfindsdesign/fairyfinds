@@ -110,11 +110,6 @@ export default function ReviewsMarquee({
           <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#1A1A1A] font-light tracking-tight">
             {heading}
           </h2>
-          {description && (
-            <p className="text-neutral-500 text-xs sm:text-sm font-light mt-3 leading-relaxed">
-              {description}
-            </p>
-          )}
         </div>
 
         {/* Infinite Marquee Track Framing with Left/Right Editorial Fade Masks */}

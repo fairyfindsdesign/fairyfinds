@@ -60,9 +60,6 @@ export default function CustomDesignsShowcase({
             <h2 className="font-serif text-2xl sm:text-4xl text-[#1A1A1A] font-light">
               {title}
             </h2>
-            <p className="text-xs sm:text-sm text-neutral-600 font-light leading-relaxed">
-              Explore outfits made specifically for our clients, from bridal sets to festive evening wear.
-            </p>
           </div>
 
           <Link
@@ -158,10 +155,6 @@ export default function CustomDesignsShowcase({
                   <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-white font-light tracking-wide leading-tight">
                     {ctaHeading}
                   </h3>
-
-                  <p className="text-xs sm:text-sm text-neutral-300 font-light leading-relaxed">
-                    {ctaDescription}
-                  </p>
 
                   <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 pt-1 text-[11px] text-neutral-400">
                     <span className="flex items-center gap-1.5">

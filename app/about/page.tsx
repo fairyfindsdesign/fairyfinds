@@ -90,9 +90,6 @@ export default function AboutPage() {
         <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-[#1A1A1A] font-light leading-tight">
           Quality Craftsmanship Meets Modern Femininity
         </h1>
-        <p className="mt-4 text-sm sm:text-base text-neutral-600 font-light leading-relaxed">
-          Rooted in Neendoor, Kottayam, Fairy Finds Boutique was founded with a singular purpose: to bring graceful dresses, bridal wear, and traditional textile artistry into the modern wardrobe.
-        </p>
       </div>
 
       {/* Hero Visual Banner */}

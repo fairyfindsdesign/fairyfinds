@@ -147,10 +147,6 @@ export default async function HomePage() {
                     </div>
                   }
                   title={section.content.heading || 'Featured Collections & Highlights'}
-                  description={
-                    section.content.description ||
-                    'Handpicked styles for weddings and celebrations. Explore our signature dresses and festive sarees.'
-                  }
                   actionLink={{
                     href: '/shop',
                     label: 'Explore All Styles',
@@ -196,11 +192,6 @@ export default async function HomePage() {
                               <h3 className="font-serif text-2xl sm:text-3xl font-light tracking-wide text-white group-hover:text-[#FF55D2] transition-colors">
                                 {col.name}
                               </h3>
-                              {col.description && (
-                                <p className="text-xs text-neutral-300 mt-1.5 font-light line-clamp-2 leading-relaxed">
-                                  {col.description}
-                                </p>
-                              )}
                               <div className="mt-4 flex items-center justify-between pt-3 border-t border-white/20 text-xs">
                                 <span className="text-[11px] text-neutral-300 uppercase tracking-wider">
                                   {count} {count === 1 ? 'Piece' : 'Pieces'} in Boutique
@@ -242,10 +233,6 @@ export default async function HomePage() {
                   <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-light text-white leading-tight">
                     {section.content.heading || 'The Signature Collection'}
                   </h2>
-                  <p className="text-neutral-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto font-light">
-                    {section.content.description ||
-                      'An ode to timeless grace. Rich silk textures, delicate weaves, and hand-finished borders designed to turn every celebration into an unforgettable memory.'}
-                  </p>
                   <div className="pt-4">
                     <Link
                       href={section.content.button_link || '/collections/red-saree'}
@@ -272,10 +259,6 @@ export default async function HomePage() {
                   </div>
                 }
                 title={section.content.heading || 'Featured Boutique Pieces'}
-                description={
-                  section.content.description ||
-                  'Signature styles and favorites selected for this season.'
-                }
                 actionLink={{
                   href: section.content.button_link || '/shop',
                   label: section.content.button_text || 'View Entire Catalog',
@@ -300,9 +283,6 @@ export default async function HomePage() {
                 id="categories"
                 eyebrow={section.subtitle || 'POPULAR STYLES'}
                 title={section.content.heading || 'Shop by Category'}
-                description={
-                  section.content.description || 'Browse our garments by style category.'
-                }
                 className="py-16 sm:py-20 bg-[#FAF9F6] border-b border-neutral-200"
               >
                 {categories.map((cat) => (
@@ -328,9 +308,6 @@ export default async function HomePage() {
                         <h3 className="font-serif text-2xl font-light tracking-wide group-hover:text-[#FF55D2] transition-colors">
                           {cat.name}
                         </h3>
-                        <p className="text-xs text-neutral-300 mt-1 line-clamp-2 font-light">
-                          {cat.description}
-                        </p>
                         <span className="mt-4 text-[11px] uppercase tracking-widest text-[#FF55D2] font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                           Shop {cat.name} <ArrowRight className="w-3.5 h-3.5" />
                         </span>
@@ -367,7 +344,6 @@ export default async function HomePage() {
                   reviews={reviews}
                   heading={section.content?.heading}
                   subtitle={section.subtitle}
-                  description={section.content?.description}
                   badge={section.content?.badge}
                 />
               </div>

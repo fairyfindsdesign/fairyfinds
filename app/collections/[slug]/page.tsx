@@ -129,11 +129,6 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
           <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-light text-white">
             {collection.name}
           </h1>
-          {collection.description && (
-            <p className="text-neutral-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto font-light">
-              {collection.description}
-            </p>
-          )}
         </div>
       </div>
 

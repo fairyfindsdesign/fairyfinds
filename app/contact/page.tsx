@@ -85,9 +85,6 @@ export default async function ContactPage() {
         <h1 className="font-serif text-4xl sm:text-5xl text-[#1A1A1A] font-light">
           We Are Here to Help
         </h1>
-        <p className="mt-3 text-sm text-neutral-500 font-light leading-relaxed">
-          For sizing questions, order help, or custom orders, our team is happy to assist you on WhatsApp and email.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">

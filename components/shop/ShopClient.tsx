@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { Product, Category, Collection } from '@/lib/types';
 import ProductCard from '@/components/ui/ProductCard';
-import { Filter, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import { Filter, SlidersHorizontal, RotateCcw, Search, X } from 'lucide-react';
 
 interface ShopClientProps {
   initialProducts: Product[];
@@ -11,6 +11,7 @@ interface ShopClientProps {
   collections: Collection[];
   initialCategory?: string;
   initialCollection?: string;
+  initialSearch?: string;
 }
 
 export default function ShopClient({
@@ -19,7 +20,9 @@ export default function ShopClient({
   collections,
   initialCategory,
   initialCollection,
+  initialSearch,
 }: ShopClientProps) {
+  const [searchQuery, setSearchQuery] = useState<string>(initialSearch || '');
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'all');
   const [selectedCollection, setSelectedCollection] = useState<string>(initialCollection || 'all');
   const [selectedSize, setSelectedSize] = useState<string>('all');
@@ -40,6 +43,18 @@ export default function ShopClient({
   const filteredProducts = useMemo(() => {
     return initialProducts
       .filter((p) => {
+        // Search filter
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase().trim();
+          const matchesName = p.name?.toLowerCase().includes(q);
+          const matchesCode = p.product_code?.toLowerCase().includes(q);
+          const matchesCategory = p.category_name?.toLowerCase().includes(q);
+          const matchesDescription = p.description?.toLowerCase().includes(q);
+          if (!matchesName && !matchesCode && !matchesCategory && !matchesDescription) {
+            return false;
+          }
+        }
+
         // Category filter
         if (selectedCategory !== 'all') {
           const cat = categories.find((c) => c.slug === selectedCategory);
@@ -76,6 +91,7 @@ export default function ShopClient({
       });
   }, [
     initialProducts,
+    searchQuery,
     selectedCategory,
     selectedCollection,
     selectedSize,
@@ -86,6 +102,7 @@ export default function ShopClient({
   ]);
 
   const resetFilters = () => {
+    setSearchQuery('');
     setSelectedCategory('all');
     setSelectedCollection('all');
     setSelectedSize('all');
@@ -94,6 +111,7 @@ export default function ShopClient({
   };
 
   const hasActiveFilters =
+    Boolean(searchQuery.trim()) ||
     selectedCategory !== 'all' ||
     selectedCollection !== 'all' ||
     selectedSize !== 'all' ||
@@ -109,10 +127,26 @@ export default function ShopClient({
         <h1 className="font-serif text-4xl sm:text-5xl text-[#1A1A1A] font-light">
           The Ready-Made Collection
         </h1>
-        <p className="text-sm text-neutral-500 mt-2 font-light max-w-2xl">
-          Carefully designed ready-to-wear women's garments from Fairy Finds Boutique in Kottayam. Select your size, review your bag, and complete your order seamlessly through WhatsApp.
-        </p>
       </div>
+
+      {/* Active Search Banner */}
+      {searchQuery.trim() && (
+        <div className="mb-8 flex items-center justify-between p-3.5 bg-neutral-50 border border-neutral-200 rounded-xs">
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-[#FF55D2]" />
+            <p className="text-xs text-neutral-800">
+              Showing results for <strong className="font-semibold text-black">&quot;{searchQuery}&quot;</strong> ({filteredProducts.length} pieces found)
+            </p>
+          </div>
+          <button
+            onClick={() => setSearchQuery('')}
+            className="text-xs text-neutral-600 hover:text-[#FF55D2] flex items-center gap-1 font-medium transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+            <span>Clear search</span>
+          </button>
+        </div>
+      )}
 
       {/* Filter Controls Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-8 border-b border-neutral-100">

@@ -13,6 +13,7 @@ interface ShopPageProps {
   searchParams: Promise<{
     category?: string;
     collection?: string;
+    q?: string;
   }>;
 }
 
@@ -131,6 +132,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         collections={collections}
         initialCategory={params.category}
         initialCollection={params.collection}
+        initialSearch={params.q}
       />
     </>
   );

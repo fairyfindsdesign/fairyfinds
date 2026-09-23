@@ -45,9 +45,6 @@ export default function CustomOrderFlow({ settings }: CustomOrderFlowProps) {
         <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl text-[#1A1A1A] font-light leading-tight">
           Custom Made to Your Measurements
         </h1>
-        <p className="mt-4 text-sm sm:text-base text-neutral-600 font-light leading-relaxed">
-          From wedding outfits to festive dresses, talk directly with us on WhatsApp to create an outfit tailored to your measurements and personal preferences.
-        </p>
       </div>
 
       {/* 4-Step Process Grid */}

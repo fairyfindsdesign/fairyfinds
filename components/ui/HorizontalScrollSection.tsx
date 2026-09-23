@@ -82,11 +82,6 @@ export default function HorizontalScrollSection({
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#1A1A1A] font-light leading-tight">
               {title}
             </h2>
-            {description && (
-              <p className="text-sm text-neutral-500 mt-2 font-light leading-relaxed">
-                {description}
-              </p>
-            )}
           </div>
 
           {/* Top Corner Controls: Explore Link & Scroll Chevrons */}

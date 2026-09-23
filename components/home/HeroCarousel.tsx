@@ -70,6 +70,8 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const isSwipingRef = useRef(false);
 
   const nextSlide = useCallback(() => {
     setActiveIndex((prev) => (prev + 1) % slides.length);
@@ -97,23 +99,45 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
   // Touch Swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+    isSwipingRef.current = false;
     setIsPaused(true);
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartXRef.current === null) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartXRef.current - touchEndX;
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+    const diffX = Math.abs(touchStartXRef.current - e.touches[0].clientX);
+    const diffY = Math.abs(touchStartYRef.current - e.touches[0].clientY);
+    if (diffX > 10 || diffY > 10) {
+      isSwipingRef.current = true;
+    }
+  };
 
-    if (Math.abs(diff) > 45) {
-      if (diff > 0) {
-        nextSlide();
-      } else {
-        prevSlide();
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current !== null) {
+      const touchEndX = e.changedTouches[0].clientX;
+      const diff = touchStartXRef.current - touchEndX;
+
+      if (Math.abs(diff) > 40) {
+        isSwipingRef.current = true;
+        if (diff > 0) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
       }
     }
     touchStartXRef.current = null;
+    touchStartYRef.current = null;
     setIsPaused(false);
+  };
+
+  const handleSlideClick = (e: React.MouseEvent) => {
+    if (isSwipingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      isSwipingRef.current = false;
+    }
   };
 
   const currentSlide = slides[activeIndex];
@@ -156,14 +180,20 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
               }}
               className="absolute inset-0"
             >
-              <Image
-                src={currentSlide.image_url}
-                alt={currentSlide.heading || 'Fairy Finds Boutique'}
-                fill
-                priority
-                sizes="100vw"
-                className="object-cover object-center w-full h-full"
-              />
+              <Link
+                href={currentSlide.button_link || '/shop'}
+                className="absolute inset-0 block cursor-pointer z-10"
+                aria-label={currentSlide.heading || 'Explore collection'}
+              >
+                <Image
+                  src={currentSlide.image_url}
+                  alt={currentSlide.heading || 'Fairy Finds Boutique'}
+                  fill
+                  priority
+                  sizes="100vw"
+                  className="object-cover object-center w-full h-full"
+                />
+              </Link>
             </motion.div>
           </motion.div>
         </AnimatePresence>
@@ -275,16 +305,17 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
       </section>
 
       {/* =========================================================================
-          2. MOBILE HERO (< sm:): Natural Image Size (No Resize) + CTA AFTER Image
+          2. MOBILE HERO (< sm:): Natural Image Size & Direct Clickable Slide Link
           ========================================================================= */}
       <div className="block sm:hidden w-full bg-neutral-900">
         <section
           className="relative w-full overflow-hidden bg-neutral-900 select-none"
           onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           aria-label="Featured Fashion Collection (Mobile)"
         >
-          {/* Natural Image Container - Never stretched to 100dvh */}
+          {/* Natural Image Container with Direct Slide Link */}
           <AnimatePresence initial={false} mode="wait">
             <motion.div
               key={currentSlide.id || activeIndex}
@@ -297,12 +328,19 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
               }}
               className="relative w-full"
             >
-              <img
-                src={currentSlide.image_url}
-                alt={currentSlide.heading || 'Fairy Finds Boutique'}
-                className="w-full h-auto max-h-[75vh] object-cover block"
-                loading="eager"
-              />
+              <Link
+                href={currentSlide.button_link || '/shop'}
+                onClick={handleSlideClick}
+                className="block relative w-full cursor-pointer focus:outline-hidden"
+                aria-label={currentSlide.heading || 'View Collection'}
+              >
+                <img
+                  src={currentSlide.image_url}
+                  alt={currentSlide.heading || 'Fairy Finds Boutique'}
+                  className="w-full h-auto max-h-[75vh] object-cover block"
+                  loading="eager"
+                />
+              </Link>
             </motion.div>
           </AnimatePresence>
 
@@ -325,32 +363,6 @@ export default function HeroCarousel({ section }: HeroCarouselProps) {
             </div>
           )}
         </section>
-
-        {/* Mobile CTA: Clean block placed directly AFTER the image */}
-        {(currentSlide.button_text || currentSlide.secondary_button_text) && (
-          <div className="w-full px-4 py-4 bg-white border-b border-neutral-100 shadow-xs">
-            <div className="flex flex-col gap-2.5 max-w-md mx-auto">
-              {currentSlide.button_text && (
-                <Link
-                  href={currentSlide.button_link || '/shop'}
-                  className="w-full min-h-[48px] px-6 py-3.5 bg-[#FF55D2] hover:bg-[#FD00B9] active:bg-[#D5009C] text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-md flex items-center justify-center gap-2 rounded-xs active:scale-98 text-center"
-                >
-                  <span>{currentSlide.button_text}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              )}
-
-              {currentSlide.secondary_button_text && (
-                <Link
-                  href={currentSlide.secondary_button_link || '/custom'}
-                  className="w-full min-h-[48px] px-6 py-3.5 bg-[#1A1A1A] hover:bg-black active:bg-neutral-800 text-white text-xs uppercase tracking-widest font-semibold transition-all duration-300 shadow-xs flex items-center justify-center rounded-xs active:scale-98 text-center"
-                >
-                  <span>{currentSlide.secondary_button_text}</span>
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
